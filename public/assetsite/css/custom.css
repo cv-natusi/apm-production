@@ -1,0 +1,18 @@
+.navbar-brand {
+	padding: 5px;
+}
+
+.addBg .container .navbar-inverse .navbar-nav > li > a {color: #222;}
+.addBg .container .navbar-inverse .navbar-nav > .active > a{color: #f92c1d;}
+.addBg .container .navbar-inverse .navbar-nav > li > a:hover, .navbar-inverse .navbar-nav > li > a:focus{color: #f92c1d; transform: scale(1.1);}
+
+#aboutUs h2, #aboutUs p{color: #fbfafa !important; }
+
+.news{ height: 250px;position: relative; }
+.news ul {position: absolute; bottom: 0; display: table; width: 100%; list-style: none; margin: 0;padding: 0;list-style-type: none;text-align: center;}
+.news ul li { display: inline-block; float: none; }
+.news ul li a {display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none; }
+.news ul li a:hover:not(.active) {background-color: #111; }
+.news .active {background-color: #4CAF50; }
+
+.navbar-inverse .navbar-nav > li > a {margin:0 !important; line-height: none !important;  }

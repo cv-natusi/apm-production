@@ -1,0 +1,38 @@
+dashboard : 
+- grafik bar vertikal (done)
+- tampilkan per poli (done)
+- tampilkan semua poli (done)
+- apm -> grid klik/data (done)
+	- bpjs -> proses sampek cetak sep
+	- umum -> langsung simpan ke db rsu
+	- tandai data yang sudah di simpan (block warna)
+- no urut sep / hari
+ ================================================	
+
+tgl 02/03/2018
+	- umum, jamkesda, pt-mentari, pt-pos, acc direktu, jamkesmas, jamsostek, kai, inhelth, perusahaan, jamkesbox, jasa raharya, jkd kab,rencana bpjs, ambil obat.
+
+	=> ketika pasien belum idpulangkan pop up (update tgl pulang SEP).
+	nomor urut sep/hari 
+
+
+	APM :
+	pop up data pasien review (setelah input nomor nik/bpjs/no-rm )
+	poli di kasih gambar
+
+
+
+aktif report
+
+1. filter peserta, poli, diagnosa lihat di image hp
+2. ketika peserta sudah dipilih bisa langsung get bpjs
+3. printer gunakan yang cepat (aktif report/ report builder)
+4. 
+
+
+// tanyakan :
+- kode poli rs tidak ada di kode poli bpjs
+- no kepesertaan di table mana (table RS)
+- user pembuat SEP
+- cetak SEP langsung di cetak atau di simpan dulu di RS
+

@@ -1,0 +1,31 @@
+.panel-label_header {
+    position:relative;
+    height:35px;
+}
+.label-header-blue {
+    background-color:#4b99d5;
+    border-radius:3px;
+    padding:3px;
+    color:white;
+    font-size:10px;
+    font-weight:bold;
+    position:absolute;
+    right:5px;
+    top:5px;
+}
+.label-header-green {
+    background-color:#4a9e3c;
+    border-radius:3px;
+    padding:3px;
+    color:white;
+    font-size:10px;
+    font-weight:bold;
+    position:absolute;
+    right:5px;
+    top:5px;
+}
+.customInput {
+	border-color:#3c8dbc;
+	/*color:#4a9e3c;*/
+	border-radius: 5px;
+}
