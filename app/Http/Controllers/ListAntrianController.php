@@ -243,17 +243,17 @@ class ListAntrianController extends Controller{
 			$updateWaktu = $bridgBpjs->updateWaktu($request);
 			$getAntrian = Antrian::where('id', $id_antrian)->first();
 			//insert antrian_id di table filling
-			// $insertFilling = DB::connection('mysql')->table('filling')
-			// ->insert([
-			// 	'no_rm' => $norm,
-			// 	'tgl_periksa' => $cekAntri->tgl_periksa,
-			// 	'antrian_id' => $id_antrian
-			// ]);
+			$insertFilling = DB::connection('mysql')->table('filling')
+			->insert([
+				'no_rm' => $norm,
+				'tgl_periksa' => $cekAntri->tgl_periksa,
+				'antrian_id' => $id_antrian
+			]);
 
-			// if(!$insertFilling){
-			// 	DB::rollback();
-			// 	return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal simpan filling','antrian'=>''];
-			// }
+			if(!$insertFilling){
+				DB::rollback();
+				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal simpan filling','antrian'=>''];
+			}
 			DB::commit();
 			return ['type'=>'success','status'=>'success','code'=>200,'head_message'=>'Berhasil!','message'=>'Berhasil menyimpan data','antrian' => $getAntrian];
 		} catch (\Throwable $e) {
