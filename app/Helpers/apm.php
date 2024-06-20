@@ -1,8 +1,12 @@
 <?php
 namespace App\Helpers;
 
+# Library / package
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+# Models
+use App\Http\Models\JadwalDokterInternal;
+use App\Http\Models\Rsu_Bridgingpoli;
 
 class apm{
 	# Custom response start
@@ -55,4 +59,64 @@ class apm{
 		return true;
 	}
 	# Logging end
+
+	public static function randomDokter($request){
+		// $date = date('N',strtotime($request->tanggalPeriksa));
+		$date = date('Y-m-d',strtotime($request->tanggalPeriksa));
+		$where = [
+			'date' => $date,
+			'is_active' => true,
+			'kode_poli_rs' => $request->kodePoli,
+		];
+		if($request->jenis_pembayaran=='BPJS'){ # Jika pasien BPJS
+			$where['is_bpjs'] = true;
+		}
+
+		$jadwal = JadwalDokterInternal::where($where)->get();
+		if(count($jadwal)>0){ # Jadwal di tanggal tersebut ada
+			$jadwal = collect($jadwal);
+			$filter = $jadwal->filter(function($item){
+				return $item->status_pilih==false;
+			});
+			$jadwal = $filter->values();
+			if(count($jadwal)>0){ # Jika "status_pilih" masih ada yg bernilai false
+				$dokter = $jadwal->random();
+				$request->merge(['id'=>$dokter->id]);
+				JadwalDokterInternal::updateToTrue($request);
+				return response()->json([
+					'metadata' => [
+						'code' => 200,
+						'message' => 'Ok'
+					],
+					'response' => $dokter,
+				]);
+			}
+
+			# Jika tidak ada, lakukan update "status_pilih", set menjadi false, kemudian pilih ulang
+			JadwalDokterInternal::where($where)->update(['status_pilih'=>false]);
+			$jadwal = collect(JadwalDokterInternal::where($where)->get());
+			$filter = $jadwal->filter(function($item){
+				return $item->status_pilih==false;
+			});
+			$jadwal = $filter->values();
+			if(count($jadwal)>0){
+				$dokter = $jadwal->random();
+				$request->merge(['id'=>$dokter->id]);
+				JadwalDokterInternal::updateToTrue($request);
+				return response()->json([
+					'metadata' => [
+						'code' => 200,
+						'message' => 'Ok'
+					],
+					'response' => $dokter,
+				]);
+			}
+		}
+		return response()->json([
+			'metadata' => [
+				'code' => 204,
+				'message' => 'No content'
+			],
+		]);
+	}
 }

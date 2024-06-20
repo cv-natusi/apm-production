@@ -333,11 +333,28 @@ class RegistrationController extends Controller{
 		return response()->json($data);
 	}
 
+	public function jadwalDokterKiosk(Request $request){
+		$request->merge([
+			'jenis_pembayaran' => $request->jenis_pasien,
+			'kodePoli' => $request->kode_poli, # Kode poli rs
+			'tanggalPeriksa' => $request->tanggal,
+		]);
+		Rsu_Bridgingpoli::convertBPJStoRS($request); # Convert kode poli BPJS ke RS
+		return Help::randomDokter($request);
+	}
+
 	public function indexAntrian(Request $request){
 		$id_kiosk = $request->id_kiosk;
+		$ignore = ['ALG','UGD','ANU'];
+		// if(date('d-m-Y',strtotime('now'))=='20-06-2024'){
+		// 	array_push($ignore,'017');
+		// }
+		// return $ignore;
 		$poli = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
-			->whereNotIn('kdpoli',['ALG','UGD','ANU'])
+			// ->whereNotIn('kdpoli',['ALG','UGD','ANU'])
+			->whereNotIn('kdpoli',$ignore)
 			->groupBy('mapping_poli_bridging.kdpoli_rs')
+			->orderBy('tm_poli.NamaPoli','ASC')
 			->get();
 
 		$waktu = '06:30'; # Init default jam buka, jika di table holiday tidak ada data
@@ -507,31 +524,24 @@ class RegistrationController extends Controller{
 		$request->metodes = "KIOSK"; // penting jangan di hapus
 		DB::beginTransaction();
 		try {
-			$cekAntrianDuplikat = Antrian::select('nik','id','is_pasien_baru','no_antrian_pbaru','nomor_antrian_poli','kode_booking','tgl_periksa','kode_poli')
+			$query = Antrian::select('nik','id','is_pasien_baru','no_antrian_pbaru','nomor_antrian_poli','kode_booking','tgl_periksa','kode_poli','jenis_pasien')
 				->where('tgl_periksa',$request->tglperiksa)
-				->where('nik',$request->nik)->first();
-			if($cekAntrianDuplikat){
-				$tujuanpoli = Rsu_Bridgingpoli::with('tm_poli')
-					->where('kdpoli', $cekAntrianDuplikat->kode_poli)->first();
-				$cekAntrianDuplikatBPJS = Antrian::select('nik','id','is_pasien_baru','no_antrian_pbaru','nomor_antrian_poli','kode_booking','tgl_periksa','jenis_pasien')
-					->where('tgl_periksa',$request->tglperiksa)
-					->where('nik',$request->nik)->where('jenis_pasien','BPJS')->first();
-				if($cekAntrianDuplikatBPJS && $request->jenis_pasien=='BPJS'){
-					return [
-						'status'=>'success',
-						'code'=>200,
-						'head_message'=>'Success',
-						'message'=>'Peserta harap 30 menit lebih awal guna pencatatan administrasi.',
-						'data'=> $cekAntrianDuplikatBPJS,
-						'poli'=> $tujuanpoli
-					];
-				}
+				->where('nik',$request->nik);
+			if($request->jenis_pasien==='BPJS'){
+				$query->where('jenis_pasien','BPJS');
+			}else{
+				$query->where('jenis_pasien','!=','BPJS')->where('kode_poli',$request->kodepoli);
+			}
+			$cekDuplikatAntrian = $query->first();
+			if($cekDuplikatAntrian){ # Cek duplikat antrian by nik & tanggal
+				$tujuanpoli = Rsu_Bridgingpoli::with('tm_poli')->where('kdpoli', $cekDuplikatAntrian->kode_poli)->first();
+				DB::rollback();
 				return [
 					'status'=>'success',
 					'code'=>200,
 					'head_message'=>'Success',
 					'message'=>'Peserta harap 30 menit lebih awal guna pencatatan administrasi.',
-					'data'=> $cekAntrianDuplikat,
+					'data'=> $cekDuplikatAntrian,
 					'poli'=> $tujuanpoli
 				];
 			}
@@ -541,28 +551,28 @@ class RegistrationController extends Controller{
 			}
 			$length = strlen($prefix)+3;
 			$antri = DB::connection('mysql')->table('antrian')->select('no_antrian')
-					->where('tgl_periksa',$request->tglperiksa)
-					->whereRaw("LENGTH(no_antrian)=$length")
-					->where('no_antrian','like',"$prefix%")
-					->orderBy('no_antrian','desc')->first();
+				->where('tgl_periksa',$request->tglperiksa)
+				->whereRaw("LENGTH(no_antrian)=$length")
+				->where('no_antrian','like',"$prefix%")
+				->orderBy('no_antrian','desc')->first();
 			$num = 0;
 			if(!empty($antri)){
 				$num = (int)substr($antri->no_antrian, -3);
 			}
-			$angkaAntri           = sprintf("%03d",$num+1);
-			$nextAntri            = "$prefix".$angkaAntri;
-			$kodebooking          = date('dmy').$nextAntri; // kode booking
+			$angkaAntri = sprintf("%03d",$num+1);
+			$nextAntri = "$prefix".$angkaAntri;
+			$kodebooking = date('dmy').$nextAntri; // kode booking
 			$request->kodebooking = $kodebooking;
-			$request->no_antrian  = $nextAntri;
-			if ($request->pasien == 'N') {
-				$no_antrian_poli  = $this->generateNoAntrianPoli($request->tglperiksa, $request->kodepoli);
+			$request->no_antrian = $nextAntri;
+			if ($request->pasien=='N') {
+				$no_antrian_poli = $this->generateNoAntrianPoli($request->tglperiksa, $request->kodepoli);
 			}
-			if ($request->pasien == 'Y') {
+			if ($request->pasien=='Y') {
 				$noPasBaru = $this->generateNoAntrianBaru($request);
 			}
 			$antrian = new Antrian;
-			$antrian->nik 				  = $request->nik;
-			$antrian->nomor_kartu 		  = !empty($request->no_bpjs)?$request->no_bpjs:null;
+			$antrian->nik = $request->nik;
+			$antrian->nomor_kartu = !empty($request->no_bpjs)?$request->no_bpjs:null;
 			if ($request->pasien=='Y') {
 				$no_rm = '00000000000';
 				$request->no_rm = '00000000000';
@@ -574,21 +584,21 @@ class RegistrationController extends Controller{
 				$request->status = $status;
 			}
 			$nohp = '000000000000';
-			$antrian->nohp           	  = $nohp;
-			$antrian->no_rm          	  = $no_rm;
-			$antrian->kode_poli      	  = $request->kodepoli;
-			$antrian->no_antrian     	  = $nextAntri;
-			$antrian->no_antrian_pbaru    = ($request->pasien == 'Y') ? $noPasBaru : null;
-			$antrian->nomor_antrian_poli  = ($request->pasien == 'N') ? $no_antrian_poli : null;
-			$antrian->status         	  = $status;
-			$antrian->tgl_periksa    	  = $request->tglperiksa;
-			$antrian->jenis_pasien   	  = $request->jenis_pasien;
-			$antrian->kode_booking   	  = $kodebooking;
-			$antrian->is_geriatri    	  = $request->geriatri;
-			$antrian->metode_ambil   	  = $request->metode;
-			$antrian->is_pasien_baru 	  = $request->pasien;
-			$antrian->kode_dokter    	  = $request->kddokter;
-			$antrian->jam_praktek    	  = $request->jadwal;
+			$antrian->nohp = $nohp;
+			$antrian->no_rm = $no_rm;
+			$antrian->kode_poli = $request->kodepoli;
+			$antrian->no_antrian = $nextAntri;
+			$antrian->no_antrian_pbaru = ($request->pasien=='Y') ? $noPasBaru : null;
+			$antrian->nomor_antrian_poli = ($request->pasien=='N') ? $no_antrian_poli : null;
+			$antrian->status = $status;
+			$antrian->tgl_periksa = $request->tglperiksa;
+			$antrian->jenis_pasien = $request->jenis_pasien;
+			$antrian->kode_booking = $kodebooking;
+			$antrian->is_geriatri = $request->geriatri;
+			$antrian->metode_ambil = $request->metode;
+			$antrian->is_pasien_baru = $request->pasien;
+			$antrian->kode_dokter = $request->kddokter;
+			$antrian->jam_praktek = $request->jadwal;
 			if ($request->jenis_pasien=='UMUM') {
 				$request->jenis_kunjungan = '2';
 				$antrian->jenis_kunjungan = $request->jenis_kunjungan;
@@ -724,7 +734,7 @@ class RegistrationController extends Controller{
 				}
 			}
 			$tujuanpoli = Rsu_Bridgingpoli::with('tm_poli')->where('kdpoli', $request->kodepoli)->first();
-			if($request->kodepoli=="PSY"||$request->kodepoli=="GIZ"||$request->kodepoli=="VCT"||$request->kodepoli=="MCU"){
+			if(in_array($request->kodepoli, ['GIG','GIZ','MCU','PSY','VCT'])){
 				$data = [
 					'status'=>'success',
 					'code'=>200,
@@ -831,7 +841,7 @@ class RegistrationController extends Controller{
 		} catch (\Throwable $e) {
 			DB::rollback();
 			$log = ['ERROR AMBIL KIOSK ANTRIAN ('.$e->getFile().')',false,$e->getMessage(),$e->getLine()];
-            Help::logging($log);
+			Help::logging($log);
 			return false;
 		}
 	}

@@ -2,31 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Http\Requests;
-use App\Http\Libraries\Requestor;
-use App\Helpers\apm as Help;
+# Library / package
 use App\Http\Controllers\Controller;
+use App\Http\Libraries\Requestor;
+use App\Http\Requests;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Redirect, Validator, DB, Auth, DateTime;
+use Yajra\Datatables\Datatables;
+# Models
 use App\Http\Models\Antrian;
 use App\Http\Models\Identity;
-use App\Http\Models\rsu_customer;
 use App\Http\Models\MstKonterPoli;
-use App\Http\Models\Rsu_Bridgingpoli;
-use App\Http\Models\rsu_poli;
 use App\Http\Models\KodeAwalanPoli;
-use App\Http\Models\Rsu_Register;
+use App\Http\Models\Rsu_Bridgingpoli;
+use App\Http\Models\rsu_customer;
 use App\Http\Models\rsu_dokter_bridging;
+use App\Http\Models\rsu_poli;
+use App\Http\Models\Rsu_Register;
 use App\Http\Models\Rsu_RiwayatRegistrasi;
-use App\Http\Models\Users;
 use App\Http\Models\TransKonterPoli;
+use App\Http\Models\Users;
+# Helpers
+use App\Helpers\apm as Help;
+# Traits
 use App\Traits\KonfirmasiAntrianTraits;
-use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Log as FacadesLog;
-use Yajra\Datatables\Datatables;
-use Redirect, Validator, DB, Auth, DateTime;
 
 class AntrianController extends Controller{
 	use KonfirmasiAntrianTraits;
@@ -49,19 +51,16 @@ class AntrianController extends Controller{
 		date_default_timezone_set("Asia/Jakarta");
 		DB::beginTransaction();
 
-		//initial variable
 		$hariIni = date('Y-m-d');
 		$kode = $request->kode;
 
-		//validasi kode unik/booking dari wa / simapan
-		if( preg_match("/[a-z]/i", $kode) ){
+		if( preg_match("/[a-z]/i", $kode) ){ # Kode booking simapan
 			$cekKode = DB::connection('mysql')->table('pasien_baru_temporary')
 				->where('kodeUnik',$kode)
 				->where('masukMaster','belum')
 				->where('tanggalPeriksa', date('Y-m-d'))
 				->orderBy('id_pas', 'DESC')
 				->first();
-			$jenis = $cekKode->caraBayar;
 		}else{
 			$cekKode = DB::connection('mysql')->table('bot_pasien as b')
 				->join('bot_data_pasien as bd', 'b.id', '=', 'bd.idBots')
@@ -69,15 +68,15 @@ class AntrianController extends Controller{
 				->where('b.random', $kode)
 				->orderBy('b.id', 'DESC')
 				->first();
-			$jenis = $cekKode->caraBayar;
 			if(!empty($cekKode)){
 				$cekKode = $this->convertReqWaToSimapan($cekKode);
 			}
 		}
-		
+
 		//mempersiapkan data untuk konfirmasi
 		$prefix = '';
 		if(!empty($cekKode)){
+			$jenis = $cekKode->caraBayar;
 			$prefix = $jenis=='BPJS'?'B':'NB';
 		}else{
 			if( preg_match("/[a-z]/i", $kode) ){
@@ -105,7 +104,7 @@ class AntrianController extends Controller{
 				return [
 					'status'  => 'error',
 					'code'    => 400,
-					'message' => 'Data tidak ditemukan'
+					'message' => 'Kode booking tidak ditemukan'
 				];
 			}
 		}
@@ -136,7 +135,6 @@ class AntrianController extends Controller{
 			//jika tangga periksa sudah lewat tanggal sekarang
 			return ['status'=> 'error', 'code'=>500 , 'message'=>'Antrian Sudah Kadaluarsa Silahkan Ambil Ulang'];
 		}
-		// return  response()->json($cekKode);
 		//generate no antrian khusus pasien baru
 		$pBaru = $cekKode->isPasienBaru;
 		if(!isset($cekKode->isPasienBaru)) {
@@ -160,10 +158,10 @@ class AntrianController extends Controller{
 			//setup data local
 			$generateReqAntreanLocal = $this->generateReqAntrean($cekKode, $kodebooking, $nextAntri, "toLocal", "wa", $noPasBaru);
 		}
-		$dataDokter = rsu_dokter_bridging::where('kodedokter',$generateReqAntreanLocal['kode_dokter'])->first();
-		if(!$dataDokter){
-			return ['status'=> 'error', 'code'=>500 , 'message'=>'Data dokter tidak ditemukan'];
-		}
+		// $dataDokter = rsu_dokter_bridging::where('kodedokter',$generateReqAntreanLocal['kode_dokter'])->first();
+		// if(!$dataDokter){
+		// 	return ['status'=> 'error', 'code'=>500 , 'message'=>'Data dokter tidak ditemukan'];
+		// }
 		//validasi agar pasien tidak bisa mengambil 2x nomor
 		$cekDataAntrian = Antrian::where('nik',$cekKode->nik)
 			->where('tgl_periksa', date('Y-m-d'))
@@ -222,11 +220,10 @@ class AntrianController extends Controller{
 				}
 			}
 		}
-		// DB::commit();
+
 		//hit to BPJS antreanAdd and updateWaktu
 		try {
-			// $ifPoli = $generateReqAntreanLocal['kode_poli'];
-			$ifPoli = $dataDokter->polibpjs;
+			$ifPoli = $generateReqAntreanLocal['kode_poli'];
 			if(in_array($ifPoli,['GIG','PSY','GIZ','VCT','MCU'])){
 				$postAntreanBpjs = 'poli internal';
 			}else{

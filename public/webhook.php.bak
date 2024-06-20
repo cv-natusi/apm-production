@@ -26,9 +26,7 @@ if($isFromMe){
 }
 $message = $data['message'];
 $phone = $data['phone'];
-// if($phone=='6281335537942'){
-// 	echo 'sulap';die();
-// }
+
 ### Info maintenance server
 // if($phone!='6281335537942'){ # Nomor untuk maintenance
 // 	if($phone!=""){
@@ -88,7 +86,6 @@ $result = mysqli_query($wablas,$cekStatus);
 $rows = $result->fetch_assoc();
 $rowsDapas=$idPsn=$idBots=$statusChat="";
 $dataIn = [];
-$listPhone = ['6281335537942','6281330003568'];
 if($result->num_rows>0){
 	$idBots = $rows['id'];
 	$statusChat = $rows['statusChat'];
@@ -102,9 +99,19 @@ if($result->num_rows>0){
 
 $reset = stripos($waText,'reset')===false;
 
-### Info pendaftaran
-if($result->num_rows<1){
-	$msg = msgWelcome($wablas);
+if($result->num_rows<1){// INFO PENDAFTARAN START
+	// if($phone=='6281335537942'){
+	// 	$dokter = json_decode(randomDokter(new Request([
+	// 		'rsu_conn' => $dbrsud,
+	// 		'apm_conn' => $wablas,
+	// 		'kode_poli' => '106',
+	// 		'jenis_pembayaran' => 'BPJS',
+	// 		'tanggal_periksa' => '2024-04-03',
+	// 	])));
+	// 	print_r($data);
+	// 	die();
+	// }
+	$msg = msgWelcome();
 }
 function waBotBridging(){
 	return new WaBotBridgingController;
@@ -116,19 +123,6 @@ if($result->num_rows<1 && $waText=='b'){
 }
 
 if($waText=='a'){
-	if($phone=='6281335537942'){
-		// $query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-		// 	JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-		// 	WHERE bp.tgl_periksa = '2024-06-04'
-		// 	AND bp.statusChat='99'
-		// 	AND bdp.kodePoli='017'
-		// ";
-		// $res = mysqli_query($wablas,$query);
-		// // echo json_encode($res->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
-		// echo json_encode(mysqli_fetch_assoc($res)['total'],JSON_PRETTY_PRINT);
-		// echo msgJadwalPolis($wablas);
-		// die();
-	}
 	$msg = "1. Daftar Pasien Baru\n";
 	$msg .= "2. Daftar Pasien Lama\n\n";
 	$msg .= "Ketik angka 1 atau 2 untuk melakukan pendaftaran.";
@@ -352,10 +346,6 @@ if(is_numeric($noBpjs) && $ifBpjs){
 	}
 }
 
-### Tutup kode poli supaya tidak ditampilkan format => ('kode',',kode')
-$notInSementara = ",'PSY'";
-// $notInSementara = "";
-
 ### Input tanggal berkunjung
 $ifTglBerobat = ($statusChat==3 || $statusChat==15 || $statusChat==23 || $statusChat==35);
 if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText)) && $ifTglBerobat){
@@ -387,17 +377,6 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 
 					$cekBatpas = "SELECT * FROM bot_data_pasien WHERE cust_id='$idPsn' AND tglBerobat='$tglBerobat' AND masukMaster='belum'";
 					$resBatpas = mysqli_query($wablas,$cekBatpas);
-					// if($phone=='6281335537942'){
-					// 	if(in_array(date('D',strtotime($tglBerobat)), ['Tue','Thu'])){
-					// 		echo 'masuk';die();
-					// 	}
-					// 	echo date('D-m-Y',strtotime($tglBerobat));
-					// 	// $notIn = "'ALG','UGD','ANU','GIG'$notInSementara";
-					// 	// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
-					// 	// $resPoli = mysqli_query($dbrsud,$poli);
-					// 	// echo json_encode($resPoli->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
-					// 	die();
-					// }
 					if($resBatpas->num_rows>0){
 						if($statusChat==23){
 							$dataIn['status'] = 24;
@@ -413,9 +392,9 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 							}
 						}
 						updateStatusChat('statusChat',$idBots,$wablas,$dataIn);
-						$notIn = "'ALG','UGD','ANU','GIG'$notInSementara";
+						
 						// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
-						$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
+						$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
 						$resPoli = mysqli_query($dbrsud,$poli);
 						$msg = getPoli($resPoli);
 						mysqli_close($wablas);
@@ -681,6 +660,10 @@ if(strlen($waText)==19 && $ifNoRef && $rowsDapas['caraBayar']=='BPJS'){
 	$prefix = substr($nomor,12,1);
 	$statusRujuk = "";
 	if($prefix!='N'){ # Prefix "N"=>rujukan internal
+		if($phone=='6281335537942'){
+			$resRujukan1 = rujukanMultiRecord($nomor,'rujukan');
+			die(json_encode($resRujukan1,JSON_PRETTY_PRINT));
+		}
 		// if($phone=='6281335537942'){
 			$resRujukan1 = rujukanMultiRecord($nomor,'rujukan');
 		// 	// die(json_encode($resRujukan1,JSON_PRETTY_PRINT));
@@ -796,28 +779,7 @@ if(is_numeric($waText) && ($ifPoli)){
 	// 	die();
 	// }
 
-	// if($phone=='6281335537942'){
-		// echo $waText;die();
-		// $query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-		// 	JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-		// 	WHERE bp.tgl_periksa = '2024-06-04'
-		// 	AND bp.statusChat='99'
-		// 	AND bdp.kodePoli='017'
-		// ";
-		// $res = mysqli_query($wablas,$query);
-		// $total = mysqli_fetch_assoc($res)['total'];
-		// if($waText==23 && date('d-m-Y',strtotime($rows['tgl_periksa']))=='04-06-2024' && $total>=40 ){
-		// 	echo msgJadwalPolis($wablas);
-		// 	die();
-		// }
-	// }
-	// if($waText==2 && !in_array(date('D',strtotime($rows['tgl_periksa'])), ['Tue','Thu'])){
-	// 	echo msgJadwalPoli();die();
-	// }
-	// if(cekLibur(date('d-m-Y',strtotime($rows['tgl_periksa']))) && $waText!=19){ # Pesan untuk hari libur RS
-	// 	echo msgLibur();die();
-	// }
-	$ignorePoli = "mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG'$notInSementara)";
+	$ignorePoli = "mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG')";
 	$poli = "
 		SELECT
 			tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli
@@ -843,26 +805,6 @@ if(is_numeric($waText) && ($ifPoli)){
 			$namaPoli = $arrPoli[$index]['NamaPoli'];
 			$kodePoli = $arrPoli[$index]['kdpoli'];
 			$ifKode = "";
-			if(
-				( # Poli jiwa hanya buka selasa & kamis
-					$kodePoli=='JIW'
-					&& !in_array(date('D',strtotime($rows['tgl_periksa'])), ['Tue','Thu'])
-				)
-				|| ( # Poli bedah onkologi, hari kamis tutup
-					$kodePoli=='017' && date('D',strtotime($rows['tgl_periksa']))=='Thu'
-				)
-			){
-				echo msgJadwalPoli($kodePoli);
-				die();
-			}
-			if(cekLibur(date('d-m-Y',strtotime($rows['tgl_periksa']))) && $waText!=19){ # Pesan untuk hari libur RS
-				echo msgLibur();
-				die();
-			}
-			// if($phone=='6281335537942'){
-			// 	echo date('D',strtotime($rows['tgl_periksa']));
-			// 	die();
-			// }
 			if($kodePoli=='040'){
 				$upKode = $kodePoli;
 				$ifKode = $kodePoli;
@@ -880,249 +822,336 @@ if(is_numeric($waText) && ($ifPoli)){
 				$ifKode = $kodePoli;
 			}
 
-			// if(in_array($phone,$listPhone)){
+			if($phone=='6281335537942'){
 				$request->merge([
 					'kode_poli' => $arrPoli[$index]['kdpoli']=='HDL' ? 'INT' : $arrPoli[$index]['kdpoli'],
 					'kode_poli_bpjs' => $arrPoli[$index]['kdpoli'],
 				]);
 				waBotBridging()->convertBPJStoRS($request);
+				// print_r(waBotBridging()->convertBPJStoRS($request));
 				$request->merge([
 					'jenis_pembayaran' => $rowsDapas['caraBayar'],
+					// 'jenis_pembayaran' => 'BPJS',
 					'tanggal_periksa' => $rowsDapas['tglBerobat'],
 				]);
 				$dokter = json_decode(waBotBridging()->randomDokter($request));
 				$request->query->remove('apm_conn');
 				$request->query->remove('rsu_conn');
+				// print_r($request->all());
 				if($dokter->metadata->code!='200'){
 					$msg = "Tidak ada jadwal dokter pada hari & poli yang Anda pilih.\n";
 					$msg .= "Silahkan pilih Nomor Poli Tujuan yang lain atau ubah tanggal kunjungan.";
-					die($msg);
+					// die($msg);
 				}
-				$dokter = $dokter->response;
+				# Nama counter
+				$counter = 'Counter E'; # ['BDM','GIG','GND','KON','MCU']
+				if(in_array($upKode,['INT','JAN','KLT'])){ $counter = 'Counter A'; }
+				if(in_array($upKode,['017','BED','BSY','OBG','ORT','URO','VCT'])){ $counter = 'Counter B'; }
+				if(in_array($upKode,['ANT','GIZ','IRM','PAR','SAR'])){ $counter = 'Counter C'; }
+				if(in_array($upKode,['040','ANA','JIW','MAT','PSY','THT'])){ $counter = 'Counter D'; }
+				if(in_array($upKode,['HDL'])){ $counter = 'Counter HD'; }
+				// print_r($counter);
+				print_r($dataIn);
 
-				# Update kode poli & jadwal dokter
-				$sptPhone = str_split($phone,2);
-				if($sptPhone[0]=='62'){
-					$sptPhone[0]='0';
+				// updateStatusChat('kodeBooking',$idBots,$wablas,$dataIn);
+				// $addPoliNew = "UPDATE bot_data_pasien SET kodePoli='$upKode' WHERE cust_id='$idPsn'";
+				// mysqli_query($wablas,$addPoliNew);
+
+				### Dokter
+				// $queryKodePoli = "SELECT * FROM bot_data_pasien WHERE cust_id='$idPsn'";
+				// $execKodePoli = mysqli_query($wablas,$queryKodePoli);
+				// $resKodePoli = $execKodePoli->fetch_assoc();
+				// print_r($resKodePoli);
+				// print_r($rowsDapas);
+				// print_r($upKode);
+				die();
+				$kodePoli = $resKodePoli['kodePoli'];
+				if($kodePoli=='040'){
+					$upKode = $kodePoli;
+					$kodePoli = 'ANA';
+					// $kodePoli = 'HDL';
+				}else if($kodePoli=='017'){
+					$upKode = $kodePoli;
+					$kodePoli = 'BED';
+					// $kodePoli = 'ANA';
+				}else if($kodePoli=='HDL'){
+					$upKode = $kodePoli;
+					// $ifKode = '16454'; // pakai kode dokter, karna kd poli & sub poli nya INT, bukan HDL
+					$kodePoli = 'INT';
+				}else{
+					$upKode = $kodePoli;
 				}
-				mysqli_begin_transaction($wablas);
-				mysqli_begin_transaction($dbrsud);
-				$resPhone = join("",$sptPhone);
-				mysqli_query($wablas,"UPDATE bot_data_pasien
-					SET
-						nohp = '$resPhone',
-						kodePoli = '$upKode',
-						kodedokter = '$dokter->kode_dokter',
-						namaDokter = '$dokter->nama_dokter',
-						jam_praktek = '$dokter->jam_praktek'
-					WHERE cust_id = '$idPsn'
-				");
-				// $getTgl = strtotime($rowsDapas['tglBerobat']);
-				// $tglPeriksa = date("d-m-Y",$getTgl);
+				// $queryDokter = "SELECT * FROM dokter_bridg WHERE polibpjs='$kodePoli'";
+				$queryDokter = "SELECT * FROM dokter_bridg WHERE kodedokter='$waText' LIMIT 1";
+				$execDokter = mysqli_query($dbrsud,$queryDokter);
+				if($execDokter->num_rows>0){
+					$kodeDokter = $waText;
+					if($kodeDokter==""){
+						$msg = "Silahkan masukkan kode dokter dengan benar!";
+					}else{
+						$tglLahir = date('Y-m-d',strtotime("-37 year",strtotime("today"))); // set tanggal lahir -37 tahun dari sekarang
+						$dataDokter = $execDokter->fetch_assoc();
+						if(in_array($dataDokter['polibpjs'],['GIG','BDM','GND','KON'])){
+							$kodePoli = $dataDokter['polibpjs'];
+							$updatePoli = "UPDATE bot_data_pasien SET kodePoli='$kodePoli' WHERE cust_id='$idPsn'";
+							// $updatePoli = "SELECT  bot_data_pasien WHERE cust_id='$idPsn'";
+							mysqli_query($wablas,$updatePoli) or die('*Terjadi kesalahan sistem, silahkan hubungi Admin.*');
+						}
+						$paramRef = [
+							$kodePoli,
+							$resKodePoli['tglBerobat'],
+							$dataDokter,
+						];
+						if($kodePoli=='PSY' || $kodePoli=='GIZ' || $kodePoli=='VCT' || $kodePoli=='MCU'){
+							$dokterInternal = dokterInternal($kodePoli,$resKodePoli['tglBerobat']);
+							$resJadDok = [
+								'metaData'=> (object)[
+									'code'=> 200,
+									'message'=> 'OK'
+								],
+								'response'=> json_decode(json_encode($dokterInternal))
+							];
+						}else{
+							$resJadDok = refJadDok($paramRef);
+						}
+						$resFilterDokter = $resJadDok['response'] === "" ? [] : filterDokter($resJadDok,$kodeDokter);
+						
+						if(!empty($resFilterDokter) || count($resFilterDokter)>0){
+							$kdDokterIn = $resFilterDokter->kodedokter;
+							$nmDokterIn = $resFilterDokter->namadokter;
+							$jpDokterIn = $resFilterDokter->jadwal;
+							$sptPhone = str_split($phone,2);
+							if($sptPhone[0]=='62'){
+								$sptPhone[0]='0';
+							}
+							mysqli_begin_transaction($wablas);
+							mysqli_begin_transaction($dbrsud);
+							$resPhone = join("",$sptPhone);
+							$dtPas = "UPDATE bot_data_pasien SET nohp='$resPhone',kodeDokter='$kdDokterIn', namaDokter='$nmDokterIn', jam_praktek='$jpDokterIn' WHERE cust_id='$idPsn'";
+							$updateDokter = mysqli_query($wablas,$dtPas);
+							
+							$dataIn['status'] = 99; // CHAT SELESAI(GENERATE LINK KONFIRMASI)
+							updateStatusChat('statusChat',$idBots,$wablas,$dataIn);
 
-				// mysqli_begin_transaction($wablas);
-				// mysqli_begin_transaction($dbrsud);
-				$dataIn['kodeBooking'] = $strRandom;
-				$dataIn['status'] = 99; // CHAT SELESAI(GENERATE LINK KONFIRMASI)
-				updateStatusChat('kodeBooking',$idBots,$wablas,$dataIn);
-				// updateStatusChat('statusChat',$idBots,$wablas,$dataIn); # Gadipake
+							$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli='$upKode' GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
+							$resPoli = mysqli_query($dbrsud,$poli);
+							$tpPoli = $resPoli->fetch_assoc();
 
-				$counter = "Pendaftaran"; # Pasien baru menuju pendaftaran(loket admisi)
-				if($rowsDapas['is_pasien_baru']!=1){ # Pasien lama menuju counter
-					$storeRsuRegister = storeRsuRegister($idPsn,$wablas,$dbrsud); // insert tr_registrasi && filling
-					if(!$storeRsuRegister){
-						mysqli_rollback($wablas);
-						mysqli_rollback($dbrsud);
-						echo 'Data gagal disimpan, *silahkan ketikkan kembali nomor poli yang Anda pilih*';
-						die();
+							$cek = $upKode;
+							$counter = "Pendaftaran";
+							if(!$updateDokter){
+								mysqli_rollback($wablas);
+								echo 'Data gagal disimpan, *silahkan ketikkan kembali kode dokter yang Anda pilih.*';
+								die();
+							}
+							// if($rowsDapas['is_pasien_baru']==0){
+							if($rowsDapas['is_pasien_baru']!=1){
+								$storeRsuRegister = storeRsuRegister($idPsn,$wablas,$dbrsud); // insert tr_registrasi && filling
+								if(!$storeRsuRegister){
+									mysqli_rollback($wablas);
+									mysqli_rollback($dbrsud);
+									echo 'Data gagal disimpan, *silahkan ketikkan kembali kode dokter yang Anda pilih*';
+									die();
+								}
+								mysqli_commit($dbrsud);
+								if($cek=='INT' || $cek=='KLT' || $cek=='JAN'){
+									$counter = "Counter A";
+								}elseif($cek=='URO'||$cek=='BSY'||$cek=='ORT'||$cek=='BED'||$cek=='OBG'||$cek=='017'||$cek=='VCT'){
+									$counter = "Counter B";
+								}elseif($cek=='IRM'||$cek=='PAR'||$cek=='SAR'||$cek=='GIZ'||$cek=='ANT'){
+									$counter = "Counter C";
+								}elseif($cek=='THT'||$cek=='MAT'||$cek=='ANA'||$cek=='JIW'){
+									$counter = "Counter D";
+								}elseif($cek=='GIG'){
+									$counter = "Counter E";
+								}
+							}
+							mysqli_commit($wablas);
+							$idBots = $rows['id'];
+							$msg = "Selamat Sdr/I ".$resKodePoli['nama']." *BERHASIL* mendaftar antrian.\n";
+							$msg .= "Kode Booking : *".$rows['random']."*\n";
+							$msg .= "Tanggal Berkunjung : ".date("d-m-Y",strtotime($resKodePoli['tglBerobat']))."\n";
+							$msg .= ".Poli Tujuan : *".$tpPoli['NamaPoli']."*\n";
+							$msg .= "Silahkan menuju *$counter*, untuk mendapatkan nomor antrian dengan cara :\n";
+							$msg .= "1. Masukkan kodebooking kedalam mesin antrian. Atau,\n";
+							$msg .= "2. Klik tautan ini : ".$baseURL."verifikasi/".$idBots."/".$rows['random']." ketika sudah di RS\n\n";
+							$msg .= "Jika terdapat kendala hubungi hotline : 0815257200088 untuk mendapatkan bantuan.";
+						}else{
+							$msg = "Kode Dokter tidak ditemukan.\n";
+							$msg .= "Silahkan masukkan kode dengan benar.";
+						}
 					}
-					mysqli_commit($dbrsud);
-					if(in_array($upKode,['INT','JAN','KLT'])){ $counter = 'Counter A'; }
-					if(in_array($upKode,['017','BED','BSY','OBG','ORT','URO','VCT'])){ $counter = 'Counter B'; }
-					if(in_array($upKode,['ANT','GIZ','IRM','PAR','SAR'])){ $counter = 'Counter C'; }
-					if(in_array($upKode,['040','ANA','JIW','MAT','PSY','THT'])){ $counter = 'Counter D'; }
-					if(in_array($upKode,['BDM','GIG','GND','KON','MCU'])){ $counter = 'Counter E'; }
-					if(in_array($upKode,['HDL'])){ $counter = 'Counter HD'; }
+				}else{
+					$msg = "Dokter tidak ditemukan silahkan hubungi admin";
 				}
-				mysqli_commit($wablas);
+				mysqli_close($wablas);
+				die();
+			}
 
-				$resPoli = mysqli_query($dbrsud,"SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli
-					FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli
-					WHERE mp.kdpoli='$upKode'
-					GROUP BY mp.kdpoli_rs
-					ORDER BY tp.KodePoli ASC
-				");
-				$tpPoli = $resPoli->fetch_assoc();
+			// get kode poli dan tanggal berobat untuk bridg jadwal dokter START
+			$queryKodePoli = "SELECT * FROM bot_data_pasien WHERE cust_id='$idPsn'";
+			$execKodePoli = mysqli_query($wablas,$queryKodePoli);
+			$resKodePoli = $execKodePoli->fetch_assoc();
+			// get kode poli dan tanggal berobat untuk bridg jadwal dokter END
+			$paramRef = [
+				$kodePoli,
+				$resKodePoli['tglBerobat']
+			];
+			$arrDokterGigi = [];
+			$arrKodeDokter = [];
+			// if($ifKode=='GIG'){ // code lama
+			if(in_array($ifKode,['GIG','BDM','GND','KON'])){ // 14-11-2023
+				// $arrKodeDokter[] = 'GIG'; # Dokter umum tidak ditampilkan, permintaan mas Reza
+				$arrKodeDokter[] = 'GIG'; # Dokter tidak ter-cover HFIS ditampilkan, permintaan pak Adi 04-03-2024
+				$paramRef[0] = 'KON';
+				$resJadDok = refJadDok($paramRef); // get ref jadwal dokter HFIS
+				if($resJadDok['metaData']->code==200){
+					foreach($resJadDok['response'] as $key => $val) {
+						$arrDokterGigi[] = $val;
+						if(!in_array($val->kodepoli, $arrKodeDokter)){
+							$arrKodeDokter[] = $val->kodepoli;
+						}
+					}
+				}
 
-				$idBots = $rows['id'];
-				$msg = "Selamat Sdr/I ".$rowsDapas['nama']." *BERHASIL* mendaftar antrian.\n";
-				$msg .= "Kode Booking : *".$strRandom."*\n";
-				$msg .= "Tanggal Berkunjung : ".date("d-m-Y",strtotime($rowsDapas['tglBerobat']))."\n";
-				$msg .= "Poli Tujuan : *".$tpPoli['NamaPoli']."*\n";
-				$msg .= "Silahkan menuju *$counter*, untuk mendapatkan nomor antrian dengan cara :\n";
-				$msg .= "1. Masukkan kodebooking kedalam mesin antrian. Atau,\n";
-				$msg .= "2. Klik tautan ini : ".$baseURL."verifikasi/".$idBots."/".$strRandom." ketika sudah di RS\n\n";
-				$msg .= "Jika terdapat kendala hubungi hotline : 0815257200088 untuk mendapatkan bantuan.";
-			// 	echo $msg;
-			// 	mysqli_close($wablas);
-			// 	mysqli_close($dbrsud);
+				$paramRef[0] = 'BDM';
+				$resJadDok = refJadDok($paramRef); // get ref jadwal dokter HFIS
+				if($resJadDok['metaData']->code==200){
+					foreach($resJadDok['response'] as $key => $val) {
+						$arrDokterGigi[] = $val;
+						if(!in_array($val->kodepoli, $arrKodeDokter)){
+							$arrKodeDokter[] = $val->kodepoli;
+						}
+					}
+				}
+
+				$paramRef[0] = 'GND';
+				$resJadDok = refJadDok($paramRef); // get ref jadwal dokter HFIS
+				if($resJadDok['metaData']->code==200){
+					foreach($resJadDok['response'] as $key => $val) {
+						$arrDokterGigi[] = $val;
+						if(!in_array($val->kodepoli, $arrKodeDokter)){
+							$arrKodeDokter[] = $val->kodepoli;
+						}
+					}
+				}
+				$resJadDok['response'] = $arrDokterGigi;
+			}else{
+				if(in_array($ifKode,['PSY','GIZ','VCT','MCU'])){
+					$dokterInternal = dokterInternal($ifKode,$resKodePoli['tglBerobat']);
+					$resJadDok = [
+						'metaData'=> (object)[
+							'code'=> 200,
+							'message'=> 'OK'
+						],
+						'response'=> json_decode(json_encode($dokterInternal))
+					];
+				}else{
+					$resJadDok = refJadDok($paramRef); // get ref jadwal dokter HFIS
+				}
+			}
+
+			// if($phone==='6281335537942'){
+			// 	echo json_encode($resJadDok,JSON_PRETTY_PRINT);
+			// 	// echo json_encode($arrKodeDokter,JSON_PRETTY_PRINT);
 			// 	die();
 			// }
+			if($resJadDok['metaData']->code==200) {
+				if($resJadDok['response']==""){
+					$msg .= "Tidak terdapat Jadwal Dokter pada hari & poli yang anda pilih";
+				}else{
+					$getTgl = strtotime($rowsDapas['tglBerobat']);
+					$tglPeriksa = date("d-m-Y",$getTgl);
+					if($statusChat==24){
+						$dataIn['status'] = 25;
+					}else{
+						if($statusChat==36){
+							$dataIn['status'] = 37;
+						}else{
+							if($rowsDapas['caraBayar']=='BPJS'){
+								$dataIn['status'] = 17;
+							}else{
+								$dataIn['status'] = 5;
+							}
+						}
+					}
+					$dataIn['kodeBooking'] = $strRandom;
 
-			// // get kode poli dan tanggal berobat untuk bridg jadwal dokter START
-			// $queryKodePoli = "SELECT * FROM bot_data_pasien WHERE cust_id='$idPsn'";
-			// $execKodePoli = mysqli_query($wablas,$queryKodePoli);
-			// $resKodePoli = $execKodePoli->fetch_assoc();
-			// // get kode poli dan tanggal berobat untuk bridg jadwal dokter END
-			// $paramRef = [
-			// 	$kodePoli,
-			// 	$resKodePoli['tglBerobat']
-			// ];
-			// $arrDokterGigi = [];
-			// $arrKodeDokter = [];
-			// // if($ifKode=='GIG'){ // code lama
-			// if(in_array($ifKode,['GIG','BDM','GND','KON'])){ // 14-11-2023
-			// 	// $arrKodeDokter[] = 'GIG'; # Dokter umum tidak ditampilkan, permintaan mas Reza
-			// 	$arrKodeDokter[] = 'GIG'; # Dokter tidak ter-cover HFIS ditampilkan, permintaan pak Adi 04-03-2024
-			// 	$paramRef[0] = 'KON';
-			// 	$resJadDok = refJadDok($paramRef); // get ref jadwal dokter HFIS
-			// 	if($resJadDok['metaData']->code==200){
-			// 		foreach($resJadDok['response'] as $key => $val) {
-			// 			$arrDokterGigi[] = $val;
-			// 			if(!in_array($val->kodepoli, $arrKodeDokter)){
-			// 				$arrKodeDokter[] = $val->kodepoli;
-			// 			}
-			// 		}
-			// 	}
+					if($ifKode=='017' || $ifKode=='040' || $ifKode=='UMU'){
+						$res = array_filter($resJadDok['response'],function($var)use($ifKode){
+							if(stripos($var->kodesubspesialis,$ifKode)!==false){
+								return $var;
+							}
+						});
+						$resJadDok['response'] = $res;
+					}else if($ifKode=='16454'){
+						$res = array_filter($resJadDok['response'],function($var)use($ifKode){
+							if(stripos($var->kodedokter,$ifKode)!==false){
+								return $var;
+							}
+						});
+						$resJadDok['response'] = $res;
+					}
+					if(count($resJadDok['response'])>0){
+						if($ifKode=='16454'){
+							$queryDokter = "SELECT * FROM dokter_bridg WHERE kodedokter='$ifKode'";
+							$execDokter = mysqli_query($dbrsud,$queryDokter) or die(mysqli_error($dbrsud));
+						// }elseif($ifKode=='GIG'){
+						}elseif(in_array($ifKode,['GIG','BDM','GND','KON'])){
+							$implodeKode = implode("','",$arrKodeDokter);
+							// $queryDokter = "SELECT * FROM dokter_bridg WHERE polibpjs IN ('{$implodeKode}')";
+							$queryDokter = "SELECT * FROM dokter_bridg WHERE polibpjs IN ('GIG','BDM','GND','KON')";
+							$execDokter = mysqli_query($dbrsud,$queryDokter) or die(mysqli_error($dbrsud));
+						}else{
+							$queryDokter = "SELECT * FROM dokter_bridg WHERE polibpjs='$ifKode'";
+							$execDokter = mysqli_query($dbrsud,$queryDokter) or die(mysqli_error($dbrsud));
+						}
+						// if($phone==='6281335537942'){
+						// 	echo json_encode($resJadDok,JSON_PRETTY_PRINT);
+						// 	// echo json_encode($arrKodeDokter,JSON_PRETTY_PRINT);
+						// 	die();
+						// }
+						// if($phone!='6281335537942'){
+							updateStatusChat('kodeBooking',$idBots,$wablas,$dataIn);
 
-			// 	$paramRef[0] = 'BDM';
-			// 	$resJadDok = refJadDok($paramRef); // get ref jadwal dokter HFIS
-			// 	if($resJadDok['metaData']->code==200){
-			// 		foreach($resJadDok['response'] as $key => $val) {
-			// 			$arrDokterGigi[] = $val;
-			// 			if(!in_array($val->kodepoli, $arrKodeDokter)){
-			// 				$arrKodeDokter[] = $val->kodepoli;
-			// 			}
-			// 		}
-			// 	}
-
-			// 	$paramRef[0] = 'GND';
-			// 	$resJadDok = refJadDok($paramRef); // get ref jadwal dokter HFIS
-			// 	if($resJadDok['metaData']->code==200){
-			// 		foreach($resJadDok['response'] as $key => $val) {
-			// 			$arrDokterGigi[] = $val;
-			// 			if(!in_array($val->kodepoli, $arrKodeDokter)){
-			// 				$arrKodeDokter[] = $val->kodepoli;
-			// 			}
-			// 		}
-			// 	}
-			// 	$resJadDok['response'] = $arrDokterGigi;
-			// }else{
-			// 	if(in_array($ifKode,['PSY','GIZ','VCT','MCU'])){
-			// 		$dokterInternal = dokterInternal($ifKode,$resKodePoli['tglBerobat']);
-			// 		$resJadDok = [
-			// 			'metaData'=> (object)[
-			// 				'code'=> 200,
-			// 				'message'=> 'OK'
-			// 			],
-			// 			'response'=> json_decode(json_encode($dokterInternal))
-			// 		];
-			// 	}else{
-			// 		$resJadDok = refJadDok($paramRef); // get ref jadwal dokter HFIS
-			// 	}
-			// }
-
-			// if($resJadDok['metaData']->code==200) {
-			// 	if($resJadDok['response']==""){
-			// 		$msg .= "Tidak terdapat Jadwal Dokter pada hari & poli yang anda pilih";
-			// 	}else{
-			// 		$getTgl = strtotime($rowsDapas['tglBerobat']);
-			// 		$tglPeriksa = date("d-m-Y",$getTgl);
-			// 		if($statusChat==24){
-			// 			$dataIn['status'] = 25;
-			// 		}else{
-			// 			if($statusChat==36){
-			// 				$dataIn['status'] = 37;
-			// 			}else{
-			// 				if($rowsDapas['caraBayar']=='BPJS'){
-			// 					$dataIn['status'] = 17;
-			// 				}else{
-			// 					$dataIn['status'] = 5;
-			// 				}
-			// 			}
-			// 		}
-			// 		$dataIn['kodeBooking'] = $strRandom;
-
-			// 		if($ifKode=='017' || $ifKode=='040' || $ifKode=='UMU'){
-			// 			$res = array_filter($resJadDok['response'],function($var)use($ifKode){
-			// 				if(stripos($var->kodesubspesialis,$ifKode)!==false){
-			// 					return $var;
-			// 				}
-			// 			});
-			// 			$resJadDok['response'] = $res;
-			// 		}else if($ifKode=='16454'){
-			// 			$res = array_filter($resJadDok['response'],function($var)use($ifKode){
-			// 				if(stripos($var->kodedokter,$ifKode)!==false){
-			// 					return $var;
-			// 				}
-			// 			});
-			// 			$resJadDok['response'] = $res;
-			// 		}
-			// 		if(count($resJadDok['response'])>0){
-			// 			if($ifKode=='16454'){
-			// 				$queryDokter = "SELECT * FROM dokter_bridg WHERE kodedokter='$ifKode'";
-			// 				$execDokter = mysqli_query($dbrsud,$queryDokter) or die(mysqli_error($dbrsud));
-			// 			// }elseif($ifKode=='GIG'){
-			// 			}elseif(in_array($ifKode,['GIG','BDM','GND','KON'])){
-			// 				$implodeKode = implode("','",$arrKodeDokter);
-			// 				// $queryDokter = "SELECT * FROM dokter_bridg WHERE polibpjs IN ('{$implodeKode}')";
-			// 				$queryDokter = "SELECT * FROM dokter_bridg WHERE polibpjs IN ('GIG','BDM','GND','KON')";
-			// 				$execDokter = mysqli_query($dbrsud,$queryDokter) or die(mysqli_error($dbrsud));
-			// 			}else{
-			// 				$queryDokter = "SELECT * FROM dokter_bridg WHERE polibpjs='$ifKode'";
-			// 				$execDokter = mysqli_query($dbrsud,$queryDokter) or die(mysqli_error($dbrsud));
-			// 			}
-			// 			// if($phone!='6281335537942'){
-			// 				updateStatusChat('kodeBooking',$idBots,$wablas,$dataIn);
-
-			// 				$addPoliNew = "UPDATE bot_data_pasien SET kodePoli='$upKode' WHERE cust_id='$idPsn'";
-			// 				mysqli_query($wablas,$addPoliNew);
-			// 			// }
-			// 			$arrDokter = [];
-			// 			while($row=$execDokter->fetch_assoc()){
-			// 				array_push($arrDokter,$row);
-			// 				if(in_array($ifKode,['GIG','BDM','GND','KON'])){
-			// 					if($row['polibpjs']=='GIG'){ # Kode GIG push ke $resJadDok['response']
-			// 						$getDay = date('D',strtotime($tglPeriksa));
-			// 						$timeDokter = ($getDay != 'Sat') ? '08.00-14.00' : '08.00-12.00';
-			// 						$pushToResJadDok = (object)[
-			// 							'kodesubspesialis' => $row['polibpjs'],
-			// 							'hari'=> 0,
-			// 							'kapasitaspasien'=> 50,
-			// 							'libur'=> 0,
-			// 							'namahari'=> '',
-			// 							'jadwal'=> $timeDokter,
-			// 							'namasubspesialis'=> $row['poli'],
-			// 							'namadokter'=> $row['dokter'],
-			// 							'kodepoli'=> $row['polibpjs'],
-			// 							'namapoli'=> $row['poli'],
-			// 							'kodedokter'=> $row['kodedokter'],
-			// 						];
-			// 						array_push($resJadDok['response'],$pushToResJadDok);
-			// 					}
-			// 				}
-			// 			}
-			// 			$count1 = toDokter($arrDokter,$resJadDok,'hitung','');
-			// 			$msg = toDokter($arrDokter,$resJadDok,'tampil',$count1);
-			// 		}else{
-			// 			$msg = "Tidak ada jadwal dokter pada hari & poli yang Anda pilih.\n";
-			// 			$msg .= "Silahkan pilih Nomor Poli Tujuan yang lain atau ubah tanggal kunjungan.";
-			// 		}
-			// 	}
-			// }else{
-			// 	$msg = "Tidak ada jadwal dokter pada hari & poli yang Anda pilih.\n";
-			// 	$msg .= "Silahkan pilih Nomor Poli Tujuan yang lain atau ubah tanggal kunjungan.";
-			// }
+							$addPoliNew = "UPDATE bot_data_pasien SET kodePoli='$upKode' WHERE cust_id='$idPsn'";
+							mysqli_query($wablas,$addPoliNew);
+						// }
+						$arrDokter = [];
+						while($row=$execDokter->fetch_assoc()){
+							array_push($arrDokter,$row);
+							if(in_array($ifKode,['GIG','BDM','GND','KON'])){
+								if($row['polibpjs']=='GIG'){ # Kode GIG push ke $resJadDok['response']
+									$getDay = date('D',strtotime($tglPeriksa));
+									$timeDokter = ($getDay != 'Sat') ? '08.00-14.00' : '08.00-12.00';
+									$pushToResJadDok = (object)[
+										'kodesubspesialis' => $row['polibpjs'],
+										'hari'=> 0,
+										'kapasitaspasien'=> 50,
+										'libur'=> 0,
+										'namahari'=> '',
+										'jadwal'=> $timeDokter,
+										'namasubspesialis'=> $row['poli'],
+										'namadokter'=> $row['dokter'],
+										'kodepoli'=> $row['polibpjs'],
+										'namapoli'=> $row['poli'],
+										'kodedokter'=> $row['kodedokter'],
+									];
+									array_push($resJadDok['response'],$pushToResJadDok);
+								}
+							}
+						}
+						$count1 = toDokter($arrDokter,$resJadDok,'hitung','');
+						$msg = toDokter($arrDokter,$resJadDok,'tampil',$count1);
+					}else{
+						$msg = "Tidak ada jadwal dokter pada hari & poli yang Anda pilih.\n";
+						$msg .= "Silahkan pilih Nomor Poli Tujuan yang lain atau ubah tanggal kunjungan.";
+					}
+				}
+			}else{
+				$msg = "Tidak ada jadwal dokter pada hari & poli yang Anda pilih.\n";
+				$msg .= "Silahkan pilih Nomor Poli Tujuan yang lain atau ubah tanggal kunjungan.";
+			}
 		}else{
 			$msg = "Nomor Poli Tidak Ditemukan!\n";
 			$msg .= "Silahkan Pilih Nomor Poli Dengan Benar!";
@@ -1221,6 +1250,10 @@ if(is_numeric($waText) && $ifKodeDokter){
 				if($sptPhone[0]=='62'){
 					$sptPhone[0]='0';
 				}
+				// if($phone=='6281335537942'){
+				// 	echo "$idPsn \n $phone";
+				// 	die();
+				// }
 
 				mysqli_begin_transaction($wablas);
 				mysqli_begin_transaction($dbrsud);
@@ -1362,7 +1395,7 @@ if($statusChat==99){
 ### Reset pendaftaran
 // if($waText=='reset' && ($statusChat>1 && $statusChat<99) && ($rows['pasien_baru']==false || $rows['pasien_baru']==true)){
 if($waText=='reset' && $statusChat>1 && ($rows['pasien_baru']==false || $rows['pasien_baru']=="" || $rows['pasien_baru']==true)){
-	$msg = msgWelcome($wablas);
+	$msg = msgWelcome();
 	if($statusChat==99 && $rowsDapas['is_pasien_baru']==false){
 		$kodeCust = $rowsDapas['KodeCust'];
 		$tglPeriksa = $rowsDapas['tglBerobat'];
@@ -1387,45 +1420,7 @@ if(isset($msg)){
 			$msg .= "\n\nUntuk mengulangi pendaftaran Silahkan ketik : *reset*";
 		}
 	}
-	// echo 'tes';
 	echo $msg;
-}
-
-function msgJadwalPolis($wablas = ''){
-	$total=0;
-	if($wablas){
-		$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-			JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-			WHERE bp.tgl_periksa = '2024-06-04'
-			AND bp.statusChat='99'
-			AND bdp.kodePoli='017'
-		";
-		$res = mysqli_query($wablas,$query);
-		$total = mysqli_fetch_assoc($res)['total'];
-	}
-	$text = "*Untuk sementara waktu.*\n";
-	$text .= "*Pelayanan Poli Jiwa hanya tersedia pada hari Selasa dan Kamis.*\n";
-	$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota 40 Pasien pada Tanggal 04 Juni 2024 dan Tidak Menerima Pasien Onsite.*";
-	if($total>0){
-		$text .= "\n*Kuota terpakai $total/40.*";
-	}
-	return $text;
-}
-
-function msgJadwalPoli($kodePoli = ''){
-	$text = "*Untuk sementara waktu.*";
-	if(!$kodePoli || $kodePoli=='JIW'){
-		$text .= "\n*Pelayanan Poli Jiwa hanya tersedia pada hari Selasa dan Kamis.*";
-	}
-	if(!$kodePoli || $kodePoli=='017'){
-		$text .= "\n*Pelayanan Poli Bedah Onkologi tutup pada hari Kamis.*";
-	}
-	return $text;
-}
-
-function cekLibur($date){ # Format(d-m-Y)
-	$arrDate = ['23-05-2024','24-05-2024'];
-	return in_array($date,$arrDate) ? : false;
 }
 
 function dokterInternal($ifKode,$tglBerobat){
@@ -1555,43 +1550,26 @@ function cekAntrian($tglBerobat,$nik,$wablas){
 	return $execQGetAntri;
 }
 
-function msgWelcome($wablas=''){
+function msgWelcome(){
 	$msg = "Selamat datang di RSUD Dr. Wahidin Sudiro Husodo Kota Mojokerto, Anda sedang berinteraksi dengan Sistem Pendaftaran Antrian Otomatis, Silahkan Pilih Layanan :\n\n";
 	$msg .= "A : Pendaftaran Antrian\n";
 	$msg .= "B : Promo Menarik\n\n";
 	$msg .= "Ketik A atau B lalu kirim.\n\n";
 	// $msg .= "*Untuk sementara waktu pendaftaran POLI GENERAL CHECK UP*\n*Hanya bisa dilakukan secara onsite.*\n\n";
-	// $msg .= msgLibur()."\n\n";
-
-	// $msg .= "*INFORMASI LIBUR CUTI BERSAMA HARI RAYA IDUL FITRI 1445 H*\n";
-	// $msg .= "_*--PELAYANAN POLI RAWAT JALAN dan POLI EKSEKUTIF--*_\n";
-	// $msg .= "*LIBUR : 08 s/d 15 April 2024*\n";
-	// $msg .= "*BUKA KEMBALI : 16 April 2024*\n";
-	// $msg .= "*Pelayanan IGD & PONEK tetap buka 24 JAM*\n";
-	// $msg .= "*Poli HD tetap buka seperti biasa, kecuali(Minggu)*\n\n";
-
+	$msg .= "*INFORMASI LIBUR CUTI BERSAMA HARI RAYA IDUL FITRI 1445 H*\n";
+	$msg .= "_*--PELAYANAN POLI RAWAT JALAN dan POLI EKSEKUTIF--*_\n";
+	$msg .= "*LIBUR : 08 s/d 15 April 2024*\n";
+	$msg .= "*BUKA KEMBALI : 16 April 2024*\n";
+	$msg .= "*Pelayanan IGD & PONEK tetap buka 24 JAM*\n";
+	$msg .= "*Poli HD tetap buka seperti biasa, kecuali(Minggu)*\n\n";
 	// $msg .= "*Pelayanan IGD & PONEK tetap buka 24 JAM*\n\n";
 	// $msg .= "*Mohon Maaf Kuota untuk Medical Check Up Persyaratan Tenaga P3K Tanggal 10-18 Sudah Penuh*\n";
 	// $msg .= "*Silahkan mendaftar kembali di tanggal 01 Juli 2023*\n";
 	// $msg .= "*Terima Kasih*\n\n";
-
-	// $msg .= msgJadwalPolis($wablas)."\n\n";
-	$msg .= msgJadwalPoli()."\n\n";
-
 	$msg .= "Hotline 0815257200088 untuk mendapatkan bantuan apabila ada kendala pendaftaran.\n";
 	$msg .= "Video tutorial penggunaan antrian cek di : shorturl.at/dhqz8";
 	// $msg .= "\n\n*Sehubungan dengan perbaikan server data untuk optimalisasi sistem informasi, maka akan terjadi down sistem pada:*\n";
 	// $msg .= "*Kamis, 28 September 2023 pukul 15:00 s/d 21:00 WIB.*";
-	return $msg;
-}
-function msgLibur(){
-	// $msg = "*INFORMASI LIBUR CUTI BERSAMA HARI RAYA IDUL FITRI 1445 H*\n";
-	$msg = "*INFORMASI LIBUR*\n";
-	$msg .= "_*--PELAYANAN POLI RAWAT JALAN dan POLI EKSEKUTIF--*_\n";
-	$msg .= "*LIBUR : 23 s/d 24 Mei 2024*\n";
-	$msg .= "*BUKA KEMBALI : 25 Mei 2024*\n";
-	$msg .= "*Pelayanan IGD & PONEK tetap buka 24 JAM*\n";
-	$msg .= "*Poli HD tetap buka seperti biasa, kecuali(Minggu)*";
 	return $msg;
 }
 

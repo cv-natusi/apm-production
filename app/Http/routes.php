@@ -146,10 +146,11 @@ Route::get('create', 'AuthController@create')->name('create');
 Route::get('/verifikasi/{id}/{random}', 'WablasController@verifikasi')->name('verifikasi');
 Route::get('verifikasiBerhasil','WablasController@verifBerhasil')->name('verifBerhasil');
 Route::post('cekRujukanWaBot','WaBotBridgingController@cekRujukan')->name('cekRujukanWaBot');
-Route::post('/api/send-message', 'WablasController@sendDataTesting')->name('testing');
+Route::get('/api/send-message', 'WablasController@sendDataTesting')->name('testing');
 
 // Ambil Antrian Kiosk
 Route::post('/apidokter', 'RegistrationController@ApiDokter')->name('api-dokter');
+Route::post('jadwal-dokter-kiosk', 'RegistrationController@jadwalDokterKiosk')->name('jadwal-dokter-kiosk');
 Route::post('/caripasien', 'RegistrationController@cari')->name('cari');
 Route::post('/pilihpasien', 'RegistrationController@pilihpasien')->name('pilih-pasien');
 Route::post('/politujuan', 'RegistrationController@politujuan')->name('politujuan');
@@ -678,6 +679,7 @@ Route::group(['prefix'=>'api'], function(){
 
 	Route::any('report','AaController@report');
 	Route::group(['prefix'=>'cron'],function(){
+		Route::post('random-jadwal-dokter', 'RegistrationController@jadwalDokterKiosk');
 		Route::get('sync-jadwal-dokter','Cron\CronController@syncJadwalDokter');
 	});
 });

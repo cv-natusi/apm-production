@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Http\Requests;
+# Library & package
 use App\Http\Controllers\Controller;
 use App\Http\Libraries\Requestor;
-use App\Http\Models\Poli;
+use App\Http\Requests;
 use DB,DateTime,Log;
+use Illuminate\Http\Request;
+# Models
+use App\Http\Models\Poli;
+use App\Http\Models\JadwalDokterInternal;
+
 class BridgBpjsController extends Controller{
 	public function __construct(){
 		// PRODUCTION START
@@ -613,13 +616,19 @@ class BridgBpjsController extends Controller{
 				'response'=>''
 			];
 		}
-		if(!$dokter = DB::connection('dbrsud')->table('dokter_bridg')->where('kodedokter',$kodedokter)->first()){
+		if(!$dokter = JadwalDokterInternal::where('date',$tanggalperiksa)->where('kode_dokter',$kodedokter)->first()){
 			return [
 				'metaData'=>(object)['code'=>'201', 'message' => 'Dokter tidak terdaftar'],
 				'response'=>''
 			];
 		}
-		$namadokter = $dokter->dokter;
+		// if(!$dokter = DB::connection('dbrsud')->table('dokter_bridg')->where('kodedokter',$kodedokter)->first()){
+		// 	return [
+		// 		'metaData'=>(object)['code'=>'201', 'message' => 'Dokter tidak terdaftar'],
+		// 		'response'=>''
+		// 	];
+		// }
+		$namadokter = $dokter->nama_dokter;
 		if ($jenispasien=='BPJS') {
 			if($nomorkartu && strlen($nomorkartu)!=13){
 				return [
@@ -715,14 +724,14 @@ class BridgBpjsController extends Controller{
 			}
 			// if(!empty($cekAntrian) && ($cekAntrian->nik==$nik)){
 			// }else{
-			if($dokter->polibpjs=='GIZ'){
+			if($dokter->kode_poli_bpjs=='GIZ'){
 				$request->kodepoli = 'UMU';
-			}else if($dokter->polibpjs=='040'){
+			}else if($dokter->kode_poli_bpjs=='040'){
 				$request->kodepoli = 'ANA';
-			}else if($dokter->polibpjs=='017'){
+			}else if($dokter->kode_poli_bpjs=='017'){
 				$request->kodepoli = 'BED';
 			}else{
-				$request->kodepoli = $dokter->polibpjs;
+				$request->kodepoli = $dokter->kode_poli_bpjs;
 			}
 			$jadwalDokter = $this->getDPJP($request);
 			$arrJad = [];
@@ -738,7 +747,7 @@ class BridgBpjsController extends Controller{
 				return [
 					'metaData'=>(object)[
 						'code'=>'201',
-						'message' => 'Jadwal Dokter '.$dokter->dokter.' Tersebut Belum Tersedia, Silahkan Reschedule Tanggal dan Jam Praktek Lainnya'
+						'message' => 'Jadwal Dokter '.$dokter->nama_dokter.' Tersebut Belum Tersedia, Silahkan Reschedule Tanggal dan Jam Praktek Lainnya'
 					],
 					'response'=>''
 				];
@@ -776,7 +785,7 @@ class BridgBpjsController extends Controller{
 						'nik'              => $nik,
 						'nohp'             => $nohp,
 						// 'kodepoli'         => strtoupper($kodepoli),
-						'kodepoli'         => strtoupper($dokter->polibpjs),
+						'kodepoli'         => strtoupper($dokter->kode_poli_bpjs),
 						'namapoli'         => $namapoli,
 						// 'pasienbaru'       => ($na=='B'?1:0),
 						'pasienbaru'       => $pasienbaru,
@@ -833,7 +842,7 @@ class BridgBpjsController extends Controller{
 						Log::info(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 					}
 				}else{
-					$arr = (object)['code'=>'201', 'message' => 'Jadwal Dokter '.$dokter->dokter.' Tersebut Belum Tersedia, Silahkan Reschedule Tanggal dan Jam Praktek Lainnya'];
+					$arr = (object)['code'=>'201', 'message' => 'Jadwal Dokter '.$dokter->nama_dokter.' Tersebut Belum Tersedia, Silahkan Reschedule Tanggal dan Jam Praktek Lainnya'];
 					$data = [
 						'metaData'=>$arr,
 						'response'=>''
@@ -841,7 +850,7 @@ class BridgBpjsController extends Controller{
 					return $data;
 				}
 			}else{
-				$arr = (object)['code'=>'201', 'message' => 'Jadwal Dokter '.$dokter->dokter.' Tersebut Belum Tersedia, Silahkan Reschedule Tanggal dan Jam Praktek Lainnya'];
+				$arr = (object)['code'=>'201', 'message' => 'Jadwal Dokter '.$dokter->nama_dokter.' Tersebut Belum Tersedia, Silahkan Reschedule Tanggal dan Jam Praktek Lainnya'];
 				$data = [
 					'metaData'=>$arr,
 					'response'=>''

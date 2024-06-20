@@ -33,8 +33,8 @@
 
 	@keyframes spin {
 		0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+		100% { transform: rotate(360deg); }
+	}
 </style>
 
 @section('content-antrian-registration')
@@ -82,16 +82,16 @@
 <div class="loader"></div>
 
 <!-- ambil antrian -->
-@include('registration.pendaftaranNew.jenis_pasien')
-@include('registration.pendaftaranNew.konsisi_pasien')
+@include('registration.pendaftaranNew.jenis_pasien') {{-- px baru / lama --}}
+@include('registration.pendaftaranNew.konsisi_pasien') {{-- difabel / tidak --}}
 @include('registration.pendaftaranNew.cari_pasien')
 @include('registration.pendaftaranNew.dialog_pasienlama')
 {{-- @include('registration.pendaftaranNew.lahir_pasien') --}}
 @include('registration.pendaftaranNew.pembayaran_pasien')
 @include('registration.pendaftaranNew.poli_pasien')
 @include('registration.pendaftaranNew.dokter_pasien')
-@include('registration.pendaftaranNew.nik_pasien')
-@include('registration.pendaftaranNew.jenis_kunjunganbpjs')
+@include('registration.pendaftaranNew.nik_pasien') {{-- ambil antran pasien umum --}}
+@include('registration.pendaftaranNew.jenis_kunjunganbpjs') {{-- ambil antran pasien bpjs --}}
 @include('registration.pendaftaranNew.dialog_kunjungan')
 @include('registration.pendaftaranNew.no_antri_pasien')
 
@@ -204,8 +204,7 @@
 		}
 	}
 
-	// Start Ambil Antrian 
-	function ambil() {
+	function ambil() { // Start Ambil Antrian
 		var now = $('#waktukini').val()
 		var waktubuka = $('#waktubuka').val()
 		var waktututup = $('#waktututup').val()
@@ -222,21 +221,31 @@
 		}
 	}
 
-	var pasien = ''
+	// var pasien1 = ''
 	var nik = ''
 	var no_bpjs = ''
 	var no_rm = ''
-	var jenis_pasien = ''
+	// var jenis_pasien1 = ''
 	var geriatri = ''
 	var metode = 'KIOSK'
 	var status = 'belum'
+	// "antrianObj" untuk simpan sementara pilihan pasien
+	initAntrianObj = _ => {
+		return {
+			metode: 'KIOSK',
+			nik: '',
+			status: 'belum',
+			tanggal: $('#tanggal').val(),
+		}
+	}
+	let antrianObj = initAntrianObj()
 
 	function kembali(params) {
 		if (params == 'jenis_pasien') {
 			$('#JenisPasienModal').modal('hide');
 			$('#antrian').show();
 		} else if (params == 'konsisi') {
-			if (pasien == 'Y') {
+			if (antrianObj.is_pasien_baru == 'Y') {
 				$('.titleHeaderRegistration').show();
 				$('#KonsisiPasienModal').modal('hide');
 				$('#JenisPasienModal').modal('show');
@@ -248,7 +257,7 @@
 			$('#LahirPasienModal').modal('hide');
 			$('#KonsisiPasienModal').modal('show');
 		} else if(params == 'pembayaran') {
-			if (pasien == 'Y') {
+			if (antrianObj.is_pasien_baru == 'Y') {
 				$('#PembayaranPasienModal').modal('hide');
 				$('#KonsisiPasienModal').modal('show');
 			} else {
@@ -269,12 +278,14 @@
 			$('#PembayaranPasienModal').modal('show');
 		} else if(params=='nikpasien'){
 			$('#NikPasienModal').modal('hide');
-			$('#DokterPasienModal').modal('show');
+			// $('#DokterPasienModal').modal('show');
+			$('#PoliPasienModal').modal('show');
 		} else if(params=='jenis_kunjungan'){
 			$('#noreferensi').val('');
 			$('#nikkunjungan').val('');
 			$('#JenisKunjunganBpjsModal').modal('hide');
-			$('#DokterPasienModal').modal('show');
+			// $('#DokterPasienModal').modal('show');
+			$('#PoliPasienModal').modal('show');
 		} else if(params=='kmanual'){
 			$('#PasienManualModal').modal('hide');
 			$('.antrian').hide();
@@ -287,9 +298,10 @@
 			$('#antrian').show();
 		}
 	}
-    
+
 	function pasienbaru() {
-		pasien = 'Y';
+		// pasien1 = 'Y';
+		antrianObj.is_pasien_baru = 'Y'
 
 		$('.titleHeaderRegistration').hide();
 		$('#JenisPasienModal').modal('hide');
@@ -297,7 +309,8 @@
 	}
 
 	function pasienlama() {
-		pasien = 'N';
+		// pasien1 = 'N';
+		antrianObj.is_pasien_baru = 'N'
 
 		$('.titleHeaderRegistration').hide();
 		$('#JenisPasienModal').modal('hide');
@@ -319,7 +332,9 @@
 						}else{
 							var lahir = data.antrian.TglLahir.substring(0,10);
 						}
-
+						antrianObj.nik = nik
+						antrianObj.no_rm = norm
+						antrianObj.noka = nobpjs
 						$('#CariPasienModal').modal('hide');
 						$('#DialogPasienLamaModal').modal('show');
 						$('#DialogPasienLamaModal #kode').val(norm);
@@ -344,7 +359,9 @@
 						var norm = data.antrian.KodeCust;
 						var nobpjs = data.antrian.FieldCust1;
 						var lahir = data.antrian.TglLahir.substring(0,10);
-
+						antrianObj.nik = nik
+						antrianObj.no_rm = norm
+						antrianObj.noka = nobpjs
 						$('#CariPasienModal').modal('hide');
 						$('#DialogPasienLamaModal').modal('show');
 						$('#DialogPasienLamaModal #kode').val(norm);
@@ -369,7 +386,9 @@
 						var norm = data.antrian.KodeCust;
 						var nobpjs = data.antrian.FieldCust1;
 						var lahir = data.antrian.TglLahir.substring(0,10);
-
+						antrianObj.nik = nik
+						antrianObj.no_rm = norm
+						antrianObj.noka = nobpjs
 						$('#CariPasienModal').modal('hide');
 						$('#DialogPasienLamaModal').modal('show');
 						$('#DialogPasienLamaModal #plamanama').html(nama);
@@ -393,7 +412,9 @@
 						var norm = data.antrian.KodeCust;
 						var nobpjs = data.antrian.FieldCust1;
 						var lahir = data.antrian.TglLahir;
-
+						antrianObj.nik = nik
+						antrianObj.no_rm = norm
+						antrianObj.noka = nobpjs
 						$('#CariPasienModal').modal('hide');
 						$('#DialogPasienLamaModal').modal('show');
 						$('#DialogPasienLamaModal #plamanama').html(nama);
@@ -414,7 +435,7 @@
 	}
 
 	function btndialog() {
-		if (pasien=='Y') {
+		if (antrianObj.is_pasien_baru=='Y') {
 			$('#DialogPasienLamaModal').modal('hide');
 			$('#KonsisiPasienModal').modal('show');
 		} else {
@@ -430,8 +451,9 @@
 		}
 	}
 
-	function ya() {
-		geriatri = 'Y';
+	function ya() { // Geriatri
+		// geriatri1 = 'Y';
+		antrianObj.is_geriatri = 'Y'
 		var nik = $('#konsisinik').val();
 		var norm = $('#konsisirm').val();
 		var nobpjs = $('#konsisibpjs').val();
@@ -444,7 +466,8 @@
 	}
 
 	function tidak() {
-		geriatri = 'N';
+		// geriatri1 = 'N';
+		antrianObj.is_geriatri = 'N'
 		var nik = $('#konsisinik').val();
 		var norm = $('#konsisirm').val();
 		var nobpjs = $('#konsisibpjs').val();
@@ -457,7 +480,7 @@
 	}
 
 	function umum() {
-		jenis_pasien = 'UMUM';
+		antrianObj.jenis_pasien = 'UMUM'
 		var nik = $('#pembayarannik').val();
 		var norm = $('#pembayaranrm').val();
 		var bpjs = $('#pembayaranbpjs').val();
@@ -470,7 +493,7 @@
 	}
 
 	function bpjs() {
-		jenis_pasien = 'BPJS';
+		antrianObj.jenis_pasien = 'BPJS'
 		var nik = $('#pembayarannik').val();
 		var norm = $('#pembayaranrm').val();
 		var bpjs = $('#pembayaranbpjs').val();
@@ -483,7 +506,7 @@
 	}
 
 	function asuransi() {
-		jenis_pasien = 'ASURANSILAIN';
+		antrianObj.jenis_pasien = 'ASURANSILAIN'
 		var nik = $('#pembayarannik').val();
 		var norm = $('#pembayaranrm').val();
 		var bpjs = $('#pembayaranbpjs').val();
@@ -495,63 +518,89 @@
 		$('#PoliPasienModal #polibpjs').val(bpjs);
 	}
 
-	function btnpoli(kode) {
+	async function btnpoli(kode) {
 		var nik = $('#polinik').val();
 		var norm = $('#polirm').val();
 		var bpjs = $('#polibpjs').val();
-		var tanggal = $('#tanggal').val();
 
-		$('#PoliPasienModal').hide()
-		$('.loader').show();
-		$('#tempatData').empty();
-		$.post("{{route('api-dokter')}}", {"_token" : "{{ csrf_token() }}", kodePoli:kode, tanggal:tanggal},function(res){
-			if ((res.code==200)) {
-				if (res.dokter.length>0) {
-					$.each(res.dokter, function (index, value)  
-					{  
-						var kdsubpoli = value.kodesubspesialis;
-						var kdpoli   = value.kodepoli;
-						var kddokter = value.kodedokter;
-						var nama     = value.namadokter;
-						var jadwal   = value.jadwal;
-
-						var html = ''
-
-						html += '<tr id="kd_'+kdsubpoli+'">'
-						html += '<td id="kdpoli'+kdsubpoli+'">'+kdsubpoli+'</td>'
-						html += '<td id="namadokter">'+nama+'</td>'
-						html += '<td id="jadwaldokter">'+jadwal+'</td>'
-						html += '<td>'
-						html += '<a href="javascript:void(0)" class="btn btn-sm btn-rounded btn-primary mr-2 text-center" onclick="pilihdokter(`'+kdsubpoli+','+jadwal+','+kddokter+'`)">Pilih</a>'
-						html += '</td>'
-						html += '</tr>'
-
-						$('#tempatData').append(html)
-					});
-
-					$('.loader').hide();
-
-					if (pasien=='Y') {
-						$('#PoliPasienModal').modal('hide');
-						$('#DokterPasienModal').modal('show');
-					} else {
-						$('#PoliPasienModal').modal('hide');
-						$('#DokterPasienModal').modal('show');
-						$('#DokterPasienModal #dokternik').val(nik);
-						$('#DokterPasienModal #dokterrm').val(norm);
-						$('#DokterPasienModal #dokterbpjs').val(bpjs);
-					}
-				} else {
-					swal('Sorry!','Tidak Ada Jadwal Dokter Pada Poli Tersebut Hari Ini','warning')
-					$('.loader').hide();
-					$('#PoliPasienModal').show();
-				}
-			} else {
-				swal('Sorry!','Tidak Ada Jadwal Dokter Pada Poli Tersebut Hari Ini','warning')
+		// $('#PoliPasienModal').hide();
+		// $('.loader').show();
+		await $.post("{{route('jadwal-dokter-kiosk')}}",{
+			jenis_pasien: antrianObj.jenis_pasien,
+			kode_poli: kode,
+			tanggal: antrianObj.tanggal,
+		}).done((data, status, xhr)=>{
+			if(data.metadata.code!=200){
 				$('.loader').hide();
-				$('#PoliPasienModal').show();
+				const msg = `Tidak ada jadwal dokter pada poli yang Anda pilih`
+				swal('Whoops', msg, 'warning'); return
 			}
+			const json = data.response
+			antrianObj.jam_praktek = json.jam_praktek
+			antrianObj.kode_dokter = json.kode_dokter
+			antrianObj.kode_poli_rs = json.kode_poli_rs
+			antrianObj.kode_poli_bpjs = json.kode_poli_bpjs
+			antrianObj.jenis_pasien=='BPJS' ? $('#nikkunjungan').val(antrianObj.nik) : $('#nikpasien').val(antrianObj.nik)
+			$('#PoliPasienModal').modal('hide');
+			antrianObj.jenis_pasien=='BPJS' ? $('#JenisKunjunganBpjsModal').modal('show') : $('#NikPasienModal').modal('show')
+			$('.loader').hide();
+		}).fail((e)=>{
+			console.log(e)
+			$('.loader').hide();
 		})
+		// return
+
+		// $('#PoliPasienModal').hide()
+		// $('.loader').show();
+		// $('#tempatData').empty();
+		// $.post("{{route('api-dokter')}}", {"_token" : "{{ csrf_token() }}", kodePoli:kode, tanggal:tanggal},function(res){
+		// 	if ((res.code==200)) {
+		// 		if (res.dokter.length>0) {
+		// 			$.each(res.dokter, function (index, value)  
+		// 			{  
+		// 				var kdsubpoli = value.kodesubspesialis;
+		// 				var kdpoli   = value.kodepoli;
+		// 				var kddokter = value.kodedokter;
+		// 				var nama     = value.namadokter;
+		// 				var jadwal   = value.jadwal;
+
+		// 				var html = ''
+
+		// 				html += '<tr id="kd_'+kdsubpoli+'">'
+		// 				html += '<td id="kdpoli'+kdsubpoli+'">'+kdsubpoli+'</td>'
+		// 				html += '<td id="namadokter">'+nama+'</td>'
+		// 				html += '<td id="jadwaldokter">'+jadwal+'</td>'
+		// 				html += '<td>'
+		// 				html += '<a href="javascript:void(0)" class="btn btn-sm btn-rounded btn-primary mr-2 text-center" onclick="pilihdokter(`'+kdsubpoli+','+jadwal+','+kddokter+'`)">Pilih</a>'
+		// 				html += '</td>'
+		// 				html += '</tr>'
+
+		// 				$('#tempatData').append(html)
+		// 			});
+
+		// 			$('.loader').hide();
+
+		// 			if (pasien1=='Y') {
+		// 				$('#PoliPasienModal').modal('hide');
+		// 				$('#DokterPasienModal').modal('show');
+		// 			} else {
+		// 				$('#PoliPasienModal').modal('hide');
+		// 				$('#DokterPasienModal').modal('show');
+		// 				$('#DokterPasienModal #dokternik').val(nik);
+		// 				$('#DokterPasienModal #dokterrm').val(norm);
+		// 				$('#DokterPasienModal #dokterbpjs').val(bpjs);
+		// 			}
+		// 		} else {
+		// 			swal('Sorry!','Tidak Ada Jadwal Dokter Pada Poli Tersebut Hari Ini','warning')
+		// 			$('.loader').hide();
+		// 			$('#PoliPasienModal').show();
+		// 		}
+		// 	} else {
+		// 		swal('Sorry!','Tidak Ada Jadwal Dokter Pada Poli Tersebut Hari Ini','warning')
+		// 		$('.loader').hide();
+		// 		$('#PoliPasienModal').show();
+		// 	}
+		// })
 	}
 
 	function pilihdokter (kdpoli){
@@ -569,15 +618,15 @@
 
 		$.post("{{route('politujuan')}}", {"_token" : "{{ csrf_token() }}",
 			nik:nik,
-			no_rm:no_rm, 
+			no_rm:no_rm,
 			no_bpjs:no_bpjs,
-			kodepoli:kodepoli, 
-			kddokter:kddokter, 
-			jadwal:jadwal, 
-			pasien:pasien, 
+			kodepoli:kodepoli,
+			kddokter:kddokter,
+			jadwal:jadwal,
+			pasien:pasien1,
 			tglperiksa:tanggal
 		},function(data){
-			if (jenis_pasien=='BPJS') {
+			if (antrianObj.jenis_pasien=='BPJS') {
 				var kodepoli = data.poli.kdpoli;
 				var kddokter = data.kddokter;
 				var jadwal = data.jadwal;
@@ -618,15 +667,12 @@
 		});
 	}
 
-	$('#btn-next-umum').click(function (e) { 
+	$('#btn-next-umum').click(function (e) { // Ambil antrian umum(tombol selanjutnya)
 		e.preventDefault();
-		var nik = $('#nikpasien').val();
-		var no_rm = $('#rmpasienlama').val();
-		var no_bpjs = $('#bpjspasienlama').val();
-		var kdpoli = $('#kodepoli').val();
-		var kddokter = $('#kddokter').val();
-		var jadwal = $('#jadwal').val();
-		var tanggal = $('#tanggal').val();
+		let nik = $('#nikpasien').val()
+			no_rm = antrianObj.no_rm || '' // Pasien lama
+			noka = antrianObj.noka || '' // Pasien lama
+			kode_poli_bpjs = antrianObj.kode_poli_bpjs
 
 		$('#NikPasienModal').hide();
 		$('.loader').show();
@@ -634,21 +680,20 @@
 		if (nik!='') {
 			$('#btn-next-umum').attr('disabled',true);
 			$.post("{{route('ambil-antrian-save')}}", {"_token" : "{{ csrf_token() }}",
-				kodepoli:kdpoli, 
-				pasien:pasien, 
-				tglperiksa:tanggal,
-				jadwal:jadwal,
-				kddokter:kddokter,
-				geriatri:geriatri,
-				metode:metode,
-				status:status,
-				jenis_pasien:jenis_pasien,
-				nik:nik,
-				no_bpjs:no_bpjs,
-				no_rm:no_rm,
+				kodepoli: kode_poli_bpjs,
+				pasien: antrianObj.is_pasien_baru,
+				tglperiksa: antrianObj.tanggal,
+				jadwal: antrianObj.jam_praktek,
+				kddokter: antrianObj.kode_dokter,
+				geriatri: antrianObj.is_geriatri,
+				metode: antrianObj.metode,
+				status: antrianObj.status,
+				jenis_pasien: antrianObj.jenis_pasien,
+				nik: nik,
+				no_bpjs: noka,
+				no_rm: no_rm,
 			},function(data){
 				if(data.code==200){
-					var kdpoli = data.data.kode_poli;
 					var id_antrian = data.data.id;
 					var poli = data.poli.tm_poli.NamaPoli;
 					var kat_pasien = data.data.is_pasien_baru;
@@ -658,11 +703,11 @@
 
 					$('#NikPasienModal').modal('hide');
 					$('#NoAntrianPasienModal').modal('show');
-					$('#NoAntrianPasienModal #kodepoli').val(kdpoli);
 					$('#NoAntrianPasienModal #id_antrian').val(id_antrian);
-					$('#NoAntrianPasienModal #is_pasien').val(kat_pasien);
 					$('#NoAntrianPasienModal #poli').html(poli);
-					if (kat_pasien == 'Y') {
+					$('#NoAntrianPasienModal #kodepoli').val(kode_poli_bpjs);
+					$('#NoAntrianPasienModal #is_pasien').val(antrianObj.is_pasien_baru);
+					if (antrianObj.is_pasien_baru == 'Y') {
 						$('#NoAntrianPasienModal #no_antrian').html(no_antrian);
 					} else {
 						$('#NoAntrianPasienModal #no_antrian').html(no_antrian_poli);
@@ -697,11 +742,10 @@
 			$.post("{{route('cari-rujukan')}}", {"_token" : "{{ csrf_token() }}", noRujuk:valRujuk,jenisKunjungan:jenisKunjungan},function(data){
 				if(data.code==200){
 					var nik = data.nik;
-
 					swal('Berhasil! '+data.code, data.message,'success')
-                    if(nik!='kontrol'){
-    					$('#nikkunjungan').val(nik);
-                    }
+					if(nik!='kontrol'){
+						$('#nikkunjungan').val(nik);
+					}
 					$('#btnCariRujukan').hide();
 					$('#btnLanjut').show();
 					$("#fktp").removeAttr('disabled');
@@ -716,15 +760,12 @@
 		}
 	}
 
-	$('#btnLanjut').click(function (e) { 
+	$('#btnLanjut').click(function (e) { // Ambil antrian bpjs(tombol selanjutnya)
 		e.preventDefault();
-		var nik = $('#nikkunjungan').val();
-		var no_rm = $('#normkunjungan').val();
-		var no_bpjs = $('#nobpjskunjungan').val();
-		var kdpoli = $('#kodepolibpjs').val();
-		var kddokter = $('#kddokterbpjs').val();
-		var jadwal = $('#jadwalbpjs').val();
-		var tanggal = $('#tanggal').val();
+		let nik = $('#nikkunjungan').val()
+			no_rm = antrianObj.no_rm || ''
+			noka = antrianObj.noka || ''
+			kode_poli_bpjs = antrianObj.kode_poli_bpjs
 		var referensi = $('#noreferensi').val();
 		var check = $('input:radio:checked').length;
 		var cekNoRujuk = $('#nmrRujuk').val();
@@ -744,42 +785,37 @@
 			}
 			$('#btnLanjut').attr('disabled',true);
 			$.post("{{route('ambil-antrian-save')}}", {"_token" : "{{ csrf_token() }}",
-				kodepoli:kdpoli, 
-				pasien:pasien, 
-				tglperiksa:tanggal,
-				jadwal:jadwal,
-				kddokter:kddokter,
-				// kodebooking:kdbooking,
-				geriatri:geriatri,
-				metode:metode,
-				// no_antrian:no_antrian,
-				status:status,
-				jenis_pasien:jenis_pasien,
-				nik:nik,
-				no_bpjs:no_bpjs,
-				no_rm:no_rm,
-				jenis_kunjungan:jenis_kunjungan,
-				no_referensi:referensi,
-				cekNoRujuk:cekNoRujuk
+				kodepoli: antrianObj.kode_poli_bpjs, 
+				pasien: antrianObj.is_pasien_baru, 
+				tglperiksa: antrianObj.tanggal,
+				jadwal: antrianObj.jam_praktek,
+				kddokter: antrianObj.kode_dokter,
+				geriatri: antrianObj.is_geriatri,
+				metode: antrianObj.metode,
+				status: antrianObj.status,
+				jenis_pasien: antrianObj.jenis_pasien,
+				nik: nik,
+				no_bpjs: noka,
+				no_rm: no_rm,
+				jenis_kunjungan: jenis_kunjungan,
+				no_referensi: referensi,
+				cekNoRujuk: cekNoRujuk
 			},function(data){
 				if(data.code==200){
-					var kdpoli = data.data.kode_poli;
 					var id_antrian = data.data.id;
 					var poli = data.poli.tm_poli.NamaPoli;
 					var no_antrian = data.data.no_antrian;
 					var no_antrian_poli = data.data.nomor_antrian_poli;
 					var kodebooking = data.data.kode_booking;
-					var kat_pasien = data.data.is_pasien_baru;
 
-					console.log(kat_pasien)
 					$('.loader').hide();
 					$('#JenisKunjunganBpjsModal').modal('hide');
 					$('#NoAntrianPasienModal').modal('show');
-					$('#NoAntrianPasienModal #kodepoli').val(kdpoli);
+					$('#NoAntrianPasienModal #kodepoli').val(kode_poli_bpjs);
 					$('#NoAntrianPasienModal #id_antrian').val(id_antrian);
-					$('#NoAntrianPasienModal #is_pasien').val(kat_pasien);
+					$('#NoAntrianPasienModal #is_pasien').val(antrianObj.is_pasien_baru);
 					$('#NoAntrianPasienModal #poli').html(poli);
-					if (kat_pasien == 'Y') {
+					if (antrianObj.is_pasien_baru=='Y') {
 						$('#NoAntrianPasienModal #no_antrian').html(no_antrian);
 					} else {
 						$('#NoAntrianPasienModal #no_antrian').html(no_antrian_poli);
@@ -998,12 +1034,12 @@
 			$('.msg-noref').html('Maaf, No rujukan tidak boleh kurang dari 19');
 		}else {
 			$('.msg-noref').html('');
-			$('input[name="noreferensi"]').val(noref);            
+			$('input[name="noreferensi"]').val(noref);
 			// $('.btn-store').removeAttr('disabled');
 		}
 	})
 	function convertToUppercase(input) {
-        input.value = input.value.toUpperCase();
-    }
+		input.value = input.value.toUpperCase();
+	}
 </script>
 @stop

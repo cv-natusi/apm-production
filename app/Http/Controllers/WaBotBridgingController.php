@@ -518,4 +518,67 @@ class WaBotBridgingController extends Controller{
 			}
 		}
 	}
+
+	public function randomDokter(Request $request){
+		$apm = $request->apm_conn;
+		$rsu = $request->rsu_conn;
+		$date = date('Y-m-d',strtotime($request->tanggal_periksa));
+		$where = "date = '$date' AND is_active = true AND kode_poli_rs='$request->kode_poli'";
+
+		if($request->jenis_pembayaran=='BPJS'){ # Jika pasien BPJS
+			$where.= " AND is_bpjs = true";
+		}
+		if($request->kode_poli_bpjs=='HDL'){ # Hemodialisa hanya ada jadwal dengan kode 16454
+			$where.= " AND kode_dokter = '16454'";
+		}
+
+		// $exec = mysqli_query($apm,$query) or die(mysqli_error($apm));
+		$exec = mysqli_query($apm,"SELECT * FROM jadwal_dokter_internal WHERE $where");
+		if(mysqli_num_rows($exec)>0){
+			$result = $exec->fetch_all(MYSQLI_ASSOC);
+			// $data = $exec->fetch_all(MYSQLI_BOTH);
+			// $data = $exec->free_result();
+			// $apm->close();
+			$filter = array_values(array_filter($result,fn($item)=>$item['status_pilih']==false));
+			if(count($filter)>0){
+				$dokter = (object)$filter[mt_rand(0, count($filter)-1)];
+				mysqli_query($apm,"UPDATE jadwal_dokter_internal SET status_pilih=true WHERE id='$dokter->id'");
+				return json_encode([
+					'metadata' => [
+						'code' => 200,
+						'message' => 'Ok'
+					],
+					'response' => $dokter,
+				]);
+			}
+
+			# Jika tidak ada, lakukan update "status_pilih", set menjadi false, kemudian pilih ulang
+			mysqli_query($apm,"UPDATE jadwal_dokter_internal SET status_pilih=false WHERE $where");
+			$exec = mysqli_query($apm,"SELECT * FROM jadwal_dokter_internal WHERE $where");
+			$result = $exec->fetch_all(MYSQLI_ASSOC);
+			$filter = array_values(array_filter($result,fn($item)=>$item['status_pilih']==false));
+			if(count($filter)>0){
+				$dokter = (object)$filter[mt_rand(0, count($filter)-1)];
+				mysqli_query($apm, "UPDATE jadwal_dokter_internal SET status_pilih=true WHERE id='$dokter->id'");
+				return json_encode([
+					'metadata' => [
+						'code' => 200,
+						'message' => 'Ok'
+					],
+					'response' => $dokter,
+				]);
+			}
+		}
+		return json_encode([
+			'metadata' => [
+				'code' => 204,
+				'message' => 'No content'
+			]
+		]);
+	}
+
+	public function convertBPJStoRS(Request $request){
+		$result = mysqli_query($request->rsu_conn,"SELECT * FROM mapping_poli_bridging WHERE kdpoli='$request->kode_poli'");
+		$request->merge(['kode_poli' => mysqli_num_rows($result)>0 ? $result->fetch_assoc()['kdpoli_rs'] : $request->kode_poli]);
+	}
 }

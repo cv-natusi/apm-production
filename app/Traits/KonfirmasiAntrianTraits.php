@@ -4,7 +4,7 @@ namespace App\Traits;
 
 use App\Http\Models\Rsu_Bridgingpoli;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\log;
+use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Models\Antrian;
 

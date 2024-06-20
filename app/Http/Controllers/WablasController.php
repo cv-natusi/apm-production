@@ -2,23 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Http\Requests;
+# Library / package
 use App\Http\Controllers\Controller;
-use App\Http\Models\Rsu_Bridgingpoli;
-use App\Http\Models\MstKonterPoli;
-use App\Http\Libraries\Requestor;
-use App\Traits\KonfirmasiAntrianTraits;
-use App\Http\Models\Antrian;
-use App\Http\Models\Rsu_Register;
-// use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Client;
+use App\Http\Requests;
 use DB,CLog;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Helpers\apm as Help;
-use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+# Traits
+use App\Traits\KonfirmasiAntrianTraits;
+# Helpers
+use App\Helpers\apm as Help;
+use App\Http\Libraries\Requestor;
+# Models
+use App\Http\Models\Antrian;
+use App\Http\Models\JadwalDokterInternal;
+use App\Http\Models\MstKonterPoli;
+use App\Http\Models\Rsu_Bridgingpoli;
+use App\Http\Models\Rsu_Register;
 
 class WablasController extends Controller{
 	use KonfirmasiAntrianTraits;
@@ -234,7 +237,7 @@ class WablasController extends Controller{
 			'log_path'=>self::$logPathError,
 			'url'=>$request->getRequestUri(),
 			'file'=>self::$path,
-			'method'=>'function verifBerhasil()',
+			'method'=>'verifBerhasil()',
 			'data'=>$request->all(),
 		];
 		$random  = $request->random;
@@ -250,24 +253,20 @@ class WablasController extends Controller{
 
 		$send['phone'] = $phone;
 		$send['botPas'] = $dataBot;
-		$ceked = "";
+		$ceked = '';
 
 		$respon = '';
 		if(!empty($dataBot)){
 			$cekPas = $dataBot->pasien_baru;
 			$send['cekPas'] = $cekPas;
-			$dataPas = DB::connection('mysql')->table('bot_data_pasien')
-				->where('idBots',$request->id)->first();
-			if(!empty($dataPas)){
+			if($dataPas = DB::connection('mysql')->table('bot_data_pasien')->where('idBots',$request->id)->first()){
 				$kodePoli = $dataPas->kodePoli;
 				$poli = $this->getPoli($kodePoli);
 				$send['poli'] = !empty($poli)?$poli->NamaPoli:'-';
 
-				$mst = Rsu_Bridgingpoli::with('tm_poli.trans_konter_poli.mst_konterpoli')->where('kdpoli',$kodePoli)->first();
-				if(!empty($mst)){
+				if($mst = Rsu_Bridgingpoli::with('tm_poli.trans_konter_poli.mst_konterpoli')->where('kdpoli',$kodePoli)->first()){
 					if(isset($mst->tm_poli->trans_konter_poli) && isset($mst->tm_poli->trans_konter_poli->mst_konterpoli)){
 						$prefix = ($cekPas==1)?"Y":"N";
-						// $na = ($prefix=="Y")?"B":"L";
 						$na = $dataPas->caraBayar=='BPJS'?'B':'NB';
 						$antri = Antrian::select('no_antrian')
 							->where('tgl_periksa',$dateCur)->where('no_antrian','like',"$na%")
@@ -306,15 +305,6 @@ class WablasController extends Controller{
 								$jenis_kunjungan = '3';
 							}
 						}
-						// if($prefixRujuk == 'P' || $prefixRujuk == 'Y' || $prefixRujuk == 'U' || $prefixRujuk == 'G'){
-						// 	$jenis_kunjungan = '1';
-						// } else if($prefixRujuk == 'K'){
-						// 	$jenis_kunjungan = '3';
-						// } else if($prefixRujuk=='B') {
-						// 	$jenis_kunjungan = '4';
-						// } else {
-						// 	$jenis_kunjungan = '2';
-						// }
 
 						$forAntrianTB = [
 							'nik'             => $dataPas->nik,
@@ -375,21 +365,6 @@ class WablasController extends Controller{
 							];
 						}
 
-						# Cek duplikat antrian start
-						// $cekAntri = Antrian::where('nik',$dataPas->nik)
-						// 	// ->where('kode_poli',$dataPas->kodePoli)
-						// 	->where('tgl_periksa',$dateCur)
-						// 	->first();
-						// if(empty($cekAntri)){
-						// 	if($cekPas==false){
-						// 		$cekAntri = Antrian::where('no_rm',$dataPas->KodeCust)
-						// 			// ->where('kode_poli',$dataPas->kodePoli)
-						// 			->where('tgl_periksa',$dateCur)
-						// 			->first();
-						// 	}
-						// }
-						# Cek duplikat antrian end
-
 						$whereCekAntri = [
 							'nik'=>$dataPas->nik,
 							'tgl_periksa'=>$dateCur,
@@ -421,23 +396,14 @@ class WablasController extends Controller{
 							'tgl_periksa'=>$dateCur,
 						];
 
-						// if(Antrian::where($duplikatWhere)->count() > 0){ # Cek duplikat sebelum insert
-						// 	return [
-						// 		'code'    => 400,
-						// 		'message' => 'Konfirmasi gagal silahkan coba kembali',
-						// 		'respon'  => 'duplikasi nomor antrian'
-						// 	];
-						// }
-
-						if(empty($cekAntri)){
-							// INSERT TABLE ANTRIAN DAN GET(id_antrian)
+						if(empty($cekAntri)){ # Create data antrian kemudian get (id) nya
 							$conMysql = DB::connection('mysql');
 							$conDbrsud = DB::connection('dbrsud');
 							$conMysql->beginTransaction();
 							$conDbrsud->beginTransaction();
 							$insertAntrian = DB::connection('mysql')->table('antrian')->insertGetId($forAntrianTB);
 
-							if($cekPas==false){ // PASIEN LAMA UPDATE FILLING(antrian_id) & update jam kedatangan di tr_registrasi
+							if($cekPas==false){ # Pasien lama update filling(antrian_id) & update jam kedaatngan di tr_registrasi
 								$getRegis = Rsu_Register::where('No_RM',$dataPas->KodeCust)
 									->whereDate('Tgl_Register','=',$dataPas->tglBerobat)
 									->update([
@@ -445,12 +411,10 @@ class WablasController extends Controller{
 										'Jam_Register'=>date('H:i:s'),
 									]);
 								$upFilling = DB::connection('mysql')->table('filling')
-									// ->where('no_rm',$dataPas->KodeCust)
 									->where([
 										'no_rm'=>$dataPas->KodeCust,
 										'tgl_periksa'=>$dataPas->tglBerobat,
-									])
-									->update(['antrian_id'=>$insertAntrian]);
+									])->update(['antrian_id'=>$insertAntrian]);
 								if(!$getRegis && !$upFilling){
 									$conMysql->rollback();
 									$conDbrsud->rollback();
@@ -489,8 +453,7 @@ class WablasController extends Controller{
 							}
 
 
-							$cekTracer = DB::connection('mysql')->table('antrian_tracer')
-								->where('antrian_id',$insertAntrian)->count();
+							$cekTracer = DB::connection('mysql')->table('antrian_tracer')->where('antrian_id',$insertAntrian)->count();
 							$dataTracer = [
 								'antrian_id'    => $insertAntrian,
 								'from'          => 'wa',
@@ -500,7 +463,7 @@ class WablasController extends Controller{
 							];
 							$dataTracer['to'] = ($cekPas==1)?'loket':'poli';
 
-							if($cekTracer==0){ // INSERT JIKA TRACER KOSONG
+							if($cekTracer==0){ # Insert baru jika tracer kosong
 								$insertTracer = DB::connection('mysql')->table('antrian_tracer')->insert($dataTracer);
 							}
 
@@ -508,31 +471,28 @@ class WablasController extends Controller{
 							$send['nomorAntrian'] = ($prefix=='Y')?$noPasBaru:$nextAntri;
 							$send['kodeBooking']  = $kodeBooking;
 
-							$dataDokter = DB::connection('dbrsud')->table('dokter_bridg')->where('kodedokter',$dataPas->kodedokter)->first();
-							if(!$dataDokter){
+							if(!$dataDokter = JadwalDokterInternal::where(['date'=>date('Y-m-d'),'kode_dokter'=>$dataPas->kodedokter])->first()){
 								$conMysql->rollback();
 								$conDbrsud->rollback();
 								return ['code'=> 404,'status'=>'error','message'=>'Data dokter tidak ditemukan'];
 							}
-							$ifKode = $dataDokter->polibpjs;
+							$ifKode = $dataDokter->kode_poli_bpjs;
 							$conMysql->commit();
 							$conDbrsud->commit();
-							// if($ifKode=='PSY' || $ifKode=='GIZ' || $ifKode=='VCT' || $ifKode=='MCU'){
 							if(in_array($ifKode,['GIG','GIZ','MCU','PSY','VCT'])){
-								$ceked = 1; // KONFIRMASI BERHASIL
+								$ceked = 1; # Konfirmasi sukses
 							}else{
 								$addAntrian = new BridgBpjsController;
-								$respon = $addAntrian->antreanAdd(new Request($dataAntriBpjs)); // SEND DATA ANTRIAN TO BPJS
+								$respon = $addAntrian->antreanAdd(new Request($dataAntriBpjs)); # Send data antrian ke bpjs
 								if($respon['metaData']->code == 200){
-									$ceked = 1; // KONFIRMASI BERHASIL
+									$ceked = 1; # Konfirmasi sukses
 								}else{
 									$logPayload['message'] = $respon['metaData']->message;
 									$request->merge(['log_payload'=>$logPayload]);
 									CLog::catchError($request);
 									if(stripos($respon['metaData']->message,'duplikasi kode')!==false){
-										$ceked = 1; // KONFIRMASI BERHASIL
+										$ceked = 1; # Konfirmasi sukses
 									}else{
-										// $ceked = 1; // KONFIRMASI BERHASIL
 										return ['code'=> 404,'status'=>'error','message'=>'Gagal Konfirmasi','data'=>$respon];
 									}
 								}
@@ -557,7 +517,7 @@ class WablasController extends Controller{
 			}
 		}
 
-		if($ceked==""){
+		if($ceked==''){
 			return [
 				'code'    => 404,
 				'message' => 'Konfirmasi gagal',
@@ -565,16 +525,12 @@ class WablasController extends Controller{
 			];
 		}else{
 			$sendData = $this->sendData((object)$send);
-			// $url = "https://web.whatsapp.com/send?phone=".$phone."&text&type=phone_number&app_absent=0";
-			// return redirect($url);
-
 			$updateBot = DB::connection('mysql')->table('bot_pasien')
 				->where([
 					'id'=>$request->id,
 					'random' => $random
 				])->update(['status_akun'=>0,'konfirmasi'=>'berhasil']);
-			$updateBot = DB::connection('mysql')->table('bot_data_pasien')
-				->where('idBots',$request->id)->update(['masukMaster'=>'sudah']);
+			$updateBot = DB::connection('mysql')->table('bot_data_pasien')->where('idBots',$request->id)->update(['masukMaster'=>'sudah']);
 			return [
 				'code'    => 200,
 				'message' => 'Konfirmasi berhasil',
@@ -583,7 +539,8 @@ class WablasController extends Controller{
 	}
 
 	public function sendData($data){
-		$token       = 'Qwf4jUkeX3h6OwNpWjzsg82stjUYWcx0tsxXc7vfLgva3Iap3nxPzlO0yrfDPGCl'; # Api key dari wablas
+		// $token       = 'Qwf4jUkeX3h6OwNpWjzsg82stjUYWcx0tsxXc7vfLgva3Iap3nxPzlO0yrfDPGCl'; # Api key dari wablas
+		$token       = 'zvwlTMHoLy80JDVpL7WknpLiQy8FHIhnfRBj396Ft8CpXfT5MgP7mljXZHSigasM'; # Api key dari wablas
 		$phone       = $data->phone;
 		$botPas      = $data->botPas;
 		$cekPas      = $data->cekPas;
@@ -621,7 +578,7 @@ class WablasController extends Controller{
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-		curl_setopt($curl, CURLOPT_URL,  "https://jogja.wablas.com/api/send-message");
+		curl_setopt($curl, CURLOPT_URL,  "https://kudus.wablas.com/api/send-message");
 		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
 		$result = curl_exec($curl);
@@ -629,7 +586,8 @@ class WablasController extends Controller{
 	}
 
 	public function sendDataTesting(Request $request){
-		$token = 'Qwf4jUkeX3h6OwNpWjzsg82stjUYWcx0tsxXc7vfLgva3Iap3nxPzlO0yrfDPGCl';
+		// $token = 'Qwf4jUkeX3h6OwNpWjzsg82stjUYWcx0tsxXc7vfLgva3Iap3nxPzlO0yrfDPGCl';
+		$token = 'zvwlTMHoLy80JDVpL7WknpLiQy8FHIhnfRBj396Ft8CpXfT5MgP7mljXZHSigasM';
 		$data = [
 			'phone' => $request->phone,
 			'message' => $request->message,
@@ -643,12 +601,12 @@ class WablasController extends Controller{
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-		curl_setopt($curl, CURLOPT_URL,  "https://jogja.wablas.com/api/send-message");
+		curl_setopt($curl, CURLOPT_URL,  "https://kudus.wablas.com/api/send-message");
 		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
 		$result = curl_exec($curl);
 		curl_close($curl);
-		return $result;
+		return response()->json(json_decode($result));
 	}
 
 	// public function sendData(Request $request){
@@ -710,5 +668,5 @@ class WablasController extends Controller{
 		// 	$result = curl_exec($curl);
 		// 	curl_close($curl);
 		// 	return $result;
-		// }
+	// }
 }

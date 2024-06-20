@@ -1342,7 +1342,7 @@
 				var stPasKel = 'style="font-size: 14px;padding-left: 35px;"';
 				var stKet = 'style="font-size: 12px;"';
 				var stCat2 = 'height="20px" style="font-size:12px;"';
-				var countPrint = 5; // jumlah halaman print
+				var countPrint = 3; // jumlah halaman print
 				for (var p = 1; p <= countPrint; p++) {
 					cetak += '<!DOCTYPE html><html><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">';
 					cetak += '<table border="0">';

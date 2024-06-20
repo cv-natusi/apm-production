@@ -8,7 +8,11 @@ class JadwalDokterInternal extends Model{
 	protected $connection = 'mysql';
 	protected $table = 'jadwal_dokter_internal';
 	protected $primaryKey = 'id';
+	// protected $primaryKey = null;
+	// public $incrementing = false;
+
 	protected $fillable = [
+		'id',
 		'date',
 		'is_active',
 		'is_bpjs',
@@ -23,4 +27,10 @@ class JadwalDokterInternal extends Model{
 	];
 
 	public $timestamps = false;
+
+	public static function updateToTrue($request){
+		return JadwalDokterInternal::where('id',$request->id)->update([
+			'status_pilih' => true
+		]);
+	}
 }
