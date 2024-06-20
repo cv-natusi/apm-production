@@ -21,6 +21,7 @@ use App\Http\Models\Rsu_Bridgingpoli;
 use App\Http\Models\rsu_customer;
 use App\Http\Models\rsu_dokter_bridging;
 use App\Http\Models\rsu_poli;
+use App\Http\Models\Rsu_setupall;
 use App\Http\Models\Rsu_Register;
 use App\Http\Models\Rsu_RiwayatRegistrasi;
 use App\Http\Models\TransKonterPoli;
@@ -908,7 +909,8 @@ class AntrianController extends Controller{
 				'kode_booking',
 				'jenis_pasien',
 				'tgl_periksa',
-				'kode_dokter'
+				'kode_dokter',
+				'pembayaran_pasien',
 			)->where('id',$request->kode)
 			->first();
 			$antrian->status = 'antripoli';
@@ -966,7 +968,7 @@ class AntrianController extends Controller{
 		} catch (\Throwable $e) {
 			DB::rollback();
 			$log = ['ERROR COUNTER TO POLI ('.$e->getFile().')',false,$e->getMessage(),$e->getLine()];
-            Help::logging($log);
+			Help::logging($log);
 			return ['code'=>500, 'status'=>'error','message'=>'Terjadi kesalahan sistem'];
 		}
 	}
@@ -997,6 +999,10 @@ class AntrianController extends Controller{
 	public function storeRsuRegister($req){
 		DB::beginTransaction();
 		try {
+			$pembayaran = Rsu_setupall::where([
+				'groups'=>'Asuransi',
+				'nilaichar'=>$req->pembayaran_pasien,
+			])->first();
 			$idAntri = $req->id;
 			$tmCust = rsu_customer::select(
 					'JenisKel',
@@ -1033,7 +1039,7 @@ class AntrianController extends Controller{
 				}else{
 					$nourut = date('y').'20000001';
 				}
-				$kodeAss = ($caraBayar=='BPJS' ? '1008' : '1001');
+				$kodeAss = $pembayaran ? $pembayaran->subgroups : ($caraBayar=='BPJS' ? '1008' : '1001');
 				$reg = new Rsu_Register; // db rsu
 				$reg->TransReg         = 'RE';
 				$reg->No_Register      = $nourut;
@@ -1095,7 +1101,7 @@ class AntrianController extends Controller{
 		} catch (\Throwable $e) {
 			DB::rollback();
 			$log = ['ERROR STORE REGISTRASI ('.$e->getFile().')',false,$e->getMessage(),$e->getLine()];
-            Help::logging($log);
+				Help::logging($log);
 			return false;
 		}
 	}
@@ -1117,8 +1123,8 @@ class AntrianController extends Controller{
 	}
 
 	public function loketToCounter(Request $request){
-		// return $request->all();
 		date_default_timezone_set("Asia/Jakarta");
+		DB::beginTransaction();
 		try{
 			// $antrian = Antrian::where('kode_booking',$request->kode)->first();
 			$antrian = Antrian::where('id',$request->kode)->first();
@@ -1138,10 +1144,20 @@ class AntrianController extends Controller{
 			}else{
 				$res = ['status'=>'error','message'=>'Pasien gagal diarahkan ke konter poli.'];
 			}
+			DB::commit();
 			return $res;
 			// return response()->json($antrian);
 		} catch (\Throwable $e) {
-			Log::info(json_encode(['pesan'=>$e->getMessage()],JSON_PRETTY_PRINT));
+			DB::rollback();
+			$request->merge(['log_payload'=>[
+				'method' => 'function loketToCounter()',
+				'url' => $request->url(),
+				'file' => $e->getFile(),
+				'message' => $e->getMessage(),
+				'line' => $e->getLine(),
+			]]);
+			Help::catchError($request);
+			// Log::info(json_encode(['pesan'=>$e->getMessage()],JSON_PRETTY_PRINT));
 			return ['status'=>'error','message'=>'Pasien gagal diarahkan ke konter poli.'];
 		}
 	}

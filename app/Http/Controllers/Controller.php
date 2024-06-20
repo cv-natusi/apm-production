@@ -27,6 +27,7 @@ abstract class Controller extends BaseController{
 			->where('antrian_id',$idAntri)
 			->where('to',$to)
 			->first();
+      $antrianTracer = '';
 		if($UI=='input'){ // INPUT BARU
 			if(empty($cek)){
 				$insertTracer = [

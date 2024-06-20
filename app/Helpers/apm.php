@@ -28,6 +28,28 @@ class apm{
 		$arrLog[0] = $param=='delete' ? 'DELETE ' : ($param=='update' ? 'UPDATE ' : 'STORE ');
 		return $arrLog;
 	}
+	public static function catchError($request){
+		$keyForLog = ['url','file','method','message','line','data']; # Declar key param log, tambahkan value di baris ini jika ingin menambah parameter untuk log
+		$payload = [];
+		# Modify params start
+		foreach($keyForLog as $k => $v){
+			if(isset($request->log_payload[$v])){
+				$message = $request->log_payload[$v];
+			}else{
+				switch ($v) {
+					case 'url': $message='URL NOT SET'; break;
+					case 'file': $message='FILE NOT SET'; break;
+					// case 'method': $message='METHOD NOT SET'; break;
+					case 'message': $message='MESSAGE NOT SET'; break;
+					default: $message='-'; break;
+				}
+			}
+			if($message!=='-'){
+				$payload[$v] = $message;
+			}
+		}
+		Log::error(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+	}
 	public static function logging($param=[]){
 		# Modify parameter for logging start
 		for($i=0; $i<5; $i++){

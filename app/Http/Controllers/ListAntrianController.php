@@ -26,21 +26,17 @@ use Redirect, Validator, Datatables, DB, Auth, DateTime;
 class ListAntrianController extends Controller{
 	public function getAntrianLoket(Request $request){
 		if ($request->ajax()) {
-			$today = date('Y-m-d');
 			$botDaPas = DB::connection('mysql')->table('bot_data_pasien')
 				->whereBetween('tglBerobat',[$request->tglAwal,$request->tglAkhir])
 				->get();
-
 			$simapan = DB::connection('mysql')->table('pasien_baru_temporary')
 				->whereBetween('tanggalPeriksa',[$request->tglAwal,$request->tglAkhir])
 				->get();
-
 			$data = Antrian::with(['tm_customer','mapping_poli_bridging.tm_poli'])
 				->whereIn('status', ['panggil', 'belum'])
 				->whereBetween('tgl_periksa', [$request->tglAwal, $request->tglAkhir])
 				->orderBy('id','asc')
 				->get();
-
 			$namaPasien ="";
 			foreach($data as $keyAnt => $valAnt){
 				$cekMetod = $valAnt->metode_ambil;
@@ -57,25 +53,13 @@ class ListAntrianController extends Controller{
 				$valAnt->namaPasien = $namaPasien;
 				$namaPasien = '';
 			}
-
-            return Datatables::of($data)
-			->addIndexColumn()
-			->addColumn('action',function($row){
-				$a = $this->templateAction($row);
-				return $a;
-			})
-			->addColumn('namaCust',function($row){
-				if($row->metode_ambil=='WA'||$row->metode_ambil=='SIMAPAN'){
-					return $row->namaPasien;
-				}else{
-					if(isset($row->tm_customer)){
-						return $row->tm_customer->NamaCust;
-					}else{
-						return '-';
-					}
-				}
-			})
-			->make(true);
+			return Datatables::of($data)
+				->addIndexColumn()
+				->addColumn('action',fn($row)=>$this->templateAction($row))
+				->addColumn('namaCust',fn($row)=>
+					($row->metode_ambil=='WA'||$row->metode_ambil=='SIMAPAN') ? $row->namaPasien : ((isset($row->tm_customer)) ? $row->tm_customer->NamaCust : '-')
+				)
+				->make(true);
 		}
 		return view('Admin.antreanBPJS.listAntrian.mainLoket');
 	}
@@ -98,7 +82,7 @@ class ListAntrianController extends Controller{
 	
 	public function kerjakanAntrian(Request $request){
 		$id = $request->id;
-		$view = $request->view ?? 0;
+		$view = $request->view ?: 0;
 
 		$antrian = Antrian::where('id', $id)->first();
 		if($antrian->no_rm=='00000000000'){
@@ -106,7 +90,6 @@ class ListAntrianController extends Controller{
 				$this->data['getAntrian'] = Antrian::with(['mapping_poli_bridging.tm_poli'])
 					->join('bot_data_pasien as bdp','antrian.nik','=','bdp.nik')
 					->where('antrian.id',$id)
-					// ->where('bdp.tglBerobat',date('Y-m-d'))
 					->where('bdp.tglBerobat',$antrian->tgl_periksa)
 					->first();
 			}else if($antrian->metode_ambil=='SIMAPAN'){
@@ -144,14 +127,14 @@ class ListAntrianController extends Controller{
 			$this->data['kel'] = $namaKel;
 			$this->data['getAntPasBaru'] = $antrianPasienBaru;
 		}
-		$this->data['jenis_pasien'] = '';
-		if ($antrian->jenis_pasien == 'ASURANSILAIN') {
-			$this->data['jenis_pasien'] = Rsu_setupall::where('groups','Asuransi')->get();
-		}
+		// $this->data['jenis_pasien'] = '';
+		$this->data['jenis_pasien'] = Rsu_setupall::where('groups','Asuransi')->get();
+		// if ($antrian->jenis_pasien == 'ASURANSILAIN') {
+		// 	$this->data['jenis_pasien'] = Rsu_setupall::where('groups','Asuransi')->get();
+		// }
 		$this->data['from'] = $this->data['getAntrian']->metode_ambil;
 		$this->data['data_provinsi'] = Provinsi::all();
-		$this->data['poli'] = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
-		->get();
+		$this->data['poli'] = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')->get();
 		$this->data['view'] = $view;
 
 		$content = view('Admin.antreanBPJS.listAntrian.form', $this->data)->render();
@@ -164,21 +147,24 @@ class ListAntrianController extends Controller{
 	}
 
 	public function saveList(Request $request){
-		// DB::beginTransaction();
-		// try {
+		DB::beginTransaction();
+		try {
+			// return Rsu_setupall::where([
+			// 	'nilaichar'=>$request->pembayaran_pasien,
+			// 	'groups'=>'Asuransi',
+			// ])->first();
 			$id = $request->id;
 			$id_antrian = $request->id_antrian;
 			$norm = $request->no_rm;
 			$cekAntri = Antrian::where('id', $id_antrian)->first();
-			$jenisPas = $cekAntri->jenis_pasien;
+			// $jenisPas = $cekAntri->jenis_pasien;
 			$Customer = rsu_customer::where('KodeCust', $norm)->first();
-			if (empty($Customer)) {
+			if (!$Customer) {
 				$Customer = rsu_customer::where('NoKtp', $request->nik)->first();
-				if (empty($Customer)) {
+				if (!$Customer) {
 					$Customer = New rsu_customer;
 				}
 			}
-			// return $cekAntri;
 			$Customer->NamaCust = $request->nama;
 			$Customer->NoKtp = $request->nik;
 			$Customer->Tempat = $request->tmpt_lahir;
@@ -208,15 +194,17 @@ class ListAntrianController extends Controller{
 			$Customer->TglLahir = $request->tgl_lahir;
 			$Customer->save();
 			if (!$Customer) {
-				// DB::rollback();
+				DB::rollback();
 				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal menyimpan customer','antrian'=>''];
 			}
+			$cekAntri->jenis_pasien = $request->jenis_pasien;
+			$cekAntri->pembayaran_pasien = $request->pembayaran_pasien;
 			$cekAntri->no_rm = $norm;
 			$cekAntri->nohp  = $request->telp;
 			$cekAntri->kode_poli = $request->poli;
 			$cekAntri->save();
 			if(!$cekAntri){
-				// DB::rollback();
+				DB::rollback();
 				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal update antrian','antrian'=>''];
 			}
 			$custId = $Customer->cust_id;
@@ -238,10 +226,10 @@ class ListAntrianController extends Controller{
 			$PasienBaru->pend_terakhir = $request->pend_terakhir;
 			$PasienBaru->save();
 			if(!$PasienBaru){
-				// DB::rollback();
+				DB::rollback();
 				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal simpan antrian pasien baru','antrian'=>''];
 			}
-			
+
 			// $antrianTracer = $this->antrianTracer($id_antrian,'loket','poli',1,'input');
 			// 	return 'ok';
 			// if(!$antrianTracer){
@@ -255,26 +243,31 @@ class ListAntrianController extends Controller{
 			$updateWaktu = $bridgBpjs->updateWaktu($request);
 			$getAntrian = Antrian::where('id', $id_antrian)->first();
 			//insert antrian_id di table filling
-			$insertFilling = DB::connection('mysql')->table('filling')
-				->insert([
-					'no_rm' => $norm,
-					'tgl_periksa' => $cekAntri->tgl_periksa,
-					'antrian_id' => $id_antrian
-				]);
+			// $insertFilling = DB::connection('mysql')->table('filling')
+			// ->insert([
+			// 	'no_rm' => $norm,
+			// 	'tgl_periksa' => $cekAntri->tgl_periksa,
+			// 	'antrian_id' => $id_antrian
+			// ]);
 
-			if(!$insertFilling){
-				// DB::rollback();
-				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal simpan filling','antrian'=>''];
-			}
-			// DB::commit();
+			// if(!$insertFilling){
+			// 	DB::rollback();
+			// 	return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal simpan filling','antrian'=>''];
+			// }
+			DB::commit();
 			return ['type'=>'success','status'=>'success','code'=>200,'head_message'=>'Berhasil!','message'=>'Berhasil menyimpan data','antrian' => $getAntrian];
-		// } catch (\Throwable $e) {
-		// 	DB::rollback();
-		// 	Log::info(['dwialim',$e]);
-		// 	$log = ['ERROR STORE CUSTOMER ('.$e->getFile().')',false,$e->getMessage(),$e->getLine()];
-  //           Help::logging($log);
-		// 	return ['code'=>500, 'status'=>'error','message'=>'Terjadi kesalahan sistem'];
-		// }
+		} catch (\Throwable $e) {
+			DB::rollback();
+			$request->merge(['log_payload'=>[
+				'method' => 'function saveList()',
+				'url' => $request->url(),
+				'file' => $e->getFile(),
+				'message' => $e->getMessage(),
+				'line' => $e->getLine(),
+			]]);
+			Help::catchError($request);
+			return ['code'=>500, 'status'=>'error','message'=>'Terjadi kesalahan sistem'];
+		}
 	}
 
 	// public function storeRsuRegister($req){

@@ -56,7 +56,7 @@
 						</select>
 					</div>
 				</div>
-    
+	 
 				<div class="row mb-3" style="margin-top: 1rem;">
 					<div class="col-md-6">
 						<label>Nama Pasien <span class="text-red" style="font-size: 14px;">*</span></label>
@@ -75,7 +75,20 @@
 						<label>Pembayaran Pasien</label>
 						<select name="pembayaran_pasien" id="pembayaran_pasien" class="form-control" @if($view == 1) readonly disabled @endif>
 							<option value="">.:: Pembayaran Pasien ::.</option>
-							@if (!empty($getAntrian->jenis_pasien) && $getAntrian->jenis_pasien == 'ASURANSILAIN')
+							@foreach($jenis_pasien as $jp)
+								<option
+									value="{{$jp->nilaichar}}"
+									{{
+										(
+											($getAntrian->jenis_pasien=='UMUM' && $jp->nilaichar==$getAntrian->jenis_pasien)
+											|| ($getAntrian->jenis_pasien=='BPJS' && $jp->nilaichar=='BPJS NON PBI ')
+											|| ($getAntrian->pembayaran_pasien==$jp->nilaichar)
+										)
+										? 'selected' : ''
+									}}
+								>{{$jp->nilaichar}}</option>
+							@endforeach
+							{{-- @if (!empty($getAntrian->jenis_pasien) && $getAntrian->jenis_pasien == 'ASURANSILAIN')
 								@if(!empty($jenis_pasien) && $jenis_pasien->count()!=0)
 									@foreach($jenis_pasien as $jp)
 										<option value="{{$jp->nilaichar}}">{{$jp->nilaichar}}</option>
@@ -84,7 +97,7 @@
 							@else
 								<option @if($getAntrian->jenis_pasien == 'UMUM') selected @endif value="UMUM">UMUM</option>
 								<option @if($getAntrian->jenis_pasien == 'BPJS') selected @endif value="BPJS">BPJS</option>								
-							@endif
+							@endif --}}
 						</select>
 					</div>
 					<!-- <div class="col-md-6">
@@ -143,7 +156,7 @@
 						</div>
 					</div>
 				</div>
-    
+	 
 				<div class="row mb-3" style="margin-top: 1rem;">
 					<div class="col-md-2">
 						<label>Tempat Lahir <span class="text-red" style="font-size: 14px;">*</span></label>
@@ -166,7 +179,7 @@
 						<input type="text" class="form-control" name="alamat" id="alamat" placeholder="Alamat Tinggal" value="{{(isset($getAntrian->tm_customer)) ? $getAntrian->tm_customer->Alamat : ''}}" @if($view == 1) readonly @endif>
 					</div>
 				</div>
-    
+	 
 				<div class="row mb-3" style="margin-top: 1rem;">
 					<div class="col-md-3">
 						<label>Jenis Kelamin <span class="text-red" style="font-size: 14px;">*</span></label>
@@ -308,7 +321,7 @@
 						</select>
 					</div>
 				</div>
-                
+					 
 				<div class="row" style="margin-top: 1rem;">
 					<div class=" @if($view == 1) col-md-12 @else col-md-2 @endif text-center">
 						<button type="button" class="btn btn-secondary btn-cancel" style="width: 100%">KEMBALI</button>
@@ -424,7 +437,7 @@
 		</div>
 	</div>
 </div>
-    
+	 
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css" />
 <link rel="stylesheet" type="text/css" href="https://select2.github.io/select2-bootstrap-theme/css/select2-bootstrap.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -921,7 +934,7 @@
 								type: res.status,
 								text: res.message,
 							})
-							location.reload();
+							// location.reload();
 						}
 					})
 				} else {
@@ -1007,6 +1020,7 @@
 				contentType: false,
 				processData: false
 			}).done(function(data) {
+				return 
 				$('.formAdd').validate(data, 'has-error');
 				if (data.code == 200) {
 					if (data.antrian.jenis_pasien == 'BPJS') {
