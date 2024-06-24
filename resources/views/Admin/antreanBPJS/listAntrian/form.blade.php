@@ -1020,7 +1020,6 @@
 				contentType: false,
 				processData: false
 			}).done(function(data) {
-				return 
 				$('.formAdd').validate(data, 'has-error');
 				if (data.code == 200) {
 					if (data.antrian.jenis_pasien == 'BPJS') {
