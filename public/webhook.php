@@ -126,8 +126,8 @@ if($waText=='a'){
 		// $res = mysqli_query($wablas,$query);
 		// // echo json_encode($res->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
 		// echo json_encode(mysqli_fetch_assoc($res)['total'],JSON_PRETTY_PRINT);
-		// echo msgJadwalPolis($wablas);
-		// die();
+		echo msgJadwalPolis($wablas);
+		die();
 	}
 	$msg = "1. Daftar Pasien Baru\n";
 	$msg .= "2. Daftar Pasien Lama\n\n";
@@ -796,21 +796,6 @@ if(is_numeric($waText) && ($ifPoli)){
 	// 	die();
 	// }
 
-	// if($phone=='6281335537942'){
-		// echo $waText;die();
-		// $query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-		// 	JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-		// 	WHERE bp.tgl_periksa = '2024-06-04'
-		// 	AND bp.statusChat='99'
-		// 	AND bdp.kodePoli='017'
-		// ";
-		// $res = mysqli_query($wablas,$query);
-		// $total = mysqli_fetch_assoc($res)['total'];
-		// if($waText==23 && date('d-m-Y',strtotime($rows['tgl_periksa']))=='04-06-2024' && $total>=40 ){
-		// 	echo msgJadwalPolis($wablas);
-		// 	die();
-		// }
-	// }
 	// if($waText==2 && !in_array(date('D',strtotime($rows['tgl_periksa'])), ['Tue','Thu'])){
 	// 	echo msgJadwalPoli();die();
 	// }
@@ -859,6 +844,23 @@ if(is_numeric($waText) && ($ifPoli)){
 				echo msgLibur();
 				die();
 			}
+
+			if($phone=='6281335537942'){
+				// echo $waText;die();
+				$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+					JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+					WHERE bp.tgl_periksa = '2024-06-27'
+					AND bp.statusChat='99'
+					AND bdp.kodePoli='017'
+				";
+				$res = mysqli_query($wablas,$query);
+				$total = mysqli_fetch_assoc($res)['total'];
+				if($kodePoli=='017' && date('d-m-Y',strtotime($rows['tgl_periksa']))=='27-06-2024' && $total>=25 ){
+					echo msgJadwalPolis($wablas);
+					die();
+				}
+			}
+
 			// if($phone=='6281335537942'){
 			// 	echo date('D',strtotime($rows['tgl_periksa']));
 			// 	die();
@@ -1396,7 +1398,7 @@ function msgJadwalPolis($wablas = ''){
 	if($wablas){
 		$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
 			JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-			WHERE bp.tgl_periksa = '2024-06-04'
+			WHERE bp.tgl_periksa = '2024-06-27'
 			AND bp.statusChat='99'
 			AND bdp.kodePoli='017'
 		";
@@ -1775,7 +1777,7 @@ function pasienBaru($cek){
 	}else{
 		$msg = "Pengiriman Data Gagal!\n";
 		$msg .= "Data Yang Dikirim Harus Sesuai Format!\n";
-        $msg .= "(Cth. *Nama : Ahmad Habibi* , lalu kirim pesan).*\n\n";
+		  $msg .= "(Cth. *Nama : Ahmad Habibi* , lalu kirim pesan).*\n\n";
 	}
 	$msg .= "Nama : masukkan nama";
 	// $msg .= "Nama : ...\n";
@@ -1869,8 +1871,8 @@ function cekStr($waText,$str){
 	if(stripos($waText, $str)!==false){
 		return true;
 	}else{
-    	return false;
-    }
+	 	return false;
+	 }
 }
 
 function randomString($length) {
