@@ -344,11 +344,23 @@ class RegistrationController extends Controller{
 	}
 
 	public function indexAntrian(Request $request){
+		// return Antrian::where([
+		// 	'tgl_periksa'=>'2024-06-27',
+		// 	'kode_poli'=>'017'
+		// ])->count();
 		$id_kiosk = $request->id_kiosk;
 		$ignore = ['ALG','UGD','ANU'];
 		// if(date('d-m-Y',strtotime('now'))=='20-06-2024'){
-		// 	array_push($ignore,'017');
-		// }
+		if(
+			date('d-m-Y',strtotime('now'))=='27-06-2024'
+			&& Antrian::where([
+				'tgl_periksa'=>'2024-06-27',
+				'kode_poli'=>'017',
+				'metode_ambil'=>'KIOSK',
+			])->count() >= 5
+		){
+			array_push($ignore,'017');
+		}
 		// return $ignore;
 		$poli = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
 			// ->whereNotIn('kdpoli',['ALG','UGD','ANU'])
@@ -517,6 +529,24 @@ class RegistrationController extends Controller{
 	}
 
 	public function ambilAntrianSave(Request $request){
+		if(
+			date('d-m-Y')=='27-06-2024'
+			&& $request->kodepoli=='017'
+			&& ($cn = Antrian::where([
+				'tgl_periksa'=>'2024-06-27',
+				'kode_poli'=>'017',
+				'metode_ambil'=>'KIOSK',
+			])->count()) >= 5
+		){
+			return [
+				'status'=>'error',
+				'code'=>400,
+				'head_message'=>'Whoops!',
+				'message'=>"Kuota POLI BEDAH ONKOLOGI sudah penuh($cn/5)",
+				'data'=> '',
+				'poli'=> ''
+			];
+		}
 		date_default_timezone_set("Asia/Jakarta");
 		$no_rm   = $request->no_rm;
 		$no_bpjs = $request->no_bpjs;

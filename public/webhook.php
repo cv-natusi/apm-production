@@ -126,8 +126,8 @@ if($waText=='a'){
 		// $res = mysqli_query($wablas,$query);
 		// // echo json_encode($res->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
 		// echo json_encode(mysqli_fetch_assoc($res)['total'],JSON_PRETTY_PRINT);
-		echo msgJadwalPolis($wablas);
-		die();
+		// echo msgJadwalPolis($wablas);
+		// die();
 	}
 	$msg = "1. Daftar Pasien Baru\n";
 	$msg .= "2. Daftar Pasien Lama\n\n";
@@ -845,7 +845,7 @@ if(is_numeric($waText) && ($ifPoli)){
 				die();
 			}
 
-			if($phone=='6281335537942'){
+			// if($phone=='6281335537942'){
 				// echo $waText;die();
 				$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
 					JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
@@ -859,7 +859,7 @@ if(is_numeric($waText) && ($ifPoli)){
 					echo msgJadwalPolis($wablas);
 					die();
 				}
-			}
+			// }
 
 			// if($phone=='6281335537942'){
 			// 	echo date('D',strtotime($rows['tgl_periksa']));
@@ -1407,9 +1407,10 @@ function msgJadwalPolis($wablas = ''){
 	}
 	$text = "*Untuk sementara waktu.*\n";
 	$text .= "*Pelayanan Poli Jiwa hanya tersedia pada hari Selasa dan Kamis.*\n";
-	$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota 40 Pasien pada Tanggal 04 Juni 2024 dan Tidak Menerima Pasien Onsite.*";
+	$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota 25 Pasien pada Tanggal 27 Juni 2024.*";
 	if($total>0){
-		$text .= "\n*Kuota terpakai $total/40.*";
+		// $text .= "\n*Kuota terpakai $total/25.*";
+		$text .= "\n*Kuota terpakai 25/25.*";
 	}
 	return $text;
 }
@@ -1577,8 +1578,8 @@ function msgWelcome($wablas=''){
 	// $msg .= "*Silahkan mendaftar kembali di tanggal 01 Juli 2023*\n";
 	// $msg .= "*Terima Kasih*\n\n";
 
-	// $msg .= msgJadwalPolis($wablas)."\n\n";
-	$msg .= msgJadwalPoli()."\n\n";
+	$msg .= msgJadwalPolis($wablas)."\n\n";
+	// $msg .= msgJadwalPoli()."\n\n";
 
 	$msg .= "Hotline 0815257200088 untuk mendapatkan bantuan apabila ada kendala pendaftaran.\n";
 	$msg .= "Video tutorial penggunaan antrian cek di : shorturl.at/dhqz8";
