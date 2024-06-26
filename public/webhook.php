@@ -848,9 +848,9 @@ if(is_numeric($waText) && ($ifPoli)){
 					$kodePoli=='JIW'
 					&& !in_array(date('D',strtotime($rows['tgl_periksa'])), ['Tue','Thu'])
 				)
-				|| ( # Poli bedah onkologi, hari kamis tutup
-					$kodePoli=='017' && date('D',strtotime($rows['tgl_periksa']))=='Thu'
-				)
+				// || ( # Poli bedah onkologi, hari kamis tutup
+				// 	$kodePoli=='017' && date('D',strtotime($rows['tgl_periksa']))=='Thu'
+				// )
 			){
 				echo msgJadwalPoli($kodePoli);
 				die();
@@ -1417,9 +1417,9 @@ function msgJadwalPoli($kodePoli = ''){
 	if(!$kodePoli || $kodePoli=='JIW'){
 		$text .= "\n*Pelayanan Poli Jiwa hanya tersedia pada hari Selasa dan Kamis.*";
 	}
-	if(!$kodePoli || $kodePoli=='017'){
-		$text .= "\n*Pelayanan Poli Bedah Onkologi tutup pada hari Kamis.*";
-	}
+	// if(!$kodePoli || $kodePoli=='017'){
+	// 	$text .= "\n*Pelayanan Poli Bedah Onkologi tutup pada hari Kamis.*";
+	// }
 	return $text;
 }
 
