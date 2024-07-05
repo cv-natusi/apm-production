@@ -828,18 +828,18 @@ if(is_numeric($waText) && ($ifPoli)){
 			$namaPoli = $arrPoli[$index]['NamaPoli'];
 			$kodePoli = $arrPoli[$index]['kdpoli'];
 			$ifKode = "";
-			if(
-				( # Poli jiwa hanya buka selasa & kamis
-					$kodePoli=='JIW'
-					&& !in_array(date('D',strtotime($rows['tgl_periksa'])), ['Tue','Thu'])
-				)
-				// || ( # Poli bedah onkologi, hari kamis tutup
-				// 	$kodePoli=='017' && date('D',strtotime($rows['tgl_periksa']))=='Thu'
-				// )
-			){
-				echo msgJadwalPoli($kodePoli);
-				die();
-			}
+			// if(
+			// 	( # Poli jiwa hanya buka selasa & kamis
+			// 		$kodePoli=='JIW'
+			// 		&& !in_array(date('D',strtotime($rows['tgl_periksa'])), ['Tue','Thu'])
+			// 	)
+			// 	// || ( # Poli bedah onkologi, hari kamis tutup
+			// 	// 	$kodePoli=='017' && date('D',strtotime($rows['tgl_periksa']))=='Thu'
+			// 	// )
+			// ){
+			// 	echo msgJadwalPoli($kodePoli);
+			// 	die();
+			// }
 			if(cekLibur(date('d-m-Y',strtotime($rows['tgl_periksa']))) && $waText!=19){ # Pesan untuk hari libur RS
 				echo msgLibur();
 				die();
@@ -847,18 +847,18 @@ if(is_numeric($waText) && ($ifPoli)){
 
 			// if($phone=='6281335537942'){
 				// echo $waText;die();
-				$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-					JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-					WHERE bp.tgl_periksa = '2024-06-27'
-					AND bp.statusChat='99'
-					AND bdp.kodePoli='017'
-				";
-				$res = mysqli_query($wablas,$query);
-				$total = mysqli_fetch_assoc($res)['total'];
-				if($kodePoli=='017' && date('d-m-Y',strtotime($rows['tgl_periksa']))=='27-06-2024' && $total>=25 ){
-					echo msgJadwalPolis($wablas);
-					die();
-				}
+				// $query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+				// 	JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+				// 	WHERE bp.tgl_periksa = '2024-06-27'
+				// 	AND bp.statusChat='99'
+				// 	AND bdp.kodePoli='017'
+				// ";
+				// $res = mysqli_query($wablas,$query);
+				// $total = mysqli_fetch_assoc($res)['total'];
+				// if($kodePoli=='017' && date('d-m-Y',strtotime($rows['tgl_periksa']))=='27-06-2024' && $total>=25 ){
+				// 	echo msgJadwalPolis($wablas);
+				// 	die();
+				// }
 			// }
 
 			// if($phone=='6281335537942'){
@@ -1382,6 +1382,7 @@ if($waText=='reset' && $statusChat>1 && ($rows['pasien_baru']==false || $rows['p
 }
 
 
+
 if(isset($msg)){
 	if(!empty($idBots) && $statusChat>=1 && $reset){
 		if($ifKodeDokter || $statusChat==99){
@@ -1578,7 +1579,7 @@ function msgWelcome($wablas=''){
 	// $msg .= "*Silahkan mendaftar kembali di tanggal 01 Juli 2023*\n";
 	// $msg .= "*Terima Kasih*\n\n";
 
-	$msg .= msgJadwalPolis($wablas)."\n\n";
+	// $msg .= msgJadwalPolis($wablas)."\n\n";
 	// $msg .= msgJadwalPoli()."\n\n";
 
 	$msg .= "Hotline 0815257200088 untuk mendapatkan bantuan apabila ada kendala pendaftaran.\n";
@@ -2006,7 +2007,6 @@ function cekRujukan($nomor,$jenis){
 	// $result = $cekRujukan->cekRujukan('0001387975239','bpjs');
 	return (object)$result;
 }
-
 
 function rujukanMultiRecord($nomor,$jenis){
 	$request = new Request([
