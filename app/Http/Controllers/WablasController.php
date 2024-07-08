@@ -97,13 +97,13 @@ class WablasController extends Controller{
 				'status_akun' =>true,
 				'statusChat'  =>99
 			])->first();
-		$verif = DB::connection('mysql')->table('bot_pasien')
-			->where([
-				'id'          =>$request->id,
-				'random'      =>$random,
-				'status_akun' =>false,
-				'statusChat'  =>99
-			])->first();
+		// $verif = DB::connection('mysql')->table('bot_pasien')
+		// 	->where([
+		// 		'id'          =>$request->id,
+		// 		'random'      =>$random,
+		// 		'status_akun' =>false,
+		// 		'statusChat'  =>99
+		// 	])->first();
 
 		$dataPasien = DB::connection('mysql')->table('bot_data_pasien')
 			->where([
@@ -179,7 +179,16 @@ class WablasController extends Controller{
 				return view('verifikasi.main',$data);
 			}
 		}else{
-			if(!empty($verif)){
+			// if(!empty($verif)){
+			if(
+				$verif = DB::connection('mysql')->table('bot_pasien')
+				->where([
+					'id' => $request->id,
+					'random' => $random,
+					'status_akun' => false,
+					'statusChat' => 99
+				])->first()
+			){
 				if($verif->konfirmasi=='berhasil'){
 					$updateBot = DB::connection('mysql')->table('bot_pasien')
 						->where([
