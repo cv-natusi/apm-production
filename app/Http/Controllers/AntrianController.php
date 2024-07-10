@@ -1032,7 +1032,7 @@ class AntrianController extends Controller{
 			$tgl = date("Y-m-d",strtotime($req->tgl_periksa));
 			$cekRegis = '';
 			$nourut = '';
-			if(!$reg = Rsu_Register::where('No_RM', $noRM)->whereDate('Tgl_Register','=',$tgl)->first()){
+			if(!$reg = Rsu_Register::where('No_RM', $noRM)->where('Kode_Poli1',$poli->kdpoli_rs)->whereDate('Tgl_Register','=',$tgl)->first()){
 				$cekRegis = '1';
 				if($urut = Rsu_Register::select('No_Register','Tgl_Register')->whereRaw("(YEAR(Tgl_Register)=$thn) AND LEFT(No_Register,3)=$tg")->orderby('No_Register','DESC')->first()){
 					$nourut = $urut->No_Register + 1;
