@@ -353,7 +353,7 @@ if(is_numeric($noBpjs) && $ifBpjs){
 }
 
 ### Tutup kode poli supaya tidak ditampilkan format => ('kode',',kode')
-$notInSementara = ",'PSY'";
+$notInSementara = ",'PSY','URO'";
 // $notInSementara = "";
 
 ### Input tanggal berkunjung
