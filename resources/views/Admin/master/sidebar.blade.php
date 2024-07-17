@@ -26,6 +26,11 @@
 					<i class="fa fa-dashboard"></i> <span>Dashboard</span></i>
 				</a>
 			</li>
+			{{-- <li class=''>
+				<a href="{{ route('pengaturan.jadwalPoli.main') }}">
+					<i class="fa fa-desktop"></i> <span>Tanggal Libur</span></i>
+				</a>
+			</li> --}}
 			<li class='treeview'>
 				<a href="#"><i class="fa fa-globe"></i><span>SIMAPAN</span><i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
@@ -60,11 +65,11 @@
 							<i class="fa fa-mobile"></i> <span>Device</span></i>
 						</a>
 					</li>
-					<li class=''>
+					{{-- <li class=''>
 						<a href="{{ route('holiday') }}">
 							<i class="fa fa-calendar"></i> <span>Tanggal Libur</span></i>
 						</a>
-					</li>
+					</li> --}}
 					<li class=''>
 						<a href="{{ route('bantuan') }}">
 							<i class="fa fa-list"></i> <span>Data Bantuan</span></i>
@@ -158,7 +163,7 @@
 					</li>
 					@endif
 
-					@if($admin || $cc2 | $cc)
+					@if($admin || $cc2 || $cc)
 					<li class=''>
 						<a href="{{route('konterC2')}}" target="_blank">
 							<i class="fa fa-desktop" aria-hidden="true"></i> <span>Display Konter C2</span>
@@ -241,7 +246,7 @@
 		@if($admin)
 			<li class=''>
 				<a href="{{ route('reg') }}">
-					<i class="	fa fa-list"></i> <span>Data Register Kunjungan</span></i>
+					<i class="	fa fa-list"></i> <span>Data Register Kunjungan</span></i>
 				</a>
 			</li>
 			<li class=''>

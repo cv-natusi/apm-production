@@ -50,7 +50,7 @@ class ListAntrianController extends Controller{
 						$namaPasien = $val->nama;
 					}
 				}
-				$valAnt->namaPasien = $namaPasien;
+				$valAnt->namaPasien = ucwords($namaPasien ? : '-');
 				$namaPasien = '';
 			}
 			return Datatables::of($data)
@@ -71,12 +71,25 @@ class ListAntrianController extends Controller{
 	}
 
 	function templateAction($data){
-		$btn = "<div class='text-center'>";
-		$btn .= "<button class='btn btn-sm btn-primary' title='Panggil' style='margin-left: 5px'; onclick='panggil(`$data->kode_booking`)'><i class='fa fa-bullhorn' aria-hidden='true'></i></button><br>";
-		$btn .= "<button class='btn btn-sm btn-success' title='Kerjakan' style='margin-left: 5px; margin-top: 5px'; onclick='kerjakan(`$data->id`)'><i class='fa fa-file' aria-hidden='true'></i></button><br>";
-		$btn .= "<button class='btn btn-sm btn-danger' title='Batalkan' style='margin-left: 5px; margin-top: 5px;' onclick='batalkan(`$data->kode_booking`)'><i class='fa fa-remove' aria-hidden='true'></i></button>";
+		// $btn = "<div class='text-center' style='display: inline-block;'>";
+		// $btn .= "<button class='btn btn-sm btn-primary' title='Panggil' style='' onclick='panggil(`$data->kode_booking`)'><i class='fa fa-bullhorn' aria-hidden='true'></i></button><br>";
+		// $btn .= "<button class='btn btn-sm btn-success' title='Kerjakan' style=' margin-top: 5px'; onclick='kerjakan(`$data->id`)'><i class='fa fa-file' aria-hidden='true'></i></button><br>";
+		// $btn .= "<button class='btn btn-sm btn-danger' title='Batalkan' style=' margin-top: 5px;' onclick='batalkan(`$data->kode_booking`)'><i class='fa fa-remove' aria-hidden='true'></i></button>";
+		// // $btn .= "<button class='btn btn-sm btn-warning' title='Cetak SEP' style='margin-top: 5px;' onclick='cetaksep()'><i class='fa fa-print' aria-hidden='true'></i></button> &nbsp;";
+		// $btn .= "</div>";
+
+		$btn = "<div class='text-center' style='width:100%; display: inline-block;'>";
+		$btn .= "<button class='btn btn-sm btn-primary' title='Panggil' style='' onclick='panggil(`$data->kode_booking`)'><i class='fa fa-bullhorn' aria-hidden='true'></i></button>";
+		$btn .= "<button class='btn btn-sm btn-success' title='Kerjakan' style='margin-left: 5px;' onclick='kerjakan(`$data->id`)'><i class='fa fa-file' aria-hidden='true'></i></button>";
+		$btn .= "<button class='btn btn-sm btn-danger' title='Batalkan' style='margin-left: 5px;' onclick='batalkan(`$data->kode_booking`)'><i class='fa fa-remove' aria-hidden='true'></i></button>";
 		// $btn .= "<button class='btn btn-sm btn-warning' title='Cetak SEP' style='margin-top: 5px;' onclick='cetaksep()'><i class='fa fa-print' aria-hidden='true'></i></button> &nbsp;";
 		$btn .= "</div>";
+
+		// $btn = "<div id='outer-action'>";
+		// $btn .= "<div class='inner-action'><button type='submit' class='msgBtn' onClick='return false;' >Save</button></div>";
+		// $btn .= "<div class='inner-action'><button type='submit' class='msgBtn2' onClick='return false;'>Publish</button></div>";
+		// $btn .= "<div class='inner-action'><button class='msgBtnBack'>Back</button></div>";
+		// $btn .= "</div>";
 		return $btn;
 	}
 	
@@ -451,27 +464,50 @@ class ListAntrianController extends Controller{
 
 	public function cetakRMAntrian(Request $request){
 		date_default_timezone_set("Asia/Jakarta");
+		DB::beginTransaction();
+		try{
+			# Nik sudah dibuat
+			if($getKode = DB::connection('dbrsud')->table('tm_customer')->where('NoKtp',$request->nik)->first(['KodeCust'])){
+				$no_rm = $getKode->KodeCust;
+			}else{ # Nik belum dibuat, generatekan RM baru
+				$getKode = DB::connection('dbrsud')->table('tm_customer')->max('KodeCust');
+				$num = (int)substr($getKode, 5);
+				$nextKode = 'W'.date("ym").(string)($num+1);
+				$cust = new rsu_customer;
+				$cust->KodeCust = $nextKode;
+				$cust->NoKtp = $request->nik;
+				$cust->save();
+				if(!$cust){
+					DB::rollback();
+					return [
+						'type'=>'warning',
+						'status'=>'error',
+						'code'=>300,
+						'alert'=>'alert',
+						'head_message'=>'Whooops!',
+						'message'=>'Antrian gagal cetak RM',
+					];
+				}
+				$no_rm = $cust->KodeCust;
+			}
 
-		// Generate NO.RM
-		$getKode = DB::connection('dbrsud')->table('tm_customer')->max('KodeCust');
-		$num = (int)substr($getKode, 5);
-		$nextKode = 'W'.date("ym").(string)($num+1);
-		$no_rm = $nextKode;
-
-		$id = $request->id;
-		$antrian = Antrian::where('kode_booking', $id)->first();
-		$antrian->no_rm = $no_rm;
-		$antrian->save();
-
-		if($antrian){
-			// DBSIMARS_BARU
-			$cust = new rsu_customer;
-			$cust->KodeCust = $no_rm;
-			$cust->NoKtp = $antrian->nik;
-			$cust->save();
-
-			$data = [
-				'nomor' => $no_rm,
+			$antrian = Antrian::where('kode_booking', $request->id)->first();
+			$antrian->no_rm = $no_rm;
+			$antrian->save();
+			if(!$antrian){
+				DB::rollback();
+				return [
+					'type'=>'warning',
+					'status'=>'error',
+					'code'=>300,
+					'alert'=>'alert',
+					'head_message'=>'Whooops!',
+					'message'=>'Antrian gagal cetak RM',
+				];
+			}
+			DB::commit();
+			return [
+				'nomor' => $antrian->no_rm,
 				'type'=>'success',
 				'status'=>'success',
 				'code'=>200,
@@ -479,18 +515,17 @@ class ListAntrianController extends Controller{
 				'head_message'=>'Success!',
 				'message'=>'Antrian berhasil cetak RM',
 			];
-		}else{
-			$data = [
+		}catch(\Throwable $e){
+			DB::rollback();
+			return [
 				'type'=>'warning',
 				'status'=>'error',
 				'code'=>300,
 				'alert'=>'alert',
 				'head_message'=>'Whooops!',
-				'message'=>'Antrian gagal cetak RM',
+				'message'=>'Antrian gagal cetak RM, terjadi kesalahan sistem',
 			];
 		}
-
-		return $data ;
 	}
 
 	public function cariFormPasien(Request $request){

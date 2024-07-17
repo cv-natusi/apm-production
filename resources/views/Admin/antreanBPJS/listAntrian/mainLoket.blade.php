@@ -39,6 +39,13 @@
 				opacity: 1;
 			}
 		}
+		#outer-action{
+			width:100%;
+			text-align: center;
+		}
+		.inner-action{
+			display: inline-block;
+		}
 	</style>
 @stop
 
@@ -67,22 +74,31 @@
 				</div>
 				<div class="clearfix" style="margin-bottom: 30px;"></div>
 				<div class="panel-body">
-					<table id="dataTable" class="table table-striped dataTable" cellspacing="0" style="width: 100%;">
-						<thead class="text-center">
-							<tr>
-								<th>No</th>
-								<th>No Antrian</th>
-								<th>Kode Booking</th>
-								<th class="text-center">No RM</th>
-								<th>Poli Tujuan</th>
-								<th>Nama Pasien</th>
-								<th>Alamat</th>
-								<th>Kategori Pasien</th>
-								<th>Jenis</th>
-								<th class="text-center">Aksi</th>
-							</tr>
-						</thead>
-					</table>
+					<div class="row">
+						<div class="col-md-12">
+							{{-- <table id="dataTable" class="table table-striped dataTable" cellspacing="0" style="width: 100%;"> --}}
+							<table id="dataTable" class="table table-striped" style="
+								width: 100%;
+								overflow-x: auto;
+								white-space: nowrap;
+							">
+								<thead class="text-center">
+									<tr>
+										<th>No</th>
+										<th>No Antrian</th>
+										<th>Kode Booking</th>
+										<th class="text-center">No RM</th>
+										<th>Poli Tujuan</th>
+										<th>Nama Pasien</th>
+										<th>Alamat</th>
+										<th>Kategori Pasien</th>
+										<th>Jenis</th>
+										<th class="text-center">Aksi</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -121,6 +137,7 @@
 			var loading = '<div class="loader" id="loader-4"><span></span><span></span><span></span></div>'
 			var url = "{{route('getAntrianLoket')}}"
 			var x = $('#dataTable').dataTable({
+				scrollX: true,
 				bPaginate: true,
 				bFilter: true,
 				bDestroy: true,
@@ -159,8 +176,10 @@
 					},
 					{data: 'mapping_poli_bridging.tm_poli.NamaPoli', name: 'NamaPoli'},
 					{
-						data: 'namaCust',
-						name: 'tm_customer.NamaCust',
+						// data: 'namaCust',
+						// name: 'tm_customer.NamaCust',
+						data: 'namaPasien',
+						name: 'namaPasien',
 						orderable:false,
 						searchable:true,
 					},

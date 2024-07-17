@@ -329,7 +329,7 @@
 					@if($view==0)
 					@if($getAntrian->no_rm=='00000000000'||$getAntrian->no_rm==null||$getAntrian->no_rm=="")
 					<div class="col-md-2 text-center">
-						<button type="button" class="btn btn-warning btn-cetak-rm" onclick="cetakrm(`{{$getAntrian->kode_booking}}`)" style="width: 100%">GENERATE NO RM</button>
+						<button type="button" class="btn btn-warning btn-cetak-rm" onclick="cetakrm(`{{json_encode($getAntrian)}}`)" style="width: 100%">GENERATE NO RM</button>
 					</div>
 					@endif
 					<div class="col-md-2 text-center">
@@ -747,7 +747,8 @@
 		$('#detail-dialog').modal('show')
 	}
 
-	function cetakrm(id) {
+	function cetakrm(obj) {
+		obj = JSON.parse(obj)
 		swal({
 			title: 'KONFIRMASI !',
 			type: 'info',
@@ -759,7 +760,7 @@
 		},(isConfirm)=>{
 			if(isConfirm){
 				var url = "{{route('cetakRMAntrian')}}";
-				$.post(url,{id:id}).done(function(data){
+				$.post(url,{id:obj.kode_booking,nik:obj.nik}).done(function(data){
 					if(data.status == 'success'){
 						swal({
 							title: 'Berhasil',
