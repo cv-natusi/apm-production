@@ -353,7 +353,8 @@ if(is_numeric($noBpjs) && $ifBpjs){
 }
 
 ### Tutup kode poli supaya tidak ditampilkan format => ('kode',',kode')
-$notInSementara = ",'PSY','URO'";
+// $notInSementara = ",'PSY','URO'";
+$notInSementara = ",'PSY'";
 // $notInSementara = "";
 
 ### Input tanggal berkunjung
@@ -413,7 +414,11 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 							}
 						}
 						updateStatusChat('statusChat',$idBots,$wablas,$dataIn);
-						$notIn = "'ALG','UGD','ANU','GIG'$notInSementara";
+						$request->merge([
+							'tanggal_berobat' => $tglBerobat,
+						]);
+						$getIgnorePoli = ignorePoli($request);
+						$notIn = "'ALG','UGD','ANU','GIG'$getIgnorePoli";
 						// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
 						$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
 						$resPoli = mysqli_query($dbrsud,$poli);
@@ -1392,6 +1397,15 @@ if(isset($msg)){
 	}
 	// echo 'tes';
 	echo $msg;
+}
+
+function ignorePoli($tanggal){
+	$ignorePoli = "";
+	$ignorePoli .= ",'PSY'";
+	if($tanggal=='2024-07-13'){
+		$ignorePoli .= ",'URO'";
+	}
+	return $ignorePoli;
 }
 
 function msgJadwalPolis($wablas = ''){
