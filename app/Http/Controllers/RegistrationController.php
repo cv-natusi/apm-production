@@ -352,12 +352,12 @@ class RegistrationController extends Controller{
 		$ignore = ['ALG','UGD','ANU'];
 		// if(date('d-m-Y',strtotime('now'))=='20-06-2024'){
 		if(
-			date('d-m-Y',strtotime('now'))=='27-06-2024'
-			&& Antrian::where([
-				'tgl_periksa'=>'2024-06-27',
-				'kode_poli'=>'017',
-				'metode_ambil'=>'KIOSK',
-			])->count() >= 5
+			date('d-m-Y',strtotime('now'))=='18-07-2024'
+			// && Antrian::where([
+			// 	'tgl_periksa'=>'2024-06-27',
+			// 	'kode_poli'=>'017',
+			// 	'metode_ambil'=>'KIOSK',
+			// ])->count() >= 5
 		){
 			array_push($ignore,'017');
 		}
