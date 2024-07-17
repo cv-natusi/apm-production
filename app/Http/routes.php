@@ -13,13 +13,13 @@ header( 'Access-Control-Allow-Headers: Authorization, Content-Type' );
 */
 Route::get('/tescurl','AaController@testing');
 Route::get('/clear', function() {
-    $exitCode = Artisan::call('route:clear');
-    $exitCode = Artisan::call('view:clear');
-    $exitCode = Artisan::call('cache:clear');
-    $exitCode = Artisan::call('config:clear');
-    $exitCode = Artisan::call('config:cache');
-    // return what you want
-    return "Berhasil Clear!";
+	$exitCode = Artisan::call('route:clear');
+	$exitCode = Artisan::call('view:clear');
+	$exitCode = Artisan::call('cache:clear');
+	$exitCode = Artisan::call('config:clear');
+	$exitCode = Artisan::call('config:cache');
+	// return what you want
+	return "Berhasil Clear!";
 });
 // Route::get('/', 'DashboardController@index')->name('quest');
 Route::get('/', function(){
@@ -147,6 +147,7 @@ Route::get('/verifikasi/{id}/{random}', 'WablasController@verifikasi')->name('ve
 Route::get('verifikasiBerhasil','WablasController@verifBerhasil')->name('verifBerhasil');
 Route::post('cekRujukanWaBot','WaBotBridgingController@cekRujukan')->name('cekRujukanWaBot');
 Route::get('/api/send-message', 'WablasController@sendDataTesting')->name('testing');
+Route::post('/api/send-message', 'WablasController@sendDataTesting')->name('testing');
 
 // Ambil Antrian Kiosk
 Route::post('/apidokter', 'RegistrationController@ApiDokter')->name('api-dokter');
@@ -171,6 +172,12 @@ Route::group(['middleware' => 'auth'], function() {
 	});
 	
 	Route::group(array('prefix'=>'admin'), function(){
+		Route::group(['prefix'=>'pengaturan', 'as'=>'pengaturan.'],function(){
+			Route::group(['prefix'=>'jadwal-poli', 'as'=>'jadwalPoli.'],function(){
+				Route::get('/','PengaturanJadwal\JadwalPoliController@jadwalPoli')->name('main');
+				Route::post('form','PengaturanJadwal\JadwalPoliController@form')->name('form');
+			});
+		});
 		// Antrean BPJS
 		Route::group(['prefix'=>'filling'],function(){
 			Route::post('/dataGridFilling','FillingController@dataGridFilling')->name('dataGridFilling');
