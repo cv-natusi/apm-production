@@ -415,10 +415,11 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 						}
 						updateStatusChat('statusChat',$idBots,$wablas,$dataIn);
 						$request->merge([
+							'natusi_apm' => $wablas,
 							'tanggal_berobat' => $tglBerobat,
 						]);
-						// $getIgnorePoli = ignorePoli($request);
-						$getIgnorePoli = $notInSementara;
+						$getIgnorePoli = ignorePoli($request);
+						// $getIgnorePoli = $notInSementara;
 						$notIn = "'ALG','UGD','ANU','GIG'$getIgnorePoli";
 						// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
 						$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
@@ -808,7 +809,14 @@ if(is_numeric($waText) && ($ifPoli)){
 	// if(cekLibur(date('d-m-Y',strtotime($rows['tgl_periksa']))) && $waText!=19){ # Pesan untuk hari libur RS
 	// 	echo msgLibur();die();
 	// }
-	$ignorePoli = "mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG'$notInSementara)";
+
+	$request->merge([
+		'natusi_apm' => $wablas,
+		'tanggal_berobat' => $rows['tgl_periksa'],
+	]);
+	$getIgnorePoli = ignorePoli($request);
+	$notIn = "mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG'$getIgnorePoli)";
+	// $ignorePoli = "mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG'$notInSementara)";
 	$poli = "
 		SELECT
 			tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli
@@ -816,7 +824,7 @@ if(is_numeric($waText) && ($ifPoli)){
 			mapping_poli_bridging AS mp JOIN tm_poli AS tp
 			ON mp.kdpoli_rs=tp.KodePoli
 		WHERE
-			$ignorePoli
+			$notIn
 		GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC
 	"; # GIG=="poli gigi dokter umum"
 	$resPoli = mysqli_query($dbrsud,$poli);
@@ -1400,11 +1408,12 @@ if(isset($msg)){
 	echo $msg;
 }
 
-function ignorePoli($tanggal){
+function ignorePoli($request){
 	$ignorePoli = "";
 	$ignorePoli .= ",'PSY'";
-	if($tanggal=='2024-07-13'){
-		$ignorePoli .= ",'URO'";
+	$tanggal = $request->tanggal_berobat;
+	if($tanggal=='2024-07-18'){
+		$ignorePoli .= ",'017'";
 	}
 	return $ignorePoli;
 }
