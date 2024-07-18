@@ -137,7 +137,7 @@
 			var loading = '<div class="loader" id="loader-4"><span></span><span></span><span></span></div>'
 			var url = "{{route('getAntrianLoket')}}"
 			var x = $('#dataTable').dataTable({
-				// scrollX: true,
+				scrollX: true,
 				bPaginate: true,
 				bFilter: true,
 				bDestroy: true,

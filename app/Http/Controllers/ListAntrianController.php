@@ -488,7 +488,7 @@ class ListAntrianController extends Controller{
 						'message'=>'Antrian gagal cetak RM',
 					];
 				}
-				$no_rm = $cust->KodeCust;
+				$no_rm = $nextKode;
 			}
 
 			$antrian = Antrian::where('kode_booking', $request->id)->first();
