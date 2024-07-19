@@ -375,6 +375,15 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 				$msg = "Nomor Rujukan anda tidak aktif mulai tanggal *".date("d-m-Y",strtotime($rowsDapas['rujukanAktif']))."*";
 				// echo json_encode($resRujukan1,JSON_PRETTY_PRINT);die();
 			}else{
+				if($phone=='6281335537942'){
+					$request->merge([
+						'natusi_apm' => $wablas,
+						'tanggal_berobat' => $tglBerobat,
+						'phone' => $phone,
+					]);
+					$getIgnorePoli = ignorePoli($request);
+					die();
+				}
 				$nik = $rowsDapas['nik'];
 				$execQGetAntri = cekAntrian($tglBerobat,$nik,$wablas);
 				if($execQGetAntri->num_rows>0){
