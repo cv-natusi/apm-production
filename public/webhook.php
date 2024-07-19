@@ -417,6 +417,7 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 						$request->merge([
 							'natusi_apm' => $wablas,
 							'tanggal_berobat' => $tglBerobat,
+							'phone' => $phone,
 						]);
 						$getIgnorePoli = ignorePoli($request);
 						// $getIgnorePoli = $notInSementara;
@@ -813,6 +814,7 @@ if(is_numeric($waText) && ($ifPoli)){
 	$request->merge([
 		'natusi_apm' => $wablas,
 		'tanggal_berobat' => $rows['tgl_periksa'],
+		'phone' => $phone,
 	]);
 	$getIgnorePoli = ignorePoli($request);
 	$notIn = "mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG'$getIgnorePoli)";
@@ -1412,7 +1414,22 @@ function ignorePoli($request){
 	$ignorePoli = "";
 	$ignorePoli .= ",'PSY'";
 	$tanggal = $request->tanggal_berobat;
-	if($tanggal=='2024-07-18'){
+	$total = 0;
+	if($request->natusi_apm){
+		$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+			JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+			WHERE bp.tgl_periksa = '$tanggal'
+			AND bp.statusChat='99'
+			AND bdp.kodePoli='017'
+		";
+		$res = mysqli_query($request->natusi_apm,$query);
+		$total = mysqli_fetch_assoc($res)['total'];
+	}
+	if($request->phone=='6281335537942'){
+		echo "$total\n";
+		echo 'Ignore Poli';
+	}
+	if(in_array($tanggal,['2024-07-23','2024-07-25'])== && $total >= 50){
 		$ignorePoli .= ",'017'";
 	}
 	return $ignorePoli;
