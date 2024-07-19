@@ -1438,7 +1438,7 @@ function ignorePoli($request){
 		echo "$total\n";
 		echo 'Ignore Poli';
 	}
-	if(in_array($tanggal,['2024-07-23','2024-07-25'])== && $total >= 50){
+	if(in_array($tanggal,['2024-07-23','2024-07-25']) && $total >= 50){
 		$ignorePoli .= ",'017'";
 	}
 	return $ignorePoli;
