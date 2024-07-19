@@ -82,7 +82,7 @@
 								overflow-x: auto;
 								white-space: nowrap;
 							">
-								<thead class="text-center">
+								<thead>
 									<tr>
 										<th>No</th>
 										<th>No Antrian</th>
