@@ -375,15 +375,6 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 				$msg = "Nomor Rujukan anda tidak aktif mulai tanggal *".date("d-m-Y",strtotime($rowsDapas['rujukanAktif']))."*";
 				// echo json_encode($resRujukan1,JSON_PRETTY_PRINT);die();
 			}else{
-				if($phone=='6281335537942'){
-					$request->merge([
-						'natusi_apm' => $wablas,
-						'tanggal_berobat' => $tglBerobat,
-						'phone' => $phone,
-					]);
-					$getIgnorePoli = ignorePoli($request);
-					die();
-				}
 				$nik = $rowsDapas['nik'];
 				$execQGetAntri = cekAntrian($tglBerobat,$nik,$wablas);
 				if($execQGetAntri->num_rows>0){
@@ -1434,11 +1425,11 @@ function ignorePoli($request){
 		$res = mysqli_query($request->natusi_apm,$query);
 		$total = mysqli_fetch_assoc($res)['total'];
 	}
-	if($request->phone=='6281335537942'){
-		echo "$total\n";
-		echo 'Ignore Poli';
-	}
-	if(in_array($tanggal,['2024-07-23','2024-07-25']) && $total >= 50){
+	// if($request->phone=='6281335537942'){
+	// 	echo "$total\n";
+	// 	echo 'Ignore Poli';
+	// }
+	if(($tanggal=='2024-07-23' && $total >= 50) || ($tanggal=='2024-07-25' && $total >= 30)){
 		$ignorePoli .= ",'017'";
 	}
 	return $ignorePoli;

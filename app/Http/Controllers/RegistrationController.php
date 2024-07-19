@@ -344,26 +344,20 @@ class RegistrationController extends Controller{
 	}
 
 	public function indexAntrian(Request $request){
-		// return Antrian::where([
-		// 	'tgl_periksa'=>'2024-06-27',
-		// 	'kode_poli'=>'017'
-		// ])->count();
+		$dateNow = date('Y-m-d');
 		$id_kiosk = $request->id_kiosk;
 		$ignore = ['ALG','UGD','ANU'];
-		// if(date('d-m-Y',strtotime('now'))=='20-06-2024'){
 		if(
-			date('d-m-Y',strtotime('now'))=='18-07-2024'
-			// && Antrian::where([
-			// 	'tgl_periksa'=>'2024-06-27',
-			// 	'kode_poli'=>'017',
-			// 	'metode_ambil'=>'KIOSK',
-			// ])->count() >= 5
+			in_array($dateNow,['2024-07-23','2024-07-25'])
+			&& Antrian::where([
+				'tgl_periksa'=>$dateNow,
+				'kode_poli'=>'017',
+				'metode_ambil'=>'KIOSK',
+			])->count() >= 10
 		){
 			array_push($ignore,'017');
 		}
-		// return $ignore;
 		$poli = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
-			// ->whereNotIn('kdpoli',['ALG','UGD','ANU'])
 			->whereNotIn('kdpoli',$ignore)
 			->groupBy('mapping_poli_bridging.kdpoli_rs')
 			->orderBy('tm_poli.NamaPoli','ASC')
@@ -529,20 +523,21 @@ class RegistrationController extends Controller{
 	}
 
 	public function ambilAntrianSave(Request $request){
+		$dateNow = date('Y-m-d');
 		if(
-			date('d-m-Y')=='27-06-2024'
+			in_array($dateNow,['2024-07-23','2024-07-25'])
 			&& $request->kodepoli=='017'
 			&& ($cn = Antrian::where([
-				'tgl_periksa'=>'2024-06-27',
+				'tgl_periksa'=>$dateNow,
 				'kode_poli'=>'017',
 				'metode_ambil'=>'KIOSK',
-			])->count()) >= 5
+			])->count()) >= 10
 		){
 			return [
 				'status'=>'error',
 				'code'=>400,
 				'head_message'=>'Whoops!',
-				'message'=>"Kuota POLI BEDAH ONKOLOGI sudah penuh($cn/5)",
+				'message'=>"Kuota POLI BEDAH ONKOLOGI sudah penuh($cn/10)",
 				'data'=> '',
 				'poli'=> ''
 			];
@@ -551,7 +546,7 @@ class RegistrationController extends Controller{
 		$no_rm   = $request->no_rm;
 		$no_bpjs = $request->no_bpjs;
 		$nik     = $request->nik;
-		$request->metodes = "KIOSK"; // penting jangan di hapus
+		$request->metodes = "KIOSK"; ### penting jangan di hapus
 		DB::beginTransaction();
 		try {
 			$query = Antrian::select('nik','id','is_pasien_baru','no_antrian_pbaru','nomor_antrian_poli','kode_booking','tgl_periksa','kode_poli','jenis_pasien')
