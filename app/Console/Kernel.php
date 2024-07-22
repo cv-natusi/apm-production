@@ -30,4 +30,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('reminder:control')
                  ->dailyAt('01:00');
     }
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->command('session:prune')->hourly();
+    }
 }
