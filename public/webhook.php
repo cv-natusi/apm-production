@@ -65,6 +65,7 @@ $dbrsud = mysqli_connect('192.168.1.5','client','Wahidin123','dbsimars');
 $request = new Request([
 	'rsu_conn' => $dbrsud,
 	'apm_conn' => $wablas,
+	'natusi_apm' => $wablas,
 ]);
 if(!$wablas){
 	die("tes Connection Failed".mysqli_connect_error());
@@ -104,11 +105,8 @@ $reset = stripos($waText,'reset')===false;
 
 ### Info pendaftaran
 if($result->num_rows<1){
-	$msg = msgWelcome($wablas);
+	$msg = msgWelcome($request);
 	if($phone=='6281335537942'){
-		// $request->merge([
-		// 	'natusi_apm' => $wablas,
-		// ]);
 		// echo pemberitahuanPoli($request);
 		echo $msg;
 		die();
@@ -410,7 +408,6 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 						}
 						updateStatusChat('statusChat',$idBots,$wablas,$dataIn);
 						$request->merge([
-							'natusi_apm' => $wablas,
 							'tanggal_berobat' => $tglBerobat,
 							'phone' => $phone,
 						]);
@@ -807,7 +804,6 @@ if(is_numeric($waText) && ($ifPoli)){
 	// }
 
 	$request->merge([
-		'natusi_apm' => $wablas,
 		'tanggal_berobat' => $rows['tgl_periksa'],
 		'phone' => $phone,
 	]);
@@ -1375,7 +1371,7 @@ if($statusChat==99){
 ### Reset pendaftaran
 // if($waText=='reset' && ($statusChat>1 && $statusChat<99) && ($rows['pasien_baru']==false || $rows['pasien_baru']==true)){
 if($waText=='reset' && $statusChat>1 && ($rows['pasien_baru']==false || $rows['pasien_baru']=="" || $rows['pasien_baru']==true)){
-	$msg = msgWelcome($wablas);
+	$msg = msgWelcome($request);
 	if($statusChat==99 && $rowsDapas['is_pasien_baru']==false){
 		$kodeCust = $rowsDapas['KodeCust'];
 		$tglPeriksa = $rowsDapas['tglBerobat'];
@@ -1658,7 +1654,7 @@ function cekAntrian($tglBerobat,$nik,$wablas){
 	return $execQGetAntri;
 }
 
-function msgWelcome($wablas=''){
+function msgWelcome($request){
 	$msg = "Selamat datang di RSUD Dr. Wahidin Sudiro Husodo Kota Mojokerto, Anda sedang berinteraksi dengan Sistem Pendaftaran Antrian Otomatis, Silahkan Pilih Layanan :\n\n";
 	$msg .= "A : Pendaftaran Antrian\n";
 	$msg .= "B : Promo Menarik\n\n";
@@ -1681,9 +1677,6 @@ function msgWelcome($wablas=''){
 	// $msg .= msgJadwalPolis($wablas)."\n\n";
 	// $msg .= msgJadwalPoli()."\n\n";
 
-	$request->merge([
-		'natusi_apm' => $wablas,
-	]);
 	$msg .= pemberitahuanPoli($request)."\n\n";
 
 	$msg .= "Hotline 0815257200088 untuk mendapatkan bantuan apabila ada kendala pendaftaran.\n";
