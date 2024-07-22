@@ -1460,7 +1460,7 @@ function pemberitahuanPoli($request){
 			$num = $num> 0 ? $num-- : 0;
 		}
 	}
-	return $text;
+	return $num===0 ? $text : false;
 }
 function namaHari($request){
 	switch ($request->nama_hari) {
@@ -1676,8 +1676,8 @@ function msgWelcome($request){
 
 	// $msg .= msgJadwalPolis($wablas)."\n\n";
 	// $msg .= msgJadwalPoli()."\n\n";
-
-	$msg .= pemberitahuanPoli($request)."\n\n";
+	$txt = pemberitahuanPoli($request);
+	$msg .= $txt !== false ? "$txt\n\n" : '';
 
 	$msg .= "Hotline 0815257200088 untuk mendapatkan bantuan apabila ada kendala pendaftaran.\n";
 	$msg .= "Video tutorial penggunaan antrian cek di : shorturl.at/dhqz8";
