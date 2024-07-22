@@ -105,6 +105,10 @@ $reset = stripos($waText,'reset')===false;
 ### Info pendaftaran
 if($result->num_rows<1){
 	$msg = msgWelcome($wablas);
+	if($phone=='6281335537942'){
+		echo 'test';
+		die();
+	}
 }
 function waBotBridging(){
 	return new WaBotBridgingController;
@@ -116,19 +120,6 @@ if($result->num_rows<1 && $waText=='b'){
 }
 
 if($waText=='a'){
-	if($phone=='6281335537942'){
-		// $query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-		// 	JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-		// 	WHERE bp.tgl_periksa = '2024-06-04'
-		// 	AND bp.statusChat='99'
-		// 	AND bdp.kodePoli='017'
-		// ";
-		// $res = mysqli_query($wablas,$query);
-		// // echo json_encode($res->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
-		// echo json_encode(mysqli_fetch_assoc($res)['total'],JSON_PRETTY_PRINT);
-		// echo msgJadwalPolis($wablas);
-		// die();
-	}
 	$msg = "1. Daftar Pasien Baru\n";
 	$msg .= "2. Daftar Pasien Lama\n\n";
 	$msg .= "Ketik angka 1 atau 2 untuk melakukan pendaftaran.";
@@ -1425,14 +1416,77 @@ function ignorePoli($request){
 		$res = mysqli_query($request->natusi_apm,$query);
 		$total = mysqli_fetch_assoc($res)['total'];
 	}
-	// if($request->phone=='6281335537942'){
-	// 	echo "$total\n";
-	// 	echo 'Ignore Poli';
-	// }
 	if(($tanggal=='2024-07-23' && $total >= 50) || ($tanggal=='2024-07-25' && $total >= 30)){
 		$ignorePoli .= ",'017'";
 	}
 	return $ignorePoli;
+}
+
+function pemberitahuanPoli($request){
+	$total=0;
+	// if($wablas){
+	// 	$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+	// 		JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+	// 		WHERE bp.tgl_periksa = '2024-06-27'
+	// 		AND bp.statusChat='99'
+	// 		AND bdp.kodePoli='017'
+	// 	";
+	// 	$res = mysqli_query($wablas,$query);
+	// 	$total = mysqli_fetch_assoc($res)['total'];
+	// }
+	$text = "*Untuk sementara waktu.*\n";
+	$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota sebagai berikut:*";
+	$tanggal = ['23-07-2024','25-07-2024'];
+	$num = 0;
+	foreach($tanggal as $key => $val){
+		$dt = date('D', strtotime($val));
+		if(strtotime('now') < strtotime($val)){
+			$whereDate = date('Y-m-d',strtotime($val));
+			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+				WHERE bp.tgl_periksa = '$whereDate'
+				AND bp.statusChat='99'
+				AND bdp.kodePoli='017'
+			";
+			$res = mysqli_query($wablas,$query);
+			$total = mysqli_fetch_assoc($res)['total'];
+
+			$num++;
+			$request->merge(['nama_hari' => $dt]);
+			$namaHari = namaHari($request);
+			$limit = $namaHari=='Selasa' ? 50 : 30;
+			$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.";
+		}else{
+			$num = $num> 0 ? $num-- : 0;
+		}
+	}
+	return $text;
+}
+function namaHari($request){
+	switch ($request->nama_hari) {
+		case 'Mon':
+			$hari = 'Senin';
+			break;
+		case 'Tue':
+			$hari = 'Selasa';
+			break;
+		case 'Wed':
+			$hari = 'Rabu';
+			break;
+		case 'Thu':
+			$hari = 'Kamis';
+			break;
+		case 'Fri':
+			$hari = "Jum'at";
+			break;
+		case 'Sat':
+			$hari = 'Sabtu';
+			break;
+		default:
+			$hari = 'Minggu';
+			break;
+	}
+	return $hari;
 }
 
 function msgJadwalPolis($wablas = ''){
