@@ -106,10 +106,11 @@ $reset = stripos($waText,'reset')===false;
 if($result->num_rows<1){
 	$msg = msgWelcome($wablas);
 	if($phone=='6281335537942'){
-		$request->merge([
-			'natusi_apm' => $wablas,
-		]);
-		echo pemberitahuanPoli($request);
+		// $request->merge([
+		// 	'natusi_apm' => $wablas,
+		// ]);
+		// echo pemberitahuanPoli($request);
+		echo $msg;
 		die();
 	}
 }
@@ -1679,6 +1680,11 @@ function msgWelcome($wablas=''){
 
 	// $msg .= msgJadwalPolis($wablas)."\n\n";
 	// $msg .= msgJadwalPoli()."\n\n";
+
+	$request->merge([
+		'natusi_apm' => $wablas,
+	]);
+	$msg .= pemberitahuanPoli($request)."\n\n";
 
 	$msg .= "Hotline 0815257200088 untuk mendapatkan bantuan apabila ada kendala pendaftaran.\n";
 	$msg .= "Video tutorial penggunaan antrian cek di : shorturl.at/dhqz8";
