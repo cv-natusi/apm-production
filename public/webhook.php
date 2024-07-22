@@ -1438,7 +1438,7 @@ function pemberitahuanPoli($request){
 	// 	$total = mysqli_fetch_assoc($res)['total'];
 	// }
 	$text = "*Untuk sementara waktu.*\n";
-	$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota sebagai berikut:*";
+	$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota sebagai berikut:*\n";
 	$tanggal = ['23-07-2024','25-07-2024'];
 	$num = 0;
 	foreach($tanggal as $key => $val){
@@ -1458,7 +1458,7 @@ function pemberitahuanPoli($request){
 			$request->merge(['nama_hari' => $dt]);
 			$namaHari = namaHari($request);
 			$limit = $namaHari=='Selasa' ? 50 : 30;
-			$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.";
+			$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".(count($tanggal)<$key+1 ? "\n" : '');
 		}else{
 			$num = $num> 0 ? $num-- : 0;
 		}
