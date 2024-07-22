@@ -66,6 +66,7 @@ $request = new Request([
 	'rsu_conn' => $dbrsud,
 	'apm_conn' => $wablas,
 	'natusi_apm' => $wablas,
+	'phone' => $phone,
 ]);
 if(!$wablas){
 	die("tes Connection Failed".mysqli_connect_error());
@@ -1459,6 +1460,9 @@ function pemberitahuanPoli($request){
 		}else{
 			$num = $num> 0 ? $num-- : 0;
 		}
+	}
+	if($request->phone=='6281335537942'){
+		echo $num;
 	}
 	return $num===0 ? $text : false;
 }
