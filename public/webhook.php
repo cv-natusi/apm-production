@@ -106,7 +106,10 @@ $reset = stripos($waText,'reset')===false;
 if($result->num_rows<1){
 	$msg = msgWelcome($wablas);
 	if($phone=='6281335537942'){
-		echo 'test';
+		$request->merge([
+			'natusi_apm' => $wablas,
+		]);
+		echo pemberitahuanPoli($request);
 		die();
 	}
 }
@@ -1448,7 +1451,7 @@ function pemberitahuanPoli($request){
 				AND bp.statusChat='99'
 				AND bdp.kodePoli='017'
 			";
-			$res = mysqli_query($wablas,$query);
+			$res = mysqli_query($request->natusi_apm,$query);
 			$total = mysqli_fetch_assoc($res)['total'];
 
 			$num++;
