@@ -1464,7 +1464,7 @@ function pemberitahuanPoli($request){
 	if($request->phone=='6281335537942'){
 		echo $num;
 	}
-	return $num===0 ? $text : false;
+	return $num!==0 ? $text : false;
 }
 function namaHari($request){
 	switch ($request->nama_hari) {
