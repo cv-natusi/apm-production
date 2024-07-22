@@ -1458,7 +1458,7 @@ function pemberitahuanPoli($request){
 			$request->merge(['nama_hari' => $dt]);
 			$namaHari = namaHari($request);
 			$limit = $namaHari=='Selasa' ? 50 : 30;
-			$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
+			$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? " benar \n" : 'salah');
 		}else{
 			$num = $num> 0 ? $num-- : 0;
 		}
