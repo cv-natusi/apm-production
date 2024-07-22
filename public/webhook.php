@@ -1441,9 +1441,9 @@ function pemberitahuanPoli($request){
 	$num = 0;
 	foreach($tanggal as $key => $val){
 		$dt = date('D', strtotime($val));
-		$now = $request->phone=='6281335537942' ? strtotime('now +1day') : strtotime('now');
-		// if(strtotime('now') < strtotime($val)){
-		if($now < strtotime($val)){
+		// $now = $request->phone=='6281335537942' ? strtotime('now +1day') : strtotime('now');
+		if(strtotime('now') < strtotime($val)){
+		// if($now < strtotime($val)){
 			$whereDate = date('Y-m-d',strtotime($val));
 			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
 				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
