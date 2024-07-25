@@ -375,25 +375,29 @@ class ApiSiramaErmController extends Controller{
 			$asuransi = Rsu_setupall::where('groups','Asuransi')->where('subgroups',$registrasi->Kode_Ass)->first()->nilaichar;
 			$trResep = DB::connection('dbwahidin')->table('tr_resep_m')->where('No_Register', $noregist)->first();
 			$cust = rsu_customer::select('NoKtp')->where('KodeCust',$registrasi->No_RM)->first();
-			# Start generate no antrian
-			$prefix = 'NB'; #UMUM/ASURANSI LAIN
-			if($registrasi->Kode_Ass=='1008' || $registrasi->Kode_Ass=='1008'){
-				$prefix = 'B';
-			}
-			$length = strlen($prefix)+3;
-			$antri = DB::connection('mysql')->table('antrian')->select('no_antrian')
-					->where('tgl_periksa', date('Y-m-d'))
-					->whereRaw("LENGTH(no_antrian)=$length")
-					->where('no_antrian','like',"$prefix%")
-					->orderBy('no_antrian','desc')->first();
-			$num = 0;
-			if(!empty($antri)){
-				$num = (int)substr($antri->no_antrian, -3);
-			}
-			$angkaAntri           = sprintf("%03d",$num+1);
-			$noAntreGenerate      = "$prefix".$angkaAntri;
-			# End generate no antrian
+			
+			# Validasi table antrian
 			if(!$antrean){
+				# Start generate no antrian
+				$prefix = 'NB'; #UMUM/ASURANSI LAIN
+				if($registrasi->Kode_Ass=='1008' || $registrasi->Kode_Ass=='1008'){
+					$prefix = 'B';
+				}
+				$length = strlen($prefix)+3;
+				$antri = DB::connection('mysql')->table('antrian')->select('no_antrian')
+						->where('tgl_periksa', date('Y-m-d'))
+						->whereRaw("LENGTH(no_antrian)=$length")
+						->where('no_antrian','like',"$prefix%")
+						->orderBy('no_antrian','desc')->first();
+				$num = 0;
+				if(!empty($antri)){
+					$num = (int)substr($antri->no_antrian, -3);
+				}
+				$angkaAntri           = sprintf("%03d",$num+1);
+				$noAntreGenerate      = "$prefix".$angkaAntri;
+				# End generate no antrian
+				
+				# Insert table antrian
 				$insertAntrian = new Antrian;
 				$insertAntrian->nik = ($cust)?$cust->NoKtp:null;
 				$insertAntrian->kode_poli = $kdPoli;
@@ -404,7 +408,8 @@ class ApiSiramaErmController extends Controller{
 				$insertAntrian->nomor_kartu = ($registrasi->NoPeserta)?$registrasi->NoPeserta:null;
 				$insertAntrian->jenis_pasien = $registrasi->NamaAsuransi;
 				$insertAntrian->is_geriatri = ($registrasi->Umur > 60)?'Y':'N';
-				$insertAntrian->metode_ambil = 'SIMRS';
+				// $insertAntrian->metode_ambil = 'SIMRS';
+				$insertAntrian->metode_ambil = 'AMBIL OBAT';
 				$insertAntrian->is_pasien_baru = $registrasi->Baru;
 				$insertAntrian->No_Register = $noregist;
 				$insertAntrian->save();
