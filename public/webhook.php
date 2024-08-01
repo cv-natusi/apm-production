@@ -107,11 +107,11 @@ $reset = stripos($waText,'reset')===false;
 ### Info pendaftaran
 if($result->num_rows<1){
 	$msg = msgWelcome($request);
-	// if($phone=='6281335537942'){
-	// 	// echo pemberitahuanPoli($request);
-	// 	echo $msg;
-	// 	die();
-	// }
+	if($phone=='6281335537942'){
+		echo pemberitahuanPoli($request);
+		// echo $msg;
+		die();
+	}
 }
 function waBotBridging(){
 	return new WaBotBridgingController;
@@ -1425,6 +1425,9 @@ function ignorePoli($request){
 
 function pemberitahuanPoli($request){
 	$dateNow = date('Y-m-d');
+	if($request->phone=='6281335537942'){
+		$dateNow = date('Y-m-d',strtotime('today +4day'));
+	}
 	$total=0;
 
 	$text = "*Untuk sementara waktu.*\n";
