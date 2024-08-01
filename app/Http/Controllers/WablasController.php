@@ -117,7 +117,7 @@ class WablasController extends Controller{
 			$data['phone'] = $dataBot->phone;
 			$bool = $timeCur2<$jamBuka && $tglBerobat==$dateCur;
 			if($dataPasien->kodePoli=='017' && $tglBerobat=='2024-08-01'){
-				$txt = "<p style='text-align:center; font-weight:600; font-size:2.5rem; margin-top:4%;'>MOHON MAAF, KUOTA POLI SAAT ONKOLOGI SAAT INI SUDAH PENUH</p>";
+				$txt = "<p style='text-align:center; font-weight:600; font-size:2.5rem; margin-top:4%;'>MOHON MAAF, KUOTA POLI ONKOLOGI SAAT INI SUDAH PENUH</p>";
 				return $txt;
 			}
 			if($tglBerobat > $dateCur || $bool){
