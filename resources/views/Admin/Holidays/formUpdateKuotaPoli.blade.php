@@ -1,11 +1,11 @@
 <div class="box box-warning" id='panel-add'>
-	<h4 style="margin-left: 15px">EDIT LIBUR NASIONAL</h4>
+	<h4 style="margin-left: 15px">EDIT KUOTA POLI</h4>
 	<hr>
-	<form method='post' action="{{ route('UpdateHoliday') }}" enctype='multipart/form-data'>
+	<form method='post' action="{{ route('UpdateKuotaPoliHoliday') }}" enctype='multipart/form-data'>
 		{{ csrf_field() }}
 		<div class="box-body">
+			<input type="hidden" name="id_holiday" value='{{ $holiday->id_holiday }}' required="required" class="form-control">
 			<div class="row" style="padding: 5px">
-				<input type="hidden" name="id_holiday" value='{{ $holiday->id_holiday }}' required="required" class="form-control">
 				<div class="col-md-12">
 					<div class="row" style="margin-bottom: 10px">
 						<div class="col-md-4">
@@ -16,8 +16,27 @@
 								<input type="text" name="tanggal_libur" id="form_datetime_today" data-date-format="dd-mm-yyyy" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off' required='required' value="{{ $holiday->tanggal }}">
 							</div> --}}
 						</div>
+						<div class="col-md-8">
+							<label for="">Pilih Poli</label>
+							<select name="pilih_poli" id="form_pilih_poli" class="form-control">
+								<option value="">Pilih Poli</option>
+								@foreach ($poli as $item)
+									<option value="{{ $item->KodePoli}}" {{ $item->KodePoli == $holiday->poli_id ? 'selected' : '' }}>{{ $item->NamaPoli}}</option>
+								@endforeach
+							</select>
+						</div>
 					</div>
-					<div class="row">
+					<div class="row" style="margin-bottom: 10px">
+						<div class="col-md-4">
+							<label for="">Kuota WA</label>
+							<input type="text" class="form-control" name="kuota_wa" id="form_kuota_wa" placeholder="Tulis kuota WA" value="{{ $holiday->kuota_wa }}">
+						</div>
+						<div class="col-md-4">
+							<label for="">Kuota Kios - K</label>
+							<input type="text" class="form-control" name="kuota_kiosk" id="form_kuota_kiosk" placeholder="Tulis kuota Kios - K" value="{{ $holiday->kuota_kiosk }}">
+						</div>
+					</div>
+					<div class="row" style="margin-bottom: 10px">
 						<div class="col-md-12">
 							<label for="">Keterangan</label>
 							<textarea name="keterangan" id="keterangan" class="form-control" cols="30" rows="10">{{ $holiday->keterangan }}</textarea>

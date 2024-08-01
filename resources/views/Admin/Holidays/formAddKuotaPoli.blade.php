@@ -1,26 +1,40 @@
 <div class="box box-warning" id='panel-add'>
-	<h4 style="margin-left: 15px">EDIT LIBUR NASIONAL</h4>
+	<h4 style="margin-left: 15px">KUOTA POLI</h4>
 	<hr>
-	<form method='post' action="{{ route('UpdateHoliday') }}" enctype='multipart/form-data'>
+	<form method='post' action="{{ route('AddKuotaPoliHoliday') }}" enctype='multipart/form-data'>
 		{{ csrf_field() }}
 		<div class="box-body">
 			<div class="row" style="padding: 5px">
-				<input type="hidden" name="id_holiday" value='{{ $holiday->id_holiday }}' required="required" class="form-control">
 				<div class="col-md-12">
 					<div class="row" style="margin-bottom: 10px">
 						<div class="col-md-4">
 							<label for="">Tanggal Libur</label>
-							<input type="date" name="tanggal_libur" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off' value="{{ $holiday->tanggal }}">
-							{{-- <div class="input-group">
-								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-								<input type="text" name="tanggal_libur" id="form_datetime_today" data-date-format="dd-mm-yyyy" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off' required='required' value="{{ $holiday->tanggal }}">
-							</div> --}}
+							<input type="date" name="tanggal_libur" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off'>
+						</div>
+						<div class="col-md-8">
+							<label for="">Pilih Poli</label>
+							<select name="pilih_poli" id="form_pilih_poli" class="form-control">
+								<option value="">Pilih Poli</option>
+								@foreach ($poli as $item)
+									<option value="{{ $item->KodePoli}}">{{ $item->NamaPoli}}</option>
+								@endforeach
+							</select>
 						</div>
 					</div>
-					<div class="row">
+					<div class="row" style="margin-bottom: 10px">
+						<div class="col-md-4">
+							<label for="">Kuota WA</label>
+							<input type="text" class="form-control" name="kuota_wa" id="form_kuota_wa" placeholder="Tulis kuota WA">
+						</div>
+						<div class="col-md-4">
+							<label for="">Kuota Kios - K</label>
+							<input type="text" class="form-control" name="kuota_kiosk" id="form_kuota_kiosk" placeholder="Tulis kuota Kios - K">
+						</div>
+					</div>
+					<div class="row" style="margin-bottom: 10px">
 						<div class="col-md-12">
 							<label for="">Keterangan</label>
-							<textarea name="keterangan" id="keterangan" class="form-control" cols="30" rows="10">{{ $holiday->keterangan }}</textarea>
+							<textarea name="keterangan" id="keterangan" class="form-control" cols="30" rows="10"></textarea>
 						</div>
 					</div>
 				</div>
@@ -65,6 +79,7 @@
         minView: 2,
         forceParse: 0,
     });
+
 	$( 'textarea#keterangan' ).ckeditor({width:'100%', height: '150px', toolbar: [
         { name: 'document', groups: [ 'mode', 'document', 'doctools' ], items: ['NewPage', 'Preview', 'Print', '-', 'Templates' ] },
         { name: 'clipboard', groups: [ 'clipboard', 'undo' ], items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ] },
@@ -80,3 +95,4 @@
         { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
 	]});
 </script>
+	

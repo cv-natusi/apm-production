@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2
+class ComposerStaticInit9429e7e1d73a82ecb1319acbd681c514
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -420,6 +420,7 @@ class ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Events\\Event' => __DIR__ . '/../..' . '/app/Events/Event.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
+        'App\\Helpers\\Logger' => __DIR__ . '/../..' . '/app/Helpers/Logger.php',
         'App\\Helpers\\apm' => __DIR__ . '/../..' . '/app/Helpers/apm.php',
         'App\\Http\\Controllers\\APIAPMController' => __DIR__ . '/../..' . '/app/Http/Controllers/APIAPMController.php',
         'App\\Http\\Controllers\\APILaboratController' => __DIR__ . '/../..' . '/app/Http/Controllers/APILaboratController.php',
@@ -438,6 +439,7 @@ class ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2
         'App\\Http\\Controllers\\BridgBpjsController' => __DIR__ . '/../..' . '/app/Http/Controllers/BridgBpjsController.php',
         'App\\Http\\Controllers\\BridgingController' => __DIR__ . '/../..' . '/app/Http/Controllers/BridgingController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\Cron\\CronController' => __DIR__ . '/../..' . '/app/Http/Controllers/Cron/CronController.php',
         'App\\Http\\Controllers\\DashboardController' => __DIR__ . '/../..' . '/app/Http/Controllers/DashboardController.php',
         'App\\Http\\Controllers\\DeviceController' => __DIR__ . '/../..' . '/app/Http/Controllers/DeviceController.php',
         'App\\Http\\Controllers\\DisplayController' => __DIR__ . '/../..' . '/app/Http/Controllers/DisplayController.php',
@@ -480,6 +482,7 @@ class ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2
         'App\\Http\\Middleware\\ApiAuth' => __DIR__ . '/../..' . '/app/Http/Middleware/ApiAuth.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
         'App\\Http\\Middleware\\EncryptCookies' => __DIR__ . '/../..' . '/app/Http/Middleware/EncryptCookies.php',
+        'App\\Http\\Middleware\\HttpsMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/HttpsMiddleware.php',
         'App\\Http\\Middleware\\RedirectIfAuthenticated' => __DIR__ . '/../..' . '/app/Http/Middleware/RedirectIfAuthenticated.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
         'App\\Http\\Models\\AntPasienBaru' => __DIR__ . '/../..' . '/app/Http/Models/AntPasienBaru.php',
@@ -4118,11 +4121,11 @@ class ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2::$prefixDirsPsr4;
-            $loader->fallbackDirsPsr4 = ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2::$fallbackDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit61ec3e4e88b90c561a15868cee64c8e2::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit9429e7e1d73a82ecb1319acbd681c514::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit9429e7e1d73a82ecb1319acbd681c514::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr4 = ComposerStaticInit9429e7e1d73a82ecb1319acbd681c514::$fallbackDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit9429e7e1d73a82ecb1319acbd681c514::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit9429e7e1d73a82ecb1319acbd681c514::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -501,40 +501,40 @@
 			processData: false
 		}).done(function(result) {
 			if (result.response != null) {
-				var data = [];
-				if ($('#param_1').val() == "1") {
-					data.noSuratKontrol = result.response.noSPRI;
-				}else if ($('#param_1').val() == "2") {
-					data.noSuratKontrol = result.response.noSuratKontrol;
-				}
-				swal(data.noSuratKontrol,'Nomor Surat Kontrol / SPRI','success');
-				$('.panel-page').fadeOut();
-				$('.other-page').fadeOut(function(){
-					$('.other-page').empty();
-					$('.main-layer').fadeIn();
-				});
-				// PRINT
 				// var data = [];
 				// if ($('#param_1').val() == "1") {
 				// 	data.noSuratKontrol = result.response.noSPRI;
 				// }else if ($('#param_1').val() == "2") {
 				// 	data.noSuratKontrol = result.response.noSuratKontrol;
 				// }
-				// data.namaDpjp = result.response.namaDokter;
-				// data.namaPoli = result.response.namaPoliKontrol;
-				// data.noKartu = result.response.noKartu;
-				// data.namaPeserta = result.response.nama;
-				// data.jenkel = result.response.kelamin;
-				// data.tglLahir = result.response.tglLahir;
-				// if (result.response.namaDiagnosa == null){
-				// 	data.diagnosa = '-';
-				// } else {
-				// 	data.diagnosa = result.response.namaDiagnosa;
-				// };
-				// data.tglKontrol = result.response.tglRencanaKontrol;
-				// data.tglTerbit = "@{!! date('Y-m-d') !!}";
-				// data.tglCetak = "@{!! date('d-m-Y') !!} @{!! date('h:i A') !!}";
-				// cetakPrint(data);
+				// swal(data.noSuratKontrol,'Nomor Surat Kontrol / SPRI','success');
+				// $('.panel-page').fadeOut();
+				// $('.other-page').fadeOut(function(){
+				// 	$('.other-page').empty();
+				// 	$('.main-layer').fadeIn();
+				// });
+				// PRINT
+				var data = [];
+				if ($('#param_1').val() == "1") {
+					data.noSuratKontrol = result.response.noSPRI;
+				}else if ($('#param_1').val() == "2") {
+					data.noSuratKontrol = result.response.noSuratKontrol;
+				}
+				data.namaDpjp = result.response.namaDokter;
+				data.namaPoli = result.response.namaPoliKontrol;
+				data.noKartu = result.response.noKartu;
+				data.namaPeserta = result.response.nama;
+				data.jenkel = result.response.kelamin;
+				data.tglLahir = result.response.tglLahir;
+				if (result.response.namaDiagnosa == null){
+					data.diagnosa = '-';
+				} else {
+					data.diagnosa = result.response.namaDiagnosa;
+				};
+				data.tglKontrol = result.response.tglRencanaKontrol;
+				data.tglTerbit = "@{!! date('Y-m-d') !!}";
+				data.tglCetak = "@{!! date('d-m-Y') !!} @{!! date('h:i A') !!}";
+				cetakPrint(data);
 			}else {
 				swal('Whoops!',result.metaData.message,'warning');
 			}
