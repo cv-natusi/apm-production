@@ -107,11 +107,11 @@ $reset = stripos($waText,'reset')===false;
 ### Info pendaftaran
 if($result->num_rows<1){
 	$msg = msgWelcome($request);
-	if($phone=='6281335537942'){
-		// echo pemberitahuanPoli($request);
-		echo $msg;
-		die();
-	}
+	// if($phone=='6281335537942'){
+	// 	// echo pemberitahuanPoli($request);
+	// 	echo $msg;
+	// 	die();
+	// }
 }
 function waBotBridging(){
 	return new WaBotBridgingController;
@@ -1424,26 +1424,38 @@ function ignorePoli($request){
 }
 
 function pemberitahuanPoli($request){
+	$dateNow = date('Y-m-d');
 	$total=0;
-	// if($wablas){
-	// 	$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-	// 		JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-	// 		WHERE bp.tgl_periksa = '2024-06-27'
-	// 		AND bp.statusChat='99'
-	// 		AND bdp.kodePoli='017'
-	// 	";
-	// 	$res = mysqli_query($wablas,$query);
-	// 	$total = mysqli_fetch_assoc($res)['total'];
-	// }
+
 	$text = "*Untuk sementara waktu.*\n";
 	$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota sebagai berikut:*\n";
-	$tanggal = ['23-07-2024','25-07-2024'];
+
+	$dt = date('D', strtotime($dateNow));
+	$request->merge(['nama_hari' => $dt]);
+	$namaHari = namaHari($request);
+	$tanggal = [];
+	// $tanggal = ['23-07-2024','25-07-2024'];
+	# 017 => kode poli onkologi
+	if($namaHari=='Senin'){ # selasa, rabu, kamis
+		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +1day")),date("d-m-Y",strtotime("$dateNow +3day")));
+	}
+	else if($namaHari=='Selasa'){ # rabu, kamis, jumat
+		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +2day")));
+	}
+	else if($namaHari=='Rabu'){ # kamis, jumat, sabtu
+		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +1day")));
+	}
+	else if($namaHari=='Sabtu'){ # minggu, senin, selasa
+		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +3day")));
+	}
+	else if($namaHari=='Minggu'){ # senin, selasa, rabu
+		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +2day")));
+	}
 	$num = 0;
 	foreach($tanggal as $key => $val){
 		$dt = date('D', strtotime($val));
 		// $now = $request->phone=='6281335537942' ? strtotime('now +1day') : strtotime('now');
 		if(strtotime('now') < strtotime($val)){
-		// if($now < strtotime($val)){
 			$whereDate = date('Y-m-d',strtotime($val));
 			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
 				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
