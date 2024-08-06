@@ -383,6 +383,9 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 					$cekBatpas = "SELECT * FROM bot_data_pasien WHERE cust_id='$idPsn' AND tglBerobat='$tglBerobat' AND masukMaster='belum'";
 					$resBatpas = mysqli_query($wablas,$cekBatpas);
 					if($phone=='6281335537942'){
+						$request->merge([
+							'tanggal_berobat' => $tglBerobat,
+						]);
 						$getIgnorePoli = ignorePoli($request);
 						$notIn = "$getIgnorePoli";
 						// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
@@ -414,7 +417,6 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 						updateStatusChat('statusChat',$idBots,$wablas,$dataIn);
 						$request->merge([
 							'tanggal_berobat' => $tglBerobat,
-							'phone' => $phone,
 						]);
 						// $notIn = "'ALG','UGD','ANU','GIG'$getIgnorePoli";
 						$getIgnorePoli = ignorePoli($request);
@@ -1422,7 +1424,7 @@ function ignorePoli($request){
 		$total = mysqli_fetch_assoc($res)['total'];
 	}
 
-	$request->merge(['nama_hari' => date('D', strtotime('today'))]);
+	$request->merge(['nama_hari' => date('D', strtotime($tanggal))]);
 	$namaHari = namaHari($request);
 	if(($namaHari=='Selasa' && $total >= 50) || ($namaHari=='Kamis' && $total >= 30)){
 		$ignorePoli .= ",'017'"; # 017 => onkologi
