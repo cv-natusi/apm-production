@@ -116,7 +116,7 @@ class WablasController extends Controller{
 			$cekPas = $dataBot->pasien_baru;
 			$data['phone'] = $dataBot->phone;
 			$bool = $timeCur2<$jamBuka && $tglBerobat==$dateCur;
-			if($dataPasien->kodePoli=='017' && $tglBerobat=='2024-08-06'){
+			if($dataPasien->kodePoli=='017' && $tglBerobat=='2024-08-05'){
 				$txt = "<p style='text-align:center; font-weight:600; font-size:2.5rem; margin-top:4%;'>MOHON MAAF, KUOTA POLI ONKOLOGI SAAT INI SUDAH PENUH</p>";
 				return $txt;
 			}
