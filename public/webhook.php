@@ -107,11 +107,11 @@ $reset = stripos($waText,'reset')===false;
 ### Info pendaftaran
 if($result->num_rows<1){
 	$msg = msgWelcome($request);
-	if($phone=='6281335537942'){
-		echo pemberitahuanPoli($request);
-		// echo $msg;
-		die();
-	}
+	// if($phone=='6281335537942'){
+	// 	echo pemberitahuanPoli($request);
+	// 	// echo $msg;
+	// 	die();
+	// }
 }
 function waBotBridging(){
 	return new WaBotBridgingController;
@@ -412,9 +412,9 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 							'tanggal_berobat' => $tglBerobat,
 							'phone' => $phone,
 						]);
+						// $notIn = "'ALG','UGD','ANU','GIG'$getIgnorePoli";
 						$getIgnorePoli = ignorePoli($request);
-						// $getIgnorePoli = $notInSementara;
-						$notIn = "'ALG','UGD','ANU','GIG'$getIgnorePoli";
+						$notIn = "$getIgnorePoli";
 						// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
 						$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
 						$resPoli = mysqli_query($dbrsud,$poli);
@@ -806,10 +806,9 @@ if(is_numeric($waText) && ($ifPoli)){
 
 	$request->merge([
 		'tanggal_berobat' => $rows['tgl_periksa'],
-		'phone' => $phone,
 	]);
 	$getIgnorePoli = ignorePoli($request);
-	$notIn = "mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG'$getIgnorePoli)";
+	$notIn = "mp.kdpoli NOT IN ($getIgnorePoli)";
 	// $ignorePoli = "mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG'$notInSementara)";
 	$poli = "
 		SELECT
@@ -1402,8 +1401,9 @@ if(isset($msg)){
 	echo $msg;
 }
 
+# Tambahkan kode poli BPJS jika tidak poli tidak ingin ditampilkan
 function ignorePoli($request){
-	$ignorePoli = "";
+	$ignorePoli = "'ALG','UGD','ANU','GIG'"; # Default ignore
 	$ignorePoli .= ",'PSY'";
 	$tanggal = $request->tanggal_berobat;
 	$total = 0;
@@ -1417,17 +1417,20 @@ function ignorePoli($request){
 		$res = mysqli_query($request->natusi_apm,$query);
 		$total = mysqli_fetch_assoc($res)['total'];
 	}
-	if(($tanggal=='2024-07-23' && $total >= 50) || ($tanggal=='2024-07-25' && $total >= 30)){
-		$ignorePoli .= ",'017'";
+
+	$request->merge(['nama_hari' => date('D', strtotime('today'))]);
+	$namaHari = namaHari($request);
+	if(($namaHari=='Selasa' && $total >= 50) || ($namaHari=='Kamis' && $total >= 30)){
+		$ignorePoli .= ",'017'"; # 017 => onkologi
 	}
 	return $ignorePoli;
 }
 
 function pemberitahuanPoli($request){
 	$dateNow = date('Y-m-d');
-	if($request->phone=='6281335537942'){
-		$dateNow = date('Y-m-d',strtotime('today +4day'));
-	}
+	// if($request->phone=='6281335537942'){
+	// 	$dateNow = date('Y-m-d',strtotime('today +4day'));
+	// }
 	$total=0;
 
 	$text = "*Untuk sementara waktu.*\n";
