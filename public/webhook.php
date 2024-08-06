@@ -374,32 +374,32 @@ if((preg_match("/^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/",$waText
 				if($execQGetAntri->num_rows>0){
 					$msg = "Anda sudah pernah mengambil pendaftaran pada hari tersebut.";
 				}else{
+
+					// if($phone=='6281335537942'){
+					// 	$request->merge([
+					// 		'tanggal_berobat' => $tglBerobat,
+					// 	]);
+					// 	$getIgnorePoli = ignorePoli($request);
+					// 	$notIn = "$getIgnorePoli";
+					// 	// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
+					// 	$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
+					// 	$resPoli = mysqli_query($dbrsud,$poli);
+					// 	$msg = getPoli($resPoli);
+					//    echo $msg;
+					// 	// echo date('D-m-Y',strtotime($tglBerobat));
+					// 	// $notIn = "'ALG','UGD','ANU','GIG'$notInSementara";
+					// 	// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
+					// 	// $resPoli = mysqli_query($dbrsud,$poli);
+					// 	// echo json_encode($resPoli->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
+					// 	die();
+					// }
+
 					$dtPas = "UPDATE bot_data_pasien SET tglBerobat='$tglBerobat' WHERE cust_id='$idPsn'";
 					mysqli_query($wablas,$dtPas);
-
 					$upTglPeriksa = "UPDATE bot_pasien SET tgl_periksa='$tglBerobat' WHERE id='$idBots'";
 					mysqli_query($wablas,$upTglPeriksa);
-
 					$cekBatpas = "SELECT * FROM bot_data_pasien WHERE cust_id='$idPsn' AND tglBerobat='$tglBerobat' AND masukMaster='belum'";
 					$resBatpas = mysqli_query($wablas,$cekBatpas);
-					if($phone=='6281335537942'){
-						$request->merge([
-							'tanggal_berobat' => $tglBerobat,
-						]);
-						$getIgnorePoli = ignorePoli($request);
-						$notIn = "$getIgnorePoli";
-						// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
-						$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
-						$resPoli = mysqli_query($dbrsud,$poli);
-						$msg = getPoli($resPoli);
-                  echo $msg;
-						// echo date('D-m-Y',strtotime($tglBerobat));
-						// $notIn = "'ALG','UGD','ANU','GIG'$notInSementara";
-						// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
-						// $resPoli = mysqli_query($dbrsud,$poli);
-						// echo json_encode($resPoli->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
-						die();
-					}
 					if($resBatpas->num_rows>0){
 						if($statusChat==23){
 							$dataIn['status'] = 24;
@@ -1432,6 +1432,7 @@ function ignorePoli($request){
 	return $ignorePoli;
 }
 
+# Message kuota poli
 function pemberitahuanPoli($request){
 	$dateNow = date('Y-m-d');
 	// if($request->phone=='6281335537942'){
