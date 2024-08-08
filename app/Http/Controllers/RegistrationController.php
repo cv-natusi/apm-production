@@ -526,24 +526,24 @@ class RegistrationController extends Controller{
 		$dateNow = date('Y-m-d');
 		$request->merge(['nama_hari_en'=>date('D',strtotime('today'))]);
 		$namaHariID = Help::namaHariID($request);
-		if(
-			in_array($namaHariID,['Selasa','Kamis'])
-			&& $request->kodepoli=='017'
-			&& ($cn = Antrian::where([
-				'tgl_periksa'=>$dateNow,
-				'kode_poli'=>'017',
-				'metode_ambil'=>'KIOSK',
-			])->count()) >= 10
-		){
-			return [
-				'status'=>'error',
-				'code'=>400,
-				'head_message'=>'Whoops!',
-				'message'=>"Kuota POLI BEDAH ONKOLOGI sudah penuh($cn/10)",
-				'data'=> '',
-				'poli'=> ''
-			];
-		}
+		// if(
+		// 	in_array($namaHariID,['Selasa','Kamis'])
+		// 	&& $request->kodepoli=='017'
+		// 	&& ($cn = Antrian::where([
+		// 		'tgl_periksa'=>$dateNow,
+		// 		'kode_poli'=>'017',
+		// 		'metode_ambil'=>'KIOSK',
+		// 	])->count()) >= 10
+		// ){
+		// 	return [
+		// 		'status'=>'error',
+		// 		'code'=>400,
+		// 		'head_message'=>'Whoops!',
+		// 		'message'=>"Kuota POLI BEDAH ONKOLOGI sudah penuh($cn/10)",
+		// 		'data'=> '',
+		// 		'poli'=> ''
+		// 	];
+		// }
 		date_default_timezone_set("Asia/Jakarta");
 		$no_rm   = $request->no_rm;
 		$no_bpjs = $request->no_bpjs;
@@ -557,7 +557,7 @@ class RegistrationController extends Controller{
 			if($request->jenis_pasien==='BPJS'){
 				$query->where('jenis_pasien','BPJS');
 			}else{
-				$query->where('jenis_pasien','!=','BPJS')->where('kode_poli',$request->kodepoli);
+				$query->where('kode_poli',$request->kodepoli);
 			}
 			$cekDuplikatAntrian = $query->first();
 			if($cekDuplikatAntrian){ # Cek duplikat antrian by nik & tanggal
@@ -761,110 +761,69 @@ class RegistrationController extends Controller{
 				}
 			}
 			$tujuanpoli = Rsu_Bridgingpoli::with('tm_poli')->where('kdpoli', $request->kodepoli)->first();
+			# Poli tidak ter-cover BPJS
 			if(in_array($request->kodepoli, ['GIG','GIZ','MCU','PSY','VCT'])){
-				$data = [
+				DB::commit();
+				return response()->json([
 					'status'=>'success',
 					'code'=>200,
 					'head_message'=>'Success',
 					'message'=>'Peserta harap 30 menit lebih awal guna pencatatan administrasi.',
 					'data'=> $antrian,
 					'poli'=> $tujuanpoli
-				];
-			}else{
-				if($request->jenis_pasien=='BPJS'){
-					// API SIMAPAN (CEK NO BPJS)
-					$cekpeserta      = new ApiSimapanController;
-					$jeniscek        = 'nik';
-					$request->jenis  = $jeniscek;
-					$request->nobpjs = $request->nik;
-					$respon2 = $cekpeserta->cekBPJS($request);
-
-					if($respon2['code']==200){
-						// API BRIDGBPJS (VALIDASI DATA)
-						$addAntrian = new BridgBpjsController;
-						$request->no_bpjs = $respon2['data']->peserta->noKartu;
-						$respon = $addAntrian->antreanAdd($request);
-						
-						if($respon['metaData']->code==200){
-							$data = [
-								'status'=>'success',
-								'code'=>200,
-								'head_message'=>'Success',
-								'message'=>'Peserta harap 30 menit lebih awal guna pencatatan administrasi.',
-								'data'=> $antrian,
-								'poli'=> $tujuanpoli
-							];
-						}else{
-							if(stripos($respon['metaData']->message,'duplikasi Kode')!==false){
-								$data = [
-									'status'=>'success',
-									'code'=>200,
-									'head_message'=>'Success',
-									'message'=>'Peserta harap 30 menit lebih awal guna pencatatan administrasi.',
-									'data'=> $antrian,
-									'poli'=> $tujuanpoli
-								];
-							}else{
-								DB::rollback();
-								$data = [
-									'status'=>'error',
-									'code'=>$respon['metaData']->code,
-									'head_message'=>'Whoops!',
-									'message'=>$respon['metaData']->message,
-									'data'=> $request->all(),
-									'poli'=> ''
-								];
-							}
-						}
-					}else{
-						$data = [
-							'status'=>'error',
-							'code'=>250,
-							'head_message'=>'Error',
-							'message'=>'NIK Yang Anda Masukkan Tidak Terdaftar BPJS',
-							'data'=> $request->all(),
-							'poli'=> '',
-						];
-					}
-				}else{
-					$addAntrian = new BridgBpjsController;
-					$respon = $addAntrian->antreanAdd($request);
-					if($respon['metaData']->code==200){
-						$data = [
-							'status'=>'success',
-							'code'=>200,
-							'head_message'=>'Success',
-							'message'=>'Peserta harap 30 menit lebih awal guna pencatatan administrasi.',
-							'data'=> $antrian,
-							'poli'=> $tujuanpoli
-						];
-					}else{
-						// Jika Messege Duplikasi KodeBooking
-						if(stripos($respon['metaData']->message,'duplikasi Kode')!==false){
-							$data = [
-								'status'=>'success',
-								'code'=>200,
-								'head_message'=>'Success',
-								'message'=>'Peserta harap 30 menit lebih awal guna pencatatan administrasi.',
-								'data'=> $antrian,
-								'poli'=> $tujuanpoli
-							];
-						}else{
-							DB::rollback();
-							$data = [
-								'status'=>'error',
-								'code'=>$respon['metaData']->code,
-								'head_message'=>'Whoops!',
-								'message'=>$respon['metaData']->message,
-								'data'=> $request->all(),
-								'poli'=> ''
-							];
-						}
-					}
-				}
+				]);
 			}
-			DB::commit();
-			return response()->json($data);
+
+			# Poli ter-cover BPJS
+			if($request->jenis_pasien=='BPJS'){ # Pasien BPJS
+				// API SIMAPAN (CEK NO BPJS)
+				$cekpeserta      = new ApiSimapanController;
+				$jeniscek        = 'nik';
+				$request->jenis  = $jeniscek;
+				$request->nobpjs = $request->nik;
+				$respon2 = $cekpeserta->cekBPJS($request);
+
+				if($respon2['code']!=200){
+					DB::rollback();
+					return response()->json([
+						'status'=>'error',
+						'code'=>250,
+						'head_message'=>'Error',
+						'message'=>'NIK Yang Anda Masukkan Tidak Terdaftar BPJS',
+						'data'=> $request->all(),
+						'poli'=> '',
+					]);
+				}
+				// API BRIDGBPJS (VALIDASI DATA)
+				$addAntrian = new BridgBpjsController;
+				$request->no_bpjs = $respon2['data']->peserta->noKartu;
+				$respon = $addAntrian->antreanAdd($request);
+			}else{
+				$addAntrian = new BridgBpjsController;
+				$respon = $addAntrian->antreanAdd($request);
+			}
+
+			# "code" == 200 atau "message" == "duplikasi kode"
+			if($respon['metaData']->code==200 || stripos($respon['metaData']->message,'duplikasi Kode')!==false){
+				DB::commit();
+				return response()->json([
+					'status'=>'success',
+					'code'=>200,
+					'head_message'=>'Success',
+					'message'=>'Peserta harap 30 menit lebih awal guna pencatatan administrasi.',
+					'data'=> $antrian,
+					'poli'=> $tujuanpoli
+				]);
+			}
+			DB::rollback();
+			return response()->json([
+				'status'=>'error',
+				'code'=>$respon['metaData']->code,
+				'head_message'=>'Whoops!',
+				'message'=>$respon['metaData']->message,
+				'data'=> $request->all(),
+				'poli'=> ''
+			]);
 		} catch (\Throwable $e) {
 			DB::rollback();
 			$log = ['ERROR AMBIL KIOSK ANTRIAN ('.$e->getFile().')',false,$e->getMessage(),$e->getLine()];
