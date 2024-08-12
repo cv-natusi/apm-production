@@ -347,8 +347,11 @@ class RegistrationController extends Controller{
 		$dateNow = date('Y-m-d');
 		$id_kiosk = $request->id_kiosk;
 		$ignore = ['ALG','UGD','ANU'];
+
+		$request->merge(['nama_hari_en'=>date('D',strtotime('today'))]);
+		$namaHariID = Help::namaHariID($request);
 		if(
-			in_array($dateNow,['2024-07-23','2024-07-25'])
+			in_array($namaHariID,['Selasa','Kamis'])
 			&& Antrian::where([
 				'tgl_periksa'=>$dateNow,
 				'kode_poli'=>'017',
