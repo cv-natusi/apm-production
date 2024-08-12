@@ -526,24 +526,24 @@ class RegistrationController extends Controller{
 		$dateNow = date('Y-m-d');
 		$request->merge(['nama_hari_en'=>date('D',strtotime('today'))]);
 		$namaHariID = Help::namaHariID($request);
-		// if(
-		// 	in_array($namaHariID,['Selasa','Kamis'])
-		// 	&& $request->kodepoli=='017'
-		// 	&& ($cn = Antrian::where([
-		// 		'tgl_periksa'=>$dateNow,
-		// 		'kode_poli'=>'017',
-		// 		'metode_ambil'=>'KIOSK',
-		// 	])->count()) >= 10
-		// ){
-		// 	return [
-		// 		'status'=>'error',
-		// 		'code'=>400,
-		// 		'head_message'=>'Whoops!',
-		// 		'message'=>"Kuota POLI BEDAH ONKOLOGI sudah penuh($cn/10)",
-		// 		'data'=> '',
-		// 		'poli'=> ''
-		// 	];
-		// }
+		if(
+			in_array($namaHariID,['Selasa','Kamis'])
+			&& $request->kodepoli=='017'
+			&& ($cn = Antrian::where([
+				'tgl_periksa'=>$dateNow,
+				'kode_poli'=>'017',
+				'metode_ambil'=>'KIOSK',
+			])->count()) >= 10
+		){
+			return [
+				'status'=>'error',
+				'code'=>400,
+				'head_message'=>'Whoops!',
+				'message'=>"Kuota POLI BEDAH ONKOLOGI sudah penuh($cn/10)",
+				'data'=> '',
+				'poli'=> ''
+			];
+		}
 		date_default_timezone_set("Asia/Jakarta");
 		$no_rm   = $request->no_rm;
 		$no_bpjs = $request->no_bpjs;
