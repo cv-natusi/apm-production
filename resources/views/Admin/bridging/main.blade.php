@@ -1470,32 +1470,52 @@
 		$('#btn-sep').html('<i class="fa fa-spinner" aria-hidden="true"></i> Loading...').attr('disabled', true);
 		var data = new FormData($('#insert-sep')[0]);
 		$.ajax({
-	        url: '{!! route("insertsep") !!}',
-	        type: 'POST',
-	        data: data,
-	        async: true,
-	        cache: false,
-	        contentType: false,
-	        processData: false
-	     }).done(function(data){
+			url: '{!! route("insertsep") !!}',
+			type: 'POST',
+			data: data,
+			async: true,
+			cache: false,
+			contentType: false,
+			processData: false
+		}).done(function(data){
 			console.log(data)
-    		$('.btn-save').attr('disabled', false).html('Simpan <span class="fa fa-save"></span>');
-    		$('#form-user').validate(data, 'has-error');
-    		if(data.status == 'success'){
-				swal("Sukses!", "Data berhasil disimpan!", "success");
+			$('.btn-save').attr('disabled', false).html('Simpan <span class="fa fa-save"></span>');
+			$('#form-user').validate(data, 'has-error');
+			if(data.status == 'success'){
+				// swal("Sukses!", "Data berhasil disimpan!", "success");
 				var kd =  data.antrian.kode_booking;
 				var status = data.antrian.status;
 				var antrian = data.antrian;
-				
-				if (antrian!='' && status == 'counter') {
-					$.post('{{route("counterToPoli")}}',{kode:kd}).done((res)=>{
+
+				if (antrian!='' && antrian.nomor_antrian_poli===null) {
+					let idAntrian = antrian.id
+					let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
+					const url = urlD.replace(":id", idAntrian)
+					var win = window.open(url)
+					var timer = setInterval(() => {
+						if(win.closed){
+							clearInterval(timer)
+							swal({
+								title: 'Berhasil',
+								type: 'success',
+								text: 'Data berhasil disimpan!',
+								showConfirmButton: true,
+							},function(isConfirm){
+								$('#nosepcetak').val(data.nosep);
+								$('#noarsip').val(data.noarsip);
+								$('#noKontrol').val(data.noKontrol);
+								$('#btn-print-sep').removeAttr('disabled');
+							})
+						}
+					}, 500)
+				}else if (antrian!='' && antrian.nomor_antrian_poli!==null) {
+					$.post('{{route("counterToPoli")}}',{kode:antrian.id}).done((res)=>{
 						if(res.status == 'success'){
 							swal({
 								title: 'Berhasil',
 								type: res.status,
 								text: res.message,
 								showConfirmButton: true,
-								// timer: 1500
 							})
 							$('#nosepcetak').val(data.nosep);
 							$('#noarsip').val(data.noarsip);
@@ -1507,33 +1527,73 @@
 								type: res.status,
 								text: res.message,
 							})
-							// location.reload();
 						}
 					})
-				// } else if(antrian!='' && status !='counter') {
-				} else if(antrian!='' && (jQuery.inArray(status, ['belum','panggil'])!==-1)) {
-					$.post('{{route("loketToCounter")}}',{kode:kd}).done((res)=>{
-						if(res.status == 'success'){
-							swal({
-								title: 'Berhasil',
-								type: res.status,
-								text: res.message,
-								showConfirmButton: true,
-								// timer: 1500
-							})
-							$('#nosepcetak').val(data.nosep);
-							$('#noarsip').val(data.noarsip);
-							$('#noKontrol').val(data.noKontrol);
-							$('#btn-print-sep').removeAttr('disabled');
-						}else{
-							swal({
-								title: 'Whoops',
-								type: res.status,
-								text: res.message,
-							})
-							// location.reload();
-						}
-					})
+				// if (antrian!='' && status == 'counter') {
+				// 	$.post('{{route("counterToPoli")}}',{kode:kd}).done((res)=>{
+				// 		if(res.status == 'success'){
+				// 			swal({
+				// 				title: 'Berhasil',
+				// 				type: res.status,
+				// 				text: res.message,
+				// 				showConfirmButton: true,
+				// 				// timer: 1500
+				// 			})
+				// 			$('#nosepcetak').val(data.nosep);
+				// 			$('#noarsip').val(data.noarsip);
+				// 			$('#noKontrol').val(data.noKontrol);
+				// 			$('#btn-print-sep').removeAttr('disabled');
+				// 		}else{
+				// 			swal({
+				// 				title: 'Whoops',
+				// 				type: res.status,
+				// 				text: res.message,
+				// 			})
+				// 		}
+				// 	})
+				// } else if(antrian!='' && (jQuery.inArray(status, ['belum','panggil'])!==-1)) {
+				// 	let idAntrian = antrian.id
+				// 	let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
+				// 	const url = urlD.replace(":id", idAntrian)
+				// 	var win = window.open(url)
+				// 	var timer = setInterval(() => {
+				// 		if(win.closed){
+				// 			clearInterval(timer)
+				// 			swal({
+				// 				title: 'Berhasil',
+				// 				type: res.status,
+				// 				text: res.message,
+				// 				showConfirmButton: true,
+				// 			},function(isConfirm){
+				// 				$('#nosepcetak').val(data.nosep);
+				// 				$('#noarsip').val(data.noarsip);
+				// 				$('#noKontrol').val(data.noKontrol);
+				// 				$('#btn-print-sep').removeAttr('disabled');
+				// 			})
+				// 		}
+				// 	}, 500)
+				// 	// $.post('{{route("loketToCounter")}}',{kode:kd}).done((res)=>{
+				// 	// 	if(res.status == 'success'){
+				// 	// 		swal({
+				// 	// 			title: 'Berhasil',
+				// 	// 			type: res.status,
+				// 	// 			text: res.message,
+				// 	// 			showConfirmButton: true,
+				// 	// 			// timer: 1500
+				// 	// 		})
+				// 	// 		$('#nosepcetak').val(data.nosep);
+				// 	// 		$('#noarsip').val(data.noarsip);
+				// 	// 		$('#noKontrol').val(data.noKontrol);
+				// 	// 		$('#btn-print-sep').removeAttr('disabled');
+				// 	// 	}else{
+				// 	// 		swal({
+				// 	// 			title: 'Whoops',
+				// 	// 			type: res.status,
+				// 	// 			text: res.message,
+				// 	// 		})
+				// 	// 		// location.reload();
+				// 	// 	}
+				// 	// })
 				} else {
 					swal("Sukses!", "Data berhasil disimpan!", "success");
 					$('#nosepcetak').val(data.nosep);
@@ -1541,7 +1601,7 @@
 					$('#noKontrol').val(data.noKontrol);
 					$('#btn-print-sep').removeAttr('disabled');
 				}
-    		} else if(data.status == 'error'){
+	 		} else if(data.status == 'error'){
 					var strPesan =  data.messages;
 					if(data.update == 'update'){
 						$.post('{!! route("formupdatetglpulang") !!}',{nobpjs:data.nobpjs, pesan : strPesan}).done(function(result){
@@ -1560,7 +1620,7 @@
 							swal('Perhatian', data.messages, 'warning');
 						}
 					}
-    		} else {
+	 		} else {
 				var n = 0;
 				for (key in data) {
 					if (n == 0) {
@@ -1571,7 +1631,7 @@
 				swal('Maaf', 'Kolom ' + dt0 + ' Tidak Boleh Kosong!!', 'error');
 				$('#btn-sep').attr('disabled', false).html('Simpan <span class="fa fa-save"></span>');
 			}
-    	});
+	 	});
 	});
 
 	function tgl_indo(tgl) {
@@ -1588,16 +1648,16 @@
 	 	var s = currentTime.getSeconds();
 		 if (h == 0){
 		  h = 24;
-		   }
-		   if (h < 10){
-		    h = "0" + h;
-		    }
-		      if (m < 10){
-		    m = "0" + m;
-		    }
-		    if (s < 10){
-		    s = "0" + s;
-		    }
+			}
+			if (h < 10){
+			 h = "0" + h;
+			 }
+				if (m < 10){
+			 m = "0" + m;
+			 }
+			 if (s < 10){
+			 s = "0" + s;
+			 }
 		 var myClock = document.getElementById('clockDisplay');
 		 $('#clockDisplay').val(h + ":" + m + ":" + s + "");
 		 setTimeout ('renderTime()',1000);
@@ -1629,20 +1689,20 @@
 
  	function cetakulang(noreg){
 		$.post("{!! route('getregister') !!}",{noregister:noreg}).done(function(result){
-        	if(result.code == '200'){
-    			$('#btn-print-sep').removeAttr('disabled');
+		  	if(result.code == '200'){
+	 			$('#btn-print-sep').removeAttr('disabled');
 				$('option[value="'+result.data.Kode_Ass+'"]').prop("selected", true);
 				$('#valDiagnosa').val(result.data.kddiagnosa);
 				$('#textDiagnosa').html(result.data.diagnosa);
 				$('#kdpoli').val(result.data.kdpoli);
 				$('#namapoli').html(result.data.namapoli);
-    			$('#nosepcetak').val(result.data.NoSEP);
-    			$('#noKontrol').val(noreg);
-    			$('#nRujuk').val(result.data.noRujuk);
-        	}else{
-        		swal('Peringatan','Pasien tidak menggunakan BPJS','warning');
-        	}
-        });
+	 			$('#nosepcetak').val(result.data.NoSEP);
+	 			$('#noKontrol').val(noreg);
+	 			$('#nRujuk').val(result.data.noRujuk);
+		  	}else{
+		  		swal('Peringatan','Pasien tidak menggunakan BPJS','warning');
+		  	}
+		  });
 	}
 
 	function reRujuk() {
@@ -1730,7 +1790,7 @@
 			selects += `<div class="form-group">
 						  <label class="pad col-lg-2 col-md-2">Flag Prosedur*</label>
 						  <div class="col-lg-5 col-md-4">
-						    <select name="prosedur_bpjs" id="prosedur_bpjs" class="">`;
+							 <select name="prosedur_bpjs" id="prosedur_bpjs" class="">`;
 							  flagProcedure.forEach(element => {
 								selects += `<option value="${element[0]}">${element[1]}</option>`;
 							  });
@@ -1748,7 +1808,7 @@
 										<div class="form-group">
 										  <label class="pad col-lg-2 col-md-2" style="font-size: 13px;">Assesment Pelayanan</label>
 										  <div class="col-lg-5 col-md-4">
-										    <select name="assesment_bpjs" id="assesment_bpjs" class="">`;
+											 <select name="assesment_bpjs" id="assesment_bpjs" class="">`;
 											  assesment.forEach(element => {
 												selects += `<option value="${element[0]}">${element[1]}</option>`;
 											  });
@@ -1798,7 +1858,7 @@
 						<div class="form-group">
 						  <label class="pad col-lg-2 col-md-2" style="font-size: 13px;">Assesment Pelayanan</label>
 						  <div class="col-lg-5 col-md-4">
-						    <select name="assesment_bpjs" id="assesment_bpjs" class="">`;
+							 <select name="assesment_bpjs" id="assesment_bpjs" class="">`;
 							  assesment.forEach(element => {
 								selects += `<option value="${element[0]}">${element[1]}</option>`;
 							  });

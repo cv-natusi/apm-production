@@ -217,7 +217,7 @@
 
 	function detail(id) {
 		$('.main-layer').hide();
-		var url = "{{route('kerjakanAntrian')}}";
+		var url = "{{route('loket.kerjakanAntrian')}}";
 		$.post(url,{id:id, view:1}).done(function(data){
 			if(data.status == 'success'){
 				$('.preloader').hide();
@@ -228,11 +228,21 @@
 		})
 	}
 
-	function cetakTracer(id){
+	async function cetakTracer(id){
 		let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
 		const url = urlD.replace(":id", id)
-		window.open(url)
-		// swal('Berhasil', 'Antrian Berhasil Mencetak Tracer.', 'success')
+		var win = await window.open(url)
+		let timer = setInterval(() => {
+			if(win.closed){
+				clearInterval(timer)
+				swal({
+					title: 'Berhasil',
+					type: 'success',
+					text: 'Berhasil Mencetak Tracer',
+					showConfirmButton: true,
+				})
+			}
+		}, 500)
 	}
 </script>
 @stop

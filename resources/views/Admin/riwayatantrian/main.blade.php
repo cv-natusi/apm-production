@@ -271,7 +271,7 @@
 	function detail(id) {
 		console.log(id)
 		$('.main-layer').hide();
-		var url = "{{route('kerjakanAntrian')}}";
+		var url = "{{route('loket.kerjakanAntrian')}}";
 		$.post(url,{id:id, view:1}).done(function(data){
 			if(data.status == 'success'){
 				$('.preloader').hide();

@@ -102,6 +102,10 @@
 	<div class='clearfix'></div>
 @stop
 @section('script')
+{{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.min.js"></script> --}}
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css" />
+<link rel="stylesheet" type="text/css" href="https://select2.github.io/select2-bootstrap-theme/css/select2-bootstrap.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/js/select2.min.js"></script>
 <script type="text/javascript">
 	$(document).ready(function () {
 		var date = new Date();
@@ -112,7 +116,7 @@
 		if (month < 10) month = "0" + month;
 		if (day < 10) day = "0" + day;
 
-		var today = year + "-" + month + "-" + day ;      
+		var today = year + "-" + month + "-" + day
 		$("#min").attr("value", today);
 		$("#max").attr("value", today);
 
@@ -125,6 +129,7 @@
 		var loading = '<div class="loader" id="loader-4"><span></span><span></span><span></span></div>'
 		var url = "{{route('riwayatAntrianKonterPoli')}}";
 		var x = $('#dataTable').dataTable({
+         destroy: true,
 			scrollX: true,
 			bPaginate: true,
 			bFilter: true,
@@ -260,7 +265,7 @@
 
 	function detail(id) {
 		$('.main-layer').hide();
-		var url = "{{route('kerjakanAntrian')}}";
+		var url = "{{route('loket.kerjakanAntrian')}}";
 		$.post(url,{id:id, view:1}).done(function(data){
 			if(data.status == 'success'){
 				$('.preloader').hide();
@@ -273,7 +278,7 @@
 
 	function edit(id) {
 		$('.main-layer').hide();
-		var url = "{{route('kerjakanAntrian')}}";
+		var url = "{{route('loket.kerjakanAntrian')}}";
 		$.post(url,{id:id}).done(function(data){
 			if(data.status == 'success'){
 				$('.preloader').hide();
@@ -301,6 +306,31 @@
 
 	function buatSep(id) {
 		window.location.href = '{{ route("bridging") }}?id='+id;
+	}
+
+	async function cetakTracer(id){
+		let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
+		const url = urlD.replace(":id", id)
+		var win = await window.open(url)
+		let timer = setInterval(() => {
+			if(win.closed){
+				clearInterval(timer)
+				swal({
+					title: 'Berhasil',
+					type: 'success',
+					text: 'Tracer barhasil dicetak',
+					showConfirmButton: true,
+				})
+			}
+		}, 500)
+	}
+
+	function editAntrian(id){
+		$.post("{{route('counter.pindahPoli')}}",{id:id}).done((data)=>{
+			// $('.main-layer').hide()
+			$('.other-page').html(data.response)
+			// $('#pindah-poli').modal('show')
+		})
 	}
 </script>
 @stop

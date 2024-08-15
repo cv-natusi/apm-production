@@ -140,7 +140,6 @@ class ListAntrianController extends Controller{
 			$this->data['kel'] = $namaKel;
 			$this->data['getAntPasBaru'] = $antrianPasienBaru;
 		}
-		// $this->data['jenis_pasien'] = '';
 		$this->data['jenis_pasien'] = Rsu_setupall::where('groups','Asuransi')->get();
 		// if ($antrian->jenis_pasien == 'ASURANSILAIN') {
 		// 	$this->data['jenis_pasien'] = Rsu_setupall::where('groups','Asuransi')->get();
@@ -171,11 +170,13 @@ class ListAntrianController extends Controller{
 			$norm = $request->no_rm;
 			$cekAntri = Antrian::where('id', $id_antrian)->first();
 			// $jenisPas = $cekAntri->jenis_pasien;
-			$Customer = rsu_customer::where('KodeCust', $norm)->first();
-			if (!$Customer) {
-				$Customer = rsu_customer::where('NoKtp', $request->nik)->first();
-				if (!$Customer) {
+			if (!($Customer = rsu_customer::where('KodeCust', $norm)->first())) {
+				if (!($Customer = rsu_customer::where('NoKtp', $request->nik)->first())) {
+					$getKode = rsu_customer::max('KodeCust');
+					$num = (int)substr($getKode, 5);
+					$nextKode = 'W'.date("ym").(string)($num+1);
 					$Customer = New rsu_customer;
+					$Customer->KodeCust = $nextKode;
 				}
 			}
 			$Customer->NamaCust = $request->nama;
@@ -221,8 +222,7 @@ class ListAntrianController extends Controller{
 				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal update antrian','antrian'=>''];
 			}
 			$custId = $Customer->cust_id;
-			$PasienBaru = AntPasienBaru::where('cust_id',$custId)->first();
-			if(empty($PasienBaru)){
+			if(!($PasienBaru = AntPasienBaru::where('cust_id',$custId)->first())){
 				$PasienBaru = new AntPasienBaru;
 				$PasienBaru->cust_id = $Customer->cust_id;
 			}

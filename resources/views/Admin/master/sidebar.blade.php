@@ -104,7 +104,7 @@
 				<a href="#"><i class="fa fa-list"></i><span>Daftar Antrian Loket</span><i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 					<li class=''>
-						<a href="{{ route('listAntrian') }}">
+						<a href="{{ route('loket.listAntrian') }}">
 							<span><i class="fa fa-male"></i> Daftar Antrian </span>
 						</a>
 					</li>
@@ -135,7 +135,7 @@
 				</a>
 				<ul class="treeview-menu">
 					<li class=''>
-						<a href="{{route('formListCounter')}}">
+						<a href="{{route('counter.formListCounter')}}">
 							<i class="fa fa-list" aria-hidden="true"></i> <span>Daftar Antrian</span>
 						</a>
 					</li>

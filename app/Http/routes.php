@@ -31,7 +31,7 @@ Route::get('/', function(){
 		if($lvl=='admin'){
 			return redirect()->route('dashboardAdmin');
 		}elseif($cekCtr1 || $cekCtr2){
-			return redirect()->route('formListCounter');
+			return redirect()->route('counter.formListCounter');
 		}elseif($lvl=='loket1'||$lvl=='loket2'){
 			return redirect()->route('antreanPanggil');
 		}elseif($lvl=='kiosk1'||$lvl=='kiosk2'||$lvl=='kiosk3'||$lvl=='kiosk4'||$lvl=='kiosk5'){
@@ -227,10 +227,22 @@ Route::group(['middleware' => 'auth'], function() {
 				Route::get('/grafik-jumlah-pasien','GrafikPelayananController@jumlah')->name('grafikJumlahPasien');
 			});
 
+			Route::group(['prefix'=>'loket','as'=>'loket.'],function(){
+				Route::get('/','Antrian\LoketController@main')->name('listAntrian');
+				Route::post('get-antrian-loket','Antrian\LoketController@getAntrianLoket')->name('getAntrianLoket');
+				Route::post('kerjakan-antrian','Antrian\LoketController@kerjakanAntrian')->name('kerjakanAntrian');
+				Route::post('send-to-counter-poli','Antrian\LoketController@sendToCounterPoli')->name('sendToCounterPoli');
+			});
+			Route::group(['prefix'=>'counter','as'=>'counter.'],function(){
+				Route::get('/','Antrian\CounterController@formListCounter')->name('formListCounter');
+				Route::post('pindah-poli','Antrian\CounterController@pindahPoli')->name('pindahPoli');
+				Route::post('reset-nomor-antrian-poli','Antrian\CounterController@resetNomorAntrianPoli')->name('resetNomorAntrianPoli');
+			});
+
 			Route::group(['prefix'=>'pasien'],function(){
-				Route::get('/loket','ListAntrianController@main')->name('listAntrian');
+				#Route::get('/loket','ListAntrianController@main')->name('listAntrian');
 				Route::get('/loket-geriatri','ListAntrianController@mainGeriatri')->name('listAntrianGeriatri');
-				Route::post('/getAntrianLoket','ListAntrianController@getAntrianLoket')->name('getAntrianLoket');
+				#Route::post('/getAntrianLoket','ListAntrianController@getAntrianLoket')->name('getAntrianLoket');
 				Route::post('/getAntrianLoketGeriatri','ListAntrianController@getAntrianLoketGeriatri')->name('getAntrianLoketGeriatri');
 				Route::get('/form-list-antrian/{id}','ListAntrianController@formList')->name('formListAntrian');
 				Route::post('/save-list-antrian','ListAntrianController@saveList')->name('saveListAntrian');
@@ -239,7 +251,7 @@ Route::group(['middleware' => 'auth'], function() {
 				Route::post('/batal-antrian','ListAntrianController@batalAntrian')->name('batalAntrian');
 				Route::post('/panggil-antrian','ListAntrianController@panggilAntrian')->name('panggilAntrian');
 				Route::post('/cetak-rmantrian','ListAntrianController@cetakRMAntrian')->name('cetakRMAntrian');
-				Route::post('/kerjakan-antrian','ListAntrianController@kerjakanAntrian')->name('kerjakanAntrian');
+				#Route::post('/kerjakan-antrian','ListAntrianController@kerjakanAntrian')->name('kerjakanAntrian');
 				Route::post('/dataGridLoket','ListAntrianController@dataGridLoket')->name('dataGridLoket');
 				Route::post('/cariDataPasien','ListAntrianController@cariDataPasien')->name('cariDataPasien');
 				Route::post('/cariFormPasien','ListAntrianController@cariFormPasien')->name('cariFormPasien');
@@ -247,7 +259,7 @@ Route::group(['middleware' => 'auth'], function() {
 				// Loket End
 
 				// Counter Start
-				Route::get('/counter','AntrianController@formListCounter')->name('formListCounter');
+				// Route::get('/counter','AntrianController@formListCounter')->name('formListCounter');
 				Route::post('/detail-counter','AntrianController@detailListCounter')->name('detailListCounter');
 				Route::post('/reset-counter','AntrianController@resetAntrianCounter')->name('resetCounter');
 				Route::post('/generate-counter','AntrianController@generateAntrianCounter')->name('generateAntrianCounter');
@@ -474,7 +486,7 @@ Route::group(['middleware' => 'auth'], function() {
  			Route::post('saveChange','BridgingController@saveChange')->name('saveChange'); // Form Cari update tgl pulang
 		});
 
-		// User
+		# User
 		Route::group(['prefix'=>'user'], function(){
 			Route::get('/','UsersController@main')->name('users');
 			Route::post('datagrid','UsersController@datagrid')->name('usersDatagrid');
@@ -486,7 +498,7 @@ Route::group(['middleware' => 'auth'], function() {
 			Route::post('delete','UsersController@delete')->name('deleteUsers');
 		});
 
-		// Tanggal Libur
+		# Tanggal Libur
 		Route::group(['prefix'=>'tanggal-libur'], function(){
 			Route::get('/','HolidayController@main')->name('holiday');
 			Route::post('datagrid','HolidayController@datagrid')->name('holidayDatagrid');
@@ -497,7 +509,7 @@ Route::group(['middleware' => 'auth'], function() {
 			Route::post('delete','HolidayController@delete')->name('deleteHoliday');
 		});
 
-		// Informasi Penyakit
+		# Informasi Penyakit
 		Route::group(['prefix'=>'informasi-penyakit'], function(){
 			Route::get('/','InfoPenyakitController@main')->name('InfoPenyakit');
 			Route::post('datagrid','InfoPenyakitController@datagrid')->name('InfoPenyakitDatagrid');
@@ -509,7 +521,7 @@ Route::group(['middleware' => 'auth'], function() {
 			Route::post('delete','InfoPenyakitController@delete')->name('deleteInfoPenyakit');
 		});
 
-		// Pola Hidup Sehat
+		# Pola Hidup Sehat
 		Route::group(['prefix'=>'pola-hidup-sehat'], function(){
 			Route::get('/','PolaHidupController@main')->name('PolaHidup');
 			Route::post('datagrid','PolaHidupController@datagrid')->name('PolaHidupDatagrid');
@@ -521,7 +533,7 @@ Route::group(['middleware' => 'auth'], function() {
 			Route::post('delete','PolaHidupController@delete')->name('deletePolaHidup');
 		});
 
-		// Estimasi Pelayanan
+		# Estimasi Pelayanan
 		Route::group(['prefix'=>'estimasi-pelayanan'], function(){
 			Route::get('/','EstimasiPelayananController@main')->name('EstimasiPelayanan');
 			Route::post('datagrid','EstimasiPelayananController@datagrid')->name('EstimasiPelayananDatagrid');
@@ -533,7 +545,7 @@ Route::group(['middleware' => 'auth'], function() {
 			Route::post('delete','EstimasiPelayananController@delete')->name('deleteEstimasiPelayanan');
 		});
 
-		// Master Poli
+		# Master Poli
 		Route::group(['prefix'=>'master-poli'], function(){
 			Route::get('/','MstPoliController@index')->name('masterpoli');
 			Route::post('/mstpoli-list','MstPoliController@listMstPoli')->name('mstpoli-list');
@@ -541,7 +553,7 @@ Route::group(['middleware' => 'auth'], function() {
 			Route::post('/store','MstPoliController@store')->name('mstpoli-store');
 		});
 
-		// Master Konter Poli
+		# Master Konter Poli
 		Route::group(['prefix'=>'mst-konterpoli'], function(){
 			Route::get('/','MstKonterPoliController@index')->name('mstkonterpoli');
 			Route::post('/datagrid','MstKonterPoliController@datagrid')->name('mstkonterpoli-list');
@@ -552,7 +564,7 @@ Route::group(['middleware' => 'auth'], function() {
 			Route::post('/store','MstKonterPoliController@store')->name('mstkonterpoli-store');
 		});
 
-		// Device
+		# Device
 		Route::group(['prefix'=>'device'], function(){
 			Route::get('/','DeviceController@main')->name('Device');
 			Route::post('datagrid','DeviceController@datagrid')->name('DeviceDatagrid');
@@ -562,7 +574,7 @@ Route::group(['middleware' => 'auth'], function() {
 			Route::post('delete','DeviceController@delete')->name('deleteDevice');
 		});
 
-		// Kotan Saran
+		# Kotan Saran
 		Route::group(['prefix'=>'kotak-saran'], function(){
 			Route::get('/','KotakSaranController@main')->name('KotakSaran');
 			Route::post('datagrid','KotakSaranController@datagrid')->name('KotakSaranDatagrid');

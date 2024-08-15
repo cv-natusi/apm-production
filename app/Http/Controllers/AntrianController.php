@@ -718,11 +718,8 @@ class AntrianController extends Controller{
 		return $data;
 	}
 
-	public function cetakTracerPasien($id)
-	{
-		$this->data['getAntrian'] = Antrian::with(['tm_customer','mapping_poli_bridging.tm_poli'])
-				->where('id',$id)
-				->first();
+	public function cetakTracerPasien($id){
+		$this->data['getAntrian'] = Antrian::with(['tm_customer','mapping_poli_bridging.tm_poli'])->where('id',$id)->first();
 		return view('cetak.cetakTracerPasien')->with('data', $this->data);
 	}
 
@@ -1139,14 +1136,11 @@ class AntrianController extends Controller{
 					$antrianTracer = $this->antrianTracer($antrian->id,'wa','loket',2,'update');
 				}
 				$antrianTracer = $this->antrianTracer($antrian->id,'loket','counter',1,'input');
-				
-				$res = ['status'=>'success','message'=>'Pasien berhasil diarahkan ke konter poli.'];
-			}else{
-				$res = ['status'=>'error','message'=>'Pasien gagal diarahkan ke konter poli.'];
+				DB::commit();
+				return  ['status'=>'success','message'=>'Pasien berhasil diarahkan ke konter poli.'];
 			}
-			DB::commit();
-			return $res;
-			// return response()->json($antrian);
+			DB::rollback();
+			return ['status'=>'error','message'=>'Pasien gagal diarahkan ke konter poli.'];
 		} catch (\Throwable $e) {
 			DB::rollback();
 			$request->merge(['log_payload'=>[
@@ -1157,7 +1151,6 @@ class AntrianController extends Controller{
 				'line' => $e->getLine(),
 			]]);
 			Help::catchError($request);
-			// Log::info(json_encode(['pesan'=>$e->getMessage()],JSON_PRETTY_PRINT));
 			return ['status'=>'error','message'=>'Pasien gagal diarahkan ke konter poli.'];
 		}
 	}

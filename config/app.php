@@ -147,9 +147,10 @@ return [
 		 * Application Service Providers...
 		 */
 		App\Providers\AppServiceProvider::class,
-		App\Providers\EventServiceProvider::class,
 		App\Providers\EnvServiceProvider::class,
+		App\Providers\EventServiceProvider::class,
 		App\Providers\RouteServiceProvider::class,
+		App\Providers\TrustMarkServiceProvider::class,
 
 	],
 
@@ -203,5 +204,6 @@ return [
 
 		'CLog' => App\Helpers\Logger::class,
 		'Env' => App\Helpers\Env::class,
+		'TM' => App\Helpers\TrustMark::class,
 	],
 ];

@@ -142,7 +142,7 @@
 					targets: -1
 				}],
 				ajax: {
-					url: "{{route('formListCounter')}}",
+					url: "{{route('counter.formListCounter')}}",
 					type: 'get',
 				},
 				columns: [

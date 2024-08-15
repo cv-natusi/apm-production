@@ -24,24 +24,26 @@
 	<div class="box box-default add-form">
 		<div class="panel-body">
 			<form class="formAdd" style="padding-top: 10px; padding-left: 20px;">
-				<h5>KELOLA ANTRIAN {{$view}}</h5>
+				<h5>KELOLA ANTRIAN</h5>
 				<hr>
 
 				<input type="hidden" name="id" id="id" value="{{$getAntrian->cust_id}}">
 				<input type="hidden" name="id_antrian" id="id_antrian" value="{{$getAntrian->id}}">
 				<div class="row mb-3" style="margin-top: 1rem;">
-					<div class="col-md-2">
+					<div class="col-md-{{$view==0 ? '3' : '2'}}">
 						<label>Nomor Antrian</label>
-						<input type="text" class="form-control" name="no_antrian" id="no_antrian" placeholder="Nomor Antrian" value="{{$getAntrian->no_antrian_pbaru}}" readonly>
+						<input type="text" class="form-control" name="no_antrian" id="no_antrian" placeholder="Nomor Antrian" value="{{$getAntrian->no_antrian_pbaru?:$getAntrian->no_antrian}}" readonly>
 					</div>
-					<div class="col-md-2">
+					<div class="col-md-{{$view==0 ? '3' : '2'}}">
 						<label>Kode Booking</label>
 						<input type="text" class="form-control" name="kodebooking" id="kodebooking" placeholder="Kode Booking" value="{{$getAntrian->kode_booking}}" readonly>
 					</div>
+					@if ($view!=0)
 					<div class="col-md-2">
 						<label>Nomor RM</label>
 						<input type="text" class="form-control" name="no_rm" id="no_rm" placeholder="Nomor RM" value="{{($getAntrian->no_rm=='00000000000')?'':$getAntrian->no_rm}}" readonly>
 					</div>
+					@endif
 					<div class="col-md-3">
 						<label>Pendaftaran Melalui</label>
 						<input type="text" class="form-control" name="metode" id="metode" placeholder="Pendaftaran Melalui" value="{{$getAntrian->metode_ambil}}" readonly>
@@ -201,13 +203,13 @@
 						<select name="provinsi_id" class="form-control select2" id="provinsi" @if($view == 1) disabled @endif>
 							<option value="" readonly="">..:: Pilih Provinsi ::..</option>
 							@if (!empty($prov))
-							@foreach ($data_provinsi as $row)
-							<option @if ($prov==$row->name) selected @endif value="{{$row->id}}">{{$row->name}}</option>
-							@endforeach
+								@foreach ($data_provinsi as $row)
+								<option @if ($prov==$row->name) selected @endif value="{{$row->id}}">{{$row->name}}</option>
+								@endforeach
 							@else
-							@foreach ($data_provinsi as $row)
-							<option value="{{$row->id}}">{{$row->name}}</option>
-							@endforeach
+								@foreach ($data_provinsi as $row)
+								<option value="{{$row->id}}">{{$row->name}}</option>
+								@endforeach
 							@endif
 						</select>
 					</div>
@@ -321,34 +323,59 @@
 						</select>
 					</div>
 				</div>
-					 
+
+				<hr style="border-top: 2px solid #dcdcdc">
+
 				<div class="row" style="margin-top: 1rem;">
-					<div class=" @if($view == 1) col-md-12 @else col-md-2 @endif text-center">
-						<button type="button" class="btn btn-secondary btn-cancel" style="width: 100%">KEMBALI</button>
+					<?php $col = $getAntrian->jenis_pasien=='BPJS' ? 3 : 4; ?>
+					<div class="col-md-<?=$col?>" style="margin-bottom: 1rem;">
+						<button type="button" style="width: 100%;" class="btn btn-secondary btn-cancel">KEMBALI</button>
 					</div>
 					@if($view==0)
-					@if($getAntrian->no_rm=='00000000000'||$getAntrian->no_rm==null||$getAntrian->no_rm=="")
-					<div class="col-md-2 text-center">
-						<button type="button" class="btn btn-warning btn-cetak-rm" onclick="cetakrm(`{{json_encode($getAntrian)}}`)" style="width: 100%">GENERATE NO RM</button>
-					</div>
+						<div class="col-md-<?=$col?>" style="margin-bottom: 1rem;">
+							<button type="button" style="width: 100%;" class="btn btn-danger btn-batal" onclick="batalkan(`{{$getAntrian->kode_booking}}`)">BATALKAN ANTRIAN</button>
+						</div>
+						@if($getAntrian->jenis_pasien=='BPJS')
+						<div class="col-md-3" style="margin-bottom: 1rem;">
+							<button type="button" style="width: 100%;" class="btn btn-primary btn-sep">BUAT SEP</button>
+						</div>
+						@endif
+						<div class="col-md-<?=$col?>" style="margin-bottom: 1rem;">
+							<button type="button" style="width: 100%;" class="btn btn-success btn-store">KIRIM KE KONTER POLI</button>
+						</div>
 					@endif
-					<div class="col-md-2 text-center">
-						<button type="button" onclick="batalkan(`{{$getAntrian->kode_booking}}`)"  class="btn btn-danger btn-batal" style="width: 100%">BATALKAN ANTRIAN</button>
-					</div>
-					@if ($getAntrian->jenis_pasien=='BPJS')
-					<div class="col-md-3" class="text-center">
-						<button type="button" class="btn btn-primary btn-sep" style="width: 100%">BUAT SEP</button>
-					</div>
-					@endif
-					@if ($getAntrian->jenis_pasien != 'BPJS')
-					<div class="col-md-3 text-center">
-						<button type="button" class="btn btn-primary btn-tracer" style="width: 100%">TRACER PASIEN</button>
-					</div>
-					@endif
-					<div class="col-md-3 text-center">
-						<button type="button" class="btn btn-success btn-store" style="width: 100%">KIRIM KE KONTER POLI</button>
-					</div>
-					@endif
+
+					{{-- <div class="col-md-12" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; grid-template-columns: repeat(4, 1fr);">
+						<button type="button" class="btn btn-secondary btn-cancel">KEMBALI</button>
+						@if($view==0) --}}
+							{{-- @if(($getAntrian->no_rm=='00000000000'||$getAntrian->no_rm==null||$getAntrian->no_rm=="") && $getAntrian->jenis_pasien=='BPJS')
+							<div class="col-md-2 text-center">
+								<button type="button" class="btn btn-warning btn-cetak-rm" onclick="cetakrm(`{{json_encode($getAntrian)}}`)" style="width: 100%">GENERATE NO RM</button>
+							</div>
+							@endif --}}
+								{{-- <button type="button" onclick="batalkan(`{{$getAntrian->kode_booking}}`)" class="btn btn-danger btn-batal">BATALKAN ANTRIAN</button>
+								@if ($getAntrian->jenis_pasien=='BPJS')
+									<button type="button" class="btn btn-primary btn-sep">BUAT SEP</button>
+								@endif
+								<button type="button" class="btn btn-success btn-store">KIRIM KE KONTER POLI</button> --}}
+							{{-- <div class="col-md-2 text-center">
+								<button type="button" onclick="batalkan(`{{$getAntrian->kode_booking}}`)"  class="btn btn-danger btn-batal" style="width: 100%">BATALKAN ANTRIAN</button>
+							</div>
+							@if ($getAntrian->jenis_pasien=='BPJS')
+							<div class="col-md-3" class="text-center">
+								<button type="button" class="btn btn-primary btn-sep" style="width: 100%">BUAT SEP</button>
+							</div>
+							@endif --}}
+							{{-- @if ($getAntrian->jenis_pasien != 'BPJS')
+							<div class="col-md-3 text-center">
+								<button type="button" class="btn btn-primary btn-tracer" style="width: 100%">TRACER PASIEN</button>
+							</div>
+							@endif --}}
+							{{-- <div class="col-md-3 text-center">
+								<button type="button" class="btn btn-success btn-store" style="width: 100%">KIRIM KE KONTER POLI</button>
+							</div> --}}
+						{{-- @endif
+					</div> --}}
 				</div>
 
 				<div class='clearfix' style="margin-bottom: 5px"></div>
@@ -437,12 +464,12 @@
 		</div>
 	</div>
 </div>
-	 
+
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css" />
 <link rel="stylesheet" type="text/css" href="https://select2.github.io/select2-bootstrap-theme/css/select2-bootstrap.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-<script src="https://code.highcharts.com/highcharts.js"></script>
+{{-- <script src="https://code.highcharts.com/highcharts.js"></script> --}}
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.min.js"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/js/select2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -601,7 +628,7 @@
 						}else{
 							loadDaerah('-','-','-')
 						}
-						$('#no_rm').val(res.data.KodeCust)
+						// $('#no_rm').val(res.data.KodeCust)
 						$('#nama').val(res.data.NamaCust)
 						if(res.data.NoKtp){
 							$('#nik').val(res.data.NoKtp)
@@ -768,7 +795,7 @@
 							text: data.message,
 							showConfirmButton: true,
 						})
-						$('#no_rm').val(data.nomor);
+						// $('#no_rm').val(data.nomor);
 						$('.btn-cetak-rm').hide()
 					}else{
 						swal({
@@ -783,100 +810,120 @@
 	}
 
 	// BTN TRACER
-	$('.btn-tracer').click(function (e) { 
-		e.preventDefault();
+	// $('.btn-tracer').click(function (e) { 
+	// 	e.preventDefault();
+	// 	var id = $('#id_antrian').val();
+	// 	var norm            = $('#no_rm').val();
+	// 	var nama            = $('#nama').val();
+	// 	var alamat          = $('#alamat').val();
+	// 	var pem_pasien      = $('#pembayaran_pasien').val();
 
-		var id = $('#id_antrian').val();
-		var norm            = $('#no_rm').val();
-		var nama            = $('#nama').val();
-		var alamat          = $('#alamat').val();
-		var pem_pasien      = $('#pembayaran_pasien').val();
+	// 	if (!norm) {
+	// 		swal('Peringatan!!', 'No RM Wajib Diisi.', 'warning')
+	// 	} else if (!nama) {
+	// 		swal('Peringatan!!', 'Nama Pasien Wajib Diisi.', 'warning')
+	// 	} else if (!alamat) {
+	// 		swal('Peringatan!!', 'Alamat Wajib Diisi.', 'warning')
+	// 	} else if (!pem_pasien) {
+	// 		swal('Peringatan!!', 'Pembayaran Pasien Wajib Diisi.', 'warning')
+	// 	} else {
+	// 		swal({
+	// 			title: 'KONFIRMASI !',
+	// 			type: 'info',
+	// 			text: 'Apakah Pasien Ingin Mencetak Tracer ?',
+	// 			confirmButtonClass: "btn-primary",
+	// 			confirmButtonText: "Ya",
+	// 			cancelButtonText: "Tidak",
+	// 			showCancelButton: true,
+	// 		},(isConfirm)=>{
+	// 			if(isConfirm){
+	// 				var data = new FormData($('.formAdd')[0]);
+	// 				$.ajax({
+	// 					url: "{{route('saveListAntrian')}}",
+	// 					type: 'POST',
+	// 					data: data,
+	// 					async: true,
+	// 					cache: false,
+	// 					contentType: false,
+	// 					processData: false
+	// 				}).done(function(data) {
+	// 					if (data.code == 200) {
+	// 						let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
+	// 						const url = urlD.replace(":id", id)
+	// 						window.open(url)
+	// 						swal('Berhasil', 'Antrian Berhasil Mencetak Tracer.', 'success')
+	// 					} else {
+	// 						swal("Warning!", "Antrian Gagal Mencetak Tracer", "error");
+	// 					}
+	// 				}).fail(function() {
+	// 					swal("MAAF!", "Terjadi Kesalahan, Silahkan Ulangi Kembali !!", "warning");
+	// 				});
+	// 			}
+	// 		})	
+	// 	}
+	// });
 
-		if (!norm) {
-			swal('Peringatan!!', 'No RM Wajib Diisi.', 'warning')
-		} else if (!nama) {
-			swal('Peringatan!!', 'Nama Pasien Wajib Diisi.', 'warning')
-		} else if (!alamat) {
-			swal('Peringatan!!', 'Alamat Wajib Diisi.', 'warning')
-		} else if (!pem_pasien) {
-			swal('Peringatan!!', 'Pembayaran Pasien Wajib Diisi.', 'warning')
-		} else {
-			swal({
-				title: 'KONFIRMASI !',
-				type: 'info',
-				text: 'Apakah Pasien Ingin Mencetak Tracer ?',
-				confirmButtonClass: "btn-primary",
-				confirmButtonText: "Ya",
-				cancelButtonText: "Tidak",
-				showCancelButton: true,
-			},(isConfirm)=>{
-				if(isConfirm){
-					var data = new FormData($('.formAdd')[0]);
-					$.ajax({
-						url: "{{route('saveListAntrian')}}",
-						type: 'POST',
-						data: data,
-						async: true,
-						cache: false,
-						contentType: false,
-						processData: false
-					}).done(function(data) {
-						if (data.code == 200) {
-							let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
-							const url = urlD.replace(":id", id)
-							window.open(url)
-							swal('Berhasil', 'Antrian Berhasil Mencetak Tracer.', 'success')
-						} else {
-							swal("Warning!", "Antrian Gagal Mencetak Tracer", "error");
-						}
-					}).fail(function() {
-						swal("MAAF!", "Terjadi Kesalahan, Silahkan Ulangi Kembali !!", "warning");
-					});
-				}
-			})	
-		}
-	});
+	function sendToCounterPoli(data){
+		return new Promise((resolve,reject)=>{
+			$.ajax({
+				url: "{{route('loket.sendToCounterPoli')}}",
+				type: 'POST',
+				data: data,
+				async: true,
+				cache: false,
+				contentType: false,
+				processData: false
+			}).then((data, status, xhr)=>{
+				resolve(data)
+			},(err)=>{
+				reject(err)
+			})
+		})
+	}
 
 	// BTN SIMPAN
-	$('.btn-store').click(function(e) {
+	$('.btn-store').click(async function(e) {
 		e.preventDefault();
-		var id              = $('#id').val();
-		var id_antrian      = $('#id_antrian').val();
-		var no_antrian      = $('#no_antrian').val();
-		var metode          = $('#metode').val();
-		var nama            = $('#nama').val();
-		var kewarganegaraan = $("input[type='radio'][name='kewarganegaraan']:checked").val();
-		var nik             = $('#nik').val();
-		var alamat          = $('#alamat').val();
-		var tmpt_lahir      = $('#tmpt_lahir').val();
-		var tgl_lahir       = $('#tgl_lahir').val();
-		var prov            = $('#provinsi').val();
-		var kab             = $('#kabupaten').val();
-		var kelamin         = $("input[type='radio'][name='jenis_kelamin']:checked").val();
-		var telp            = $('#telp').val();
-		var kec             = $('#kecamatan').val();
-		var desa            = $('#desa').val();
-		var gol_darah       = $('#gol_darah').find(":selected").val();
-		var agama           = $('#agama').find(":selected").val();
-		var pekerjaan       = $('#pekerjaan').val();
-		var pen_jawab       = $('#pen_jawab').find(":selected").val();
-		var pend_terakhir   = $('#pend_terakhir').find(":selected").val();
-		var s_perkawinan    = $('#s_perkawinan').val();
-		var nama_pen_jawab  = $('#nama_pen_jawab').val();
-		var telp_pen_jawab  = $('#telp_pen_jawab').val();
-		var poli            = $('#poli').val();
-		var norm            = $('#no_rm').val();
-		var pem_pasien      = $('#pembayaran_pasien').val();
+		var id = $('#id').val();
+			id_antrian = $('#id_antrian').val();
+			no_antrian = $('#no_antrian').val();
+			metode = $('#metode').val();
+			nama = $('#nama').val();
+			kewarganegaraan = $("input[type='radio'][name='kewarganegaraan']:checked").val();
+			nik = $('#nik').val();
+			alamat = $('#alamat').val();
+			tmpt_lahir = $('#tmpt_lahir').val();
+			tgl_lahir = $('#tgl_lahir').val();
+			prov = $('#provinsi').val();
+			kab = $('#kabupaten').val();
+			kelamin = $("input[type='radio'][name='jenis_kelamin']:checked").val();
+			telp = $('#telp').val();
+			kec = $('#kecamatan').val();
+			desa = $('#desa').val();
+			gol_darah = $('#gol_darah').find(":selected").val();
+			agama = $('#agama').find(":selected").val();
+			pekerjaan = $('#pekerjaan').val();
+			pen_jawab = $('#pen_jawab').find(":selected").val();
+			pend_terakhir = $('#pend_terakhir').find(":selected").val();
+			s_perkawinan = $('#s_perkawinan').val();
+			nama_pen_jawab = $('#nama_pen_jawab').val();
+			telp_pen_jawab = $('#telp_pen_jawab').val();
+			poli = $('#poli').val();
+			// norm = $('#no_rm').val();
+			jenis_pasien = $('#jenis_pasien').val();
+			pem_pasien = $('#pembayaran_pasien').val();
+			kodebooking = $('#kodebooking').val();
 
-		if (!norm) {
-			swal('Whooops','No RM Tidak Boleh Kosong!','warning');
-		} else if(!nama){
+		// if (!norm && jenis_pasien=='BPJS') {
+		// 	swal('Whooops','No RM Tidak Boleh Kosong!','warning');
+		// } else
+		if(!nama){
 			swal('Whooops','Nama Pasien Tidak Boleh Kosong!','warning');
 		} else if (!kewarganegaraan) {
 			swal('Whooops','Kewarganegaraan Tidak Boleh Kosong!','warning');
 		} else if (!nik) {
 			swal('Whooops','NIK Tidak Boleh Kosong!','warning');
-		}  else if(!alamat) {
+		} else if(!alamat) {
 			swal('Whooops','Alamat Tidak Boleh Kosong!','warning');
 		} else if(!tmpt_lahir) {
 			swal('Whooops','Tempat Lahir Tidak Boleh Kosong!','warning');
@@ -898,172 +945,351 @@
 			swal('Whooops','Agama Tidak Boleh Kosong!','warning');
 		} else if(!s_perkawinan) {
 			swal('Whooops','Status Perkawinan Tidak Boleh Kosong!','warning');
-		} else if(!pem_pasien) {
-			swal('Whooops','Pembayaran Pasien Tidak Boleh Kosong!','warning');
+		} else if(!jenis_pasien || !pem_pasien) {
+			swal('Whooops','Jenis / Pembayaran Pasien Tidak Boleh Kosong!','warning');
 		} else{
 			var data = new FormData($('.formAdd')[0]);
-			$.ajax({
-				url: "{{route('saveListAntrian')}}",
-				type: 'POST',
-				data: data,
-				async: true,
-				cache: false,
-				contentType: false,
-				processData: false
-			}).done(function(data) {
-				$('.formAdd').validate(data, 'has-error');
-				if (data.code == 200) {
-					// var kd =  data.antrian.kode_booking;
-					var kd =  data.antrian.id;
-					$.post('{{route("loketToCounter")}}',{kode:kd}).done((res)=>{
-						if(res.status == 'success'){
+			sendToCounterPoli(data).then(async(data)=>{
+				if(data.metadata.code==200){
+					let idAntrian = $('#id_antrian').val()
+					let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
+					const url = urlD.replace(":id", idAntrian)
+					var win = await window.open(url)
+					var timer = setInterval(() => {
+						if(win.closed){
+							clearInterval(timer)
 							swal({
 								title: 'Berhasil',
-								type: res.status,
-								text: res.message,
+								type: data.metadata.status,
+								text: data.metadata.message,
 								showConfirmButton: true,
+							},function(isConfirm){
+								// main-layer
+								$('.other-page').fadeOut(function() {
+									$('.other-page').empty()
+									$('.main-layer').fadeIn()
+									$('#dataTable').DataTable().ajax.reload()
+								})
 							})
-							// main-layer
-							$('.other-page').fadeOut(function() {
-								$('.other-page').empty();
-								$('.main-layer').fadeIn();
-								$('#dataTable').DataTable().ajax.reload();
-							});
-						}else{
-							swal({
-								title: 'Whoops',
-								type: res.status,
-								text: res.message,
-							})
-							// location.reload();
 						}
+					}, 500)
+				}else{
+					swal({
+						title: 'Whoops..',
+						type: data.metadata.status,
+						text: data.metadata.message,
+						showConfirmButton: true,
 					})
-				} else {
-					swal("Warning!", "Data Gagal Disimpan", "error");
 				}
-			}).fail(function() {
-				Swal.fire("MAAF!", "Terjadi Kesalahan, Silahkan Ulangi Kembali !!", "warning");
-				$('.btn-store').val('Simpan').removeAttr('disabled');
-			});
+			}).catch((e)=>{
+				console.log(e)
+				swal({
+					title: 'Whoops..',
+					type: e.responseJSON.metadata.status,
+					text: e.responseJSON.metadata.message,
+					showConfirmButton: true,
+				})
+			})
+			return
+
+			// var data = new FormData($('.formAdd')[0]);
+			// $.ajax({
+			// 	url: "{{route('loket.sendToCounterPoli')}}",
+			// 	type: 'POST',
+			// 	data: obj,
+			// 	async: true,
+			// 	cache: false,
+			// 	contentType: false,
+			// 	processData: false
+			// }).then((data, status, xhr)=>{
+			// 	console.log(data)
+			// }).fail((e)=>{
+			// 	console.log('fail')
+			// })
+
+			// console.log('done')
+			// return
+			// if(jenis_pasien!='BPJS'){
+			// 	var url = "{{route('cetakRMAntrian')}}";
+			// 	$.post(url,{id:kodebooking,nik:nik}).done(function(res){
+			// 		if(res.status == 'success'){
+			// 			data.set('no_rm',res.nomor)
+			// 			let request = storeAntrian(data)
+			// 			if(request){
+			// 				let idAntrian = $('#id_antrian').val()
+			// 				let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
+			// 				const url = urlD.replace(":id", idAntrian)
+			// 				var win = window.open(url)
+			// 				var timer = setInterval(() => {
+			// 					if(win.closed){
+			// 						console.log('Cetak tracer berhasil')
+			// 						clearInterval(timer)
+			// 						swal({
+			// 							title: 'Berhasil',
+			// 							type: res.status,
+			// 							text: res.message,
+			// 							showConfirmButton: true,
+			// 						},function(isConfirm){
+			// 							// main-layer
+			// 							$('.other-page').fadeOut(function() {
+			// 								$('.other-page').empty()
+			// 								$('.main-layer').fadeIn()
+			// 								$('#dataTable').DataTable().ajax.reload()
+			// 							})
+			// 						})
+			// 					}
+			// 				}, 500)
+			// 			}
+
+			// 			// swal({
+			// 			// 	title: 'Berhasil',
+			// 			// 	type: data.status,
+			// 			// 	text: data.message,
+			// 			// 	showConfirmButton: true,
+			// 			// })
+			// 			// $('#no_rm').val(data.nomor);
+			// 			// $('.btn-cetak-rm').hide()
+			// 		}else{
+			// 			swal({
+			// 				title: 'Whoops',
+			// 				type: res.status,
+			// 				text: res.message,
+			// 			})
+			// 		}
+			// 	})
+			// }else{
+			// 	storeAntrian(data)
+			// }
+
+
+			// $.ajax({
+				// 	url: "{{route('saveListAntrian')}}",
+				// 	type: 'POST',
+				// 	data: data,
+				// 	async: true,
+				// 	cache: false,
+				// 	contentType: false,
+				// 	processData: false
+				// }).done(function(data) {
+				// 	return
+				// 	$('.formAdd').validate(data, 'has-error')
+				// 	if (data.code == 200) {
+				// 		var kd =  data.antrian.id
+				// 		$.post('{{route("loketToCounter")}}',{kode:kd}).done(async (res)=>{
+				// 			if(res.status == 'success'){
+				// 				let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
+				// 				const url = urlD.replace(":id", id)
+				// 				await window.open(url)
+				// 				// swal('Berhasil', 'Antrian Berhasil Mencetak Tracer.', 'success')
+				// 				await swal({
+				// 					title: 'Berhasil',
+				// 					type: res.status,
+				// 					text: res.message,
+				// 					showConfirmButton: true,
+				// 				})
+				// 				// main-layer
+				// 				$('.other-page').fadeOut(function() {
+				// 					$('.other-page').empty();
+				// 					$('.main-layer').fadeIn();
+				// 					$('#dataTable').DataTable().ajax.reload();
+				// 				});
+				// 			}else{
+				// 				swal({
+				// 					title: 'Whoops',
+				// 					type: res.status,
+				// 					text: res.message,
+				// 				})
+				// 				// location.reload();
+				// 			}
+				// 		})
+				// 	} else {
+				// 		swal("Warning!", "Data Gagal Disimpan", "error");
+				// 	}
+				// }).fail(function() {
+				// 	Swal.fire("MAAF!", "Terjadi Kesalahan, Silahkan Ulangi Kembali !!", "warning");
+				// 	$('.btn-store').val('Simpan').removeAttr('disabled');
+				// });
 		}
-	});
+	})
+	// function storeAntrian(obj){
+	// 	let exec = false
+	// 	// console.log(exec)
+	// 	// return exec;
+	// 	// console.log('tes')
+	// 	// let idAntrian = $('#id_antrian').val()
+	// 	$.ajax({
+	// 		url: "{{route('saveListAntrian')}}",
+	// 		type: 'POST',
+	// 		data: obj,
+	// 		async: true,
+	// 		cache: false,
+	// 		contentType: false,
+	// 		processData: false
+	// 	}).done(async function(data){
+	// 		// $('.formAdd').validate(data, 'has-error')
+	// 		if (data.code == 200) {
+	// 			var kd =  data.antrian.id
+	// 			await $.post('{{route("loketToCounter")}}',{kode:kd}).done(async (res)=>{
+	// 				if(res.status == 'success'){
+	// 					exec = true
+	// 					// swal('Berhasil', 'Antrian Berhasil Mencetak Tracer.', 'success')
+	// 				}else{
+	// 					swal({
+	// 						title: 'Whoops',
+	// 						type: res.status,
+	// 						text: res.message,
+	// 					})
+	// 				}
+	// 			})
+	// 		} else {
+	// 			swal("Warning!", "Data Gagal Disimpan", "error");
+	// 		}
+	// 	}).fail(function() {
+	// 		Swal.fire("MAAF!", "Terjadi Kesalahan, Silahkan Ulangi Kembali !!", "warning");
+	// 		$('.btn-store').val('Simpan').removeAttr('disabled');
+	// 	})
+	// 	return exec
+	// }
 
 	// BTN SEP
 	$('.btn-sep').click(function(e) {
-		e.preventDefault();
+		e.preventDefault()
+		var id = $('#id').val()
+			id_antrian = $('#id_antrian').val()
+			no_antrian = $('#no_antrian').val()
+			metode = $('#metode').val()
+			nama = $('#nama').val()
+			kewarganegaraan = $("input[type='radio'][name='kewarganegaraan']:checked").val()
+			nik = $('#nik').val()
+			alamat = $('#alamat').val()
+			tmpt_lahir = $('#tmpt_lahir').val()
+			tgl_lahir = $('#tgl_lahir').val()
+			prov = $('#provinsi').val()
+			kab = $('#kabupaten').val()
+			kelamin = $("input[type='radio'][name='jenis_kelamin']:checked").val()
+			telp = $('#telp').val()
+			kec = $('#kecamatan').val()
+			desa = $('#desa').val()
+			gol_darah = $('#gol_darah').find(":selected").val()
+			agama = $('#agama').find(":selected").val()
+			pekerjaan = $('#pekerjaan').val()
+			pen_jawab = $('#pen_jawab').find(":selected").val()
+			pend_terakhir = $('#pend_terakhir').find(":selected").val()
+			s_perkawinan = $('#s_perkawinan').val()
+			nama_pen_jawab = $('#nama_pen_jawab').val()
+			telp_pen_jawab = $('#telp_pen_jawab').val()
+			poli = $('#poli').val()
+			// norm = $('#no_rm').val()
+			jenis_pasien = $('#jenis_pasien').val()
+			pem_pasien = $('#pembayaran_pasien').val()
 
-		var id              = $('#id').val();
-		var id_antrian      = $('#id_antrian').val();
-		var no_antrian      = $('#no_antrian').val();
-		var metode          = $('#metode').val();
-		var nama            = $('#nama').val();
-		var kewarganegaraan = $("input[type='radio'][name='kewarganegaraan']:checked").val();
-		var nik             = $('#nik').val();
-		var alamat          = $('#alamat').val();
-		var tmpt_lahir      = $('#tmpt_lahir').val();
-		var tgl_lahir       = $('#tgl_lahir').val();
-		var prov            = $('#provinsi').val();
-		var kab             = $('#kabupaten').val();
-		var kelamin         = $("input[type='radio'][name='jenis_kelamin']:checked").val();
-		var telp            = $('#telp').val();
-		var kec             = $('#kecamatan').val();
-		var desa            = $('#desa').val();
-		var gol_darah       = $('#gol_darah').find(":selected").val();
-		var agama           = $('#agama').find(":selected").val();
-		var pekerjaan       = $('#pekerjaan').val();
-		var pen_jawab       = $('#pen_jawab').find(":selected").val();
-		var pend_terakhir   = $('#pend_terakhir').find(":selected").val();
-		var s_perkawinan    = $('#s_perkawinan').val();
-		var nama_pen_jawab  = $('#nama_pen_jawab').val();
-		var telp_pen_jawab  = $('#telp_pen_jawab').val();
-		var poli            = $('#poli').val();
-		var norm            = $('#no_rm').val();
-		var pem_pasien      = $('#pembayaran_pasien').val();
-
-		if (!norm) {
-			swal('Whooops','No RM Tidak Boleh Kosong!','warning');
-		} else if(!nama){
-			swal('Whooops','Nama Pasien Tidak Boleh Kosong!','warning');
+		// if (!norm) {
+		// 	swal('Whooops','No RM Tidak Boleh Kosong!','warning')
+		// } else
+		if(!nama){
+			swal('Whooops','Nama Pasien Tidak Boleh Kosong!','warning')
 		} else if (!kewarganegaraan) {
-			swal('Whooops','Kewarganegaraan Tidak Boleh Kosong!','warning');
+			swal('Whooops','Kewarganegaraan Tidak Boleh Kosong!','warning')
 		} else if (!nik) {
-			swal('Whooops','NIK Tidak Boleh Kosong!','warning');
-		}  else if(!alamat) {
-			swal('Whooops','Alamat Tidak Boleh Kosong!','warning');
+			swal('Whooops','NIK Tidak Boleh Kosong!','warning')
+		} else if(!alamat) {
+			swal('Whooops','Alamat Tidak Boleh Kosong!','warning')
 		} else if(!tmpt_lahir) {
-			swal('Whooops','Tempat Lahir Tidak Boleh Kosong!','warning');
+			swal('Whooops','Tempat Lahir Tidak Boleh Kosong!','warning')
 		} else if(!tgl_lahir) {
-			swal('Whooops','Tanggal Lahir Tidak Boleh Kosong!','warning');
+			swal('Whooops','Tanggal Lahir Tidak Boleh Kosong!','warning')
 		} else if(!prov) {
-			swal('Whooops','Provinsi Tidak Boleh Kosong!','warning');
+			swal('Whooops','Provinsi Tidak Boleh Kosong!','warning')
 		} else if(!kab) {
-			swal('Whooops','Kabupaten / Kota Tidak Boleh Kosong!','warning');
+			swal('Whooops','Kabupaten / Kota Tidak Boleh Kosong!','warning')
 		} else if(!telp) {
-			swal('Whooops','No.telepon Tidak Boleh Kosong!','warning');
+			swal('Whooops','No.telepon Tidak Boleh Kosong!','warning')
 		} else if(!kec) {
-			swal('Whooops','Kecamatan Tidak Boleh Kosong!','warning');
+			swal('Whooops','Kecamatan Tidak Boleh Kosong!','warning')
 		} else if(!desa) {
-			swal('Whooops','Desa / Kelurahan Tidak Boleh Kosong!','warning');
+			swal('Whooops','Desa / Kelurahan Tidak Boleh Kosong!','warning')
 		} else if(!agama) {
-			swal('Whooops','Agama Tidak Boleh Kosong!','warning');
+			swal('Whooops','Agama Tidak Boleh Kosong!','warning')
 		} else if(!s_perkawinan) {
-			swal('Whooops','Status Perkawinan Tidak Boleh Kosong!','warning');
-		} else if(!pem_pasien) {
-			swal('Whooops','Pembayaran Pasien Tidak Boleh Kosong!','warning');
+			swal('Whooops','Status Perkawinan Tidak Boleh Kosong!','warning')
+		} else if(!jenis_pasien || !pem_pasien) {
+			swal('Whooops','Jenis / Pembayaran Pasien Tidak Boleh Kosong!','warning')
 		} else{
-			var data = new FormData($('.formAdd')[0]);
-			$.ajax({
-				url: "{{route('saveListAntrian')}}",
-				type: 'POST',
-				data: data,
-				async: true,
-				cache: false,
-				contentType: false,
-				processData: false
-			}).done(function(data) {
-				$('.formAdd').validate(data, 'has-error');
-				if (data.code == 200) {
-					if (data.antrian.jenis_pasien == 'BPJS') {
-						swal("Berhasil!", "Data Berhasil Disimpan", "success");
-						// window.location.href = '{{ route("apm") }}?id='+id_antrian;
-						window.location.href = '{{ route("bridging") }}?id='+id_antrian;
-					} else {
-						var kd =  data.antrian.kode_booking;
-						$.post('{{route("loketToCounter")}}',{kode:kd}).done((res)=>{
-							if(res.status == 'success'){
-								swal({
-									title: 'Berhasil',
-									type: res.status,
-									text: res.message,
-									showConfirmButton: true,
-								})
-								// main-layer
-								$('.other-page').fadeOut(function() {
-									$('.other-page').empty();
-									$('.main-layer').fadeIn();
-									$('#dataTable').DataTable().ajax.reload();
-								});
-							}else{
-								swal({
-									title: 'Whoops',
-									type: res.status,
-									text: res.message,
-								})
-								location.reload();
-							}
-						})
-					}
-				} else {
-					swal("Warning!", "Data Gagal Disimpan", "error");
+			var data = new FormData($('.formAdd')[0])
+			sendToCounterPoli(data).then(async(data)=>{
+				if(data.metadata.code==200){
+					let idAntrian = $('#id_antrian').val()
+					window.location.href = '{{route("bridging")}}?id='+idAntrian
+				}else{
+					swal({
+						title: 'Whoops..',
+						type: data.metadata.status,
+						text: data.metadata.message,
+						showConfirmButton: true,
+					})
 				}
-			}).fail(function() {
-				Swal.fire("MAAF!", "Terjadi Kesalahan, Silahkan Ulangi Kembali !!", "warning");
-				$('.btn-sep').val('Simpan').removeAttr('disabled');
-			});
-		}
-	});
+			}).catch((e)=>{
+				console.log(e)
+				swal({
+					title: 'Whoops..',
+					type: e.responseJSON.metadata.status,
+					text: e.responseJSON.metadata.message,
+					showConfirmButton: true,
+				})
+			})
 
-	// BTN BATAL
+			// $.ajax({
+			// 	url: "{{route('saveListAntrian')}}",
+			// 	type: 'POST',
+			// 	data: data,
+			// 	async: true,
+			// 	cache: false,
+			// 	contentType: false,
+			// 	processData: false
+			// }).done(function(data) {
+			// 	// $('.formAdd').validate(data, 'has-error');
+			// 	if (data.code == 200) {
+			// 		if (data.antrian.jenis_pasien == 'BPJS') {
+			// 			swal("Berhasil!", "Data Berhasil Disimpan", "success");
+			// 			// window.location.href = '{{ route("apm") }}?id='+id_antrian;
+			// 			window.location.href = '{{ route("bridging") }}?id='+id_antrian;
+			// 		} else {
+			// 			var kd =  data.antrian.kode_booking;
+			// 			$.post('{{route("loketToCounter")}}',{kode:kd}).done((res)=>{
+			// 				if(res.status == 'success'){
+			// 					swal({
+			// 						title: 'Berhasil',
+			// 						type: res.status,
+			// 						text: res.message,
+			// 						showConfirmButton: true,
+			// 					})
+			// 					// main-layer
+			// 					$('.other-page').fadeOut(function() {
+			// 						$('.other-page').empty();
+			// 						$('.main-layer').fadeIn();
+			// 						$('#dataTable').DataTable().ajax.reload();
+			// 					});
+			// 				}else{
+			// 					swal({
+			// 						title: 'Whoops',
+			// 						type: res.status,
+			// 						text: res.message,
+			// 					})
+			// 					location.reload();
+			// 				}
+			// 			})
+			// 		}
+			// 	} else {
+			// 		swal("Warning!", "Data Gagal Disimpan", "error");
+			// 	}
+			// }).fail(function() {
+			// 	Swal.fire("MAAF!", "Terjadi Kesalahan, Silahkan Ulangi Kembali !!", "warning");
+			// 	$('.btn-sep').val('Simpan').removeAttr('disabled');
+			// });
+		}
+	})
+
+	// Batalkan antrian
 	function batalkan(kode) {
 		swal({
 			title: "Konfirmasi Batal!",
@@ -1107,12 +1333,15 @@
 		$('.other-page').fadeOut(function() {
 			$('.other-page').empty();
 			$('.main-layer').fadeIn();
+			@if($view == 1) window.location.reload(); @endif
 		});
 	});
 
 	$(document).ready(function () {
 		setTimeout(()=>{
+			@if($view==0)
 			$('.select2').select2()
+			@endif
 			loadDaerah();
 		},200)
 
@@ -1163,10 +1392,9 @@
 	});
 
 	function loadDaerah(kab='',kec='',kel='') {
-		var id = $('#provinsi').val();
-
+		var id = $('#provinsi').val()
 		// SELECTED KABUPATEN
-		var selectedkab = "{{ !empty($kab) ? $kab:'' }}";
+		var selectedkab = "{{ !empty($kab) ? $kab:'' }}"
 		setTimeout(()=>{
 			if(kab=='-'){
 				selectedkab = ''
@@ -1175,16 +1403,15 @@
 			}
 			// if (selectedkab != "" && selectedkab != null) {
 				$.post("{{route('get_kabupaten')}}",{id:id},(data)=>{
-					var kabupaten = '<option value="first">..:: Pilih Kabupaten ::..</option>';
+					var kabupaten = '<option value="first">..:: Pilih Kabupaten ::..</option>'
 					if(data.status=='success'){
 						if(data.data.length>0){
 							$.each(data.data,function(v,k){
-								kabupaten+='<option value="'+k.id+'">'+k.name+'</option>';
-							});
+								kabupaten+='<option value="'+k.id+'">'+k.name+'</option>'
+							})
 						}
-
-						$('#kabupaten').html(kabupaten);
-						$('#kabupaten').val((selectedkab?selectedkab:'first')).trigger('change');
+						$('#kabupaten').html(kabupaten)
+						$('#kabupaten').val((selectedkab?selectedkab:'first')).trigger('change')
 					}
 				});
 			// }

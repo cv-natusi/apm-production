@@ -23,7 +23,6 @@
             <ul class="treeview-menu">
 				<li class=''>
 					<a href="{{ route('listAntrian') }}">
-						
 						<span><i class="fa fa-male"></i> Normal</span>
 					</a>
 				</li>
@@ -34,11 +33,6 @@
 				</li>
 			</ul>
 		</li>
-		{{-- <li class=''>
-			<a href="{{ route('listAntrian') }}">
-				<i class="fa fa-list" aria-hidden="true"></i> <span>Daftar Antrian Loket</span>
-			</a>
-		</li> --}}
 		<li class="treeview">
 			<a href="javascript:void(0)">
 				<i class="fa fa-list"></i><span>(Don't Click)</span>
