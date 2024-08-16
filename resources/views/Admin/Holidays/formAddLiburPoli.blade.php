@@ -1,26 +1,34 @@
 <div class="box box-warning" id='panel-add'>
-	<h4 style="margin-left: 15px">EDIT LIBUR NASIONAL</h4>
+	<h4 style="margin-left: 15px">LIBUR POLI</h4>
 	<hr>
-	<form method='post' action="{{ route('UpdateHoliday') }}" enctype='multipart/form-data'>
+	<form method='post' action="{{ route('AddLiburPoliHoliday') }}" enctype='multipart/form-data'>
 		{{ csrf_field() }}
 		<div class="box-body">
 			<div class="row" style="padding: 5px">
-				<input type="hidden" name="id_holiday" value='{{ $holiday->id_holiday }}' required="required" class="form-control">
 				<div class="col-md-12">
 					<div class="row" style="margin-bottom: 10px">
 						<div class="col-md-4">
 							<label for="">Tanggal Libur</label>
-							<input type="date" name="tanggal_libur" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off' value="{{ $holiday->tanggal }}">
+							<input type="date" name="tanggal_libur" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off'>
 							{{-- <div class="input-group">
 								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-								<input type="text" name="tanggal_libur" id="form_datetime_today" data-date-format="dd-mm-yyyy" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off' required='required' value="{{ $holiday->tanggal }}">
+								<input type="text" name="tanggal_libur" id="form_datetime_today" data-date-format="dd-mm-yyyy" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off' required='required'>
 							</div> --}}
 						</div>
+						<div class="col-md-8">
+							<label for="">Pilih Poli</label>
+							<select name="pilih_poli" id="form_pilih_poli" class="form-control">
+								<option value="" readonly>Pilih Poli</option>
+								@foreach ($poli as $item)
+									<option value="{{ $item->KodePoli }}">{{ $item->NamaPoli }}</option>
+								@endforeach
+							</select>
+						</div>
 					</div>
-					<div class="row">
+					<div class="row" style="margin-bottom: 10px">
 						<div class="col-md-12">
 							<label for="">Keterangan</label>
-							<textarea name="keterangan" id="keterangan" class="form-control" cols="30" rows="10">{{ $holiday->keterangan }}</textarea>
+							<textarea name="keterangan" id="keterangan" class="form-control" cols="30" rows="10"></textarea>
 						</div>
 					</div>
 				</div>
@@ -80,3 +88,4 @@
         { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
 	]});
 </script>
+	

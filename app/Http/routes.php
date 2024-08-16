@@ -502,11 +502,23 @@ Route::group(['middleware' => 'auth'], function() {
 		Route::group(['prefix'=>'tanggal-libur'], function(){
 			Route::get('/','HolidayController@main')->name('holiday');
 			Route::post('datagrid','HolidayController@datagrid')->name('holidayDatagrid');
+			Route::post('datagridKuotaPoli','HolidayController@datagridKuotaPoli')->name('holidayDatagridKuotaPoli');
+			Route::post('datagridLiburPoli','HolidayController@datagridLiburPoli')->name('holidayDatagridLiburPoli');
 			Route::post('formAdd','HolidayController@formAdd')->name('formAddHoliday');
+			Route::post('formAddKuotaPoli','HolidayController@formAddKuotaPoli')->name('formAddKuotaPoliHoliday');
+			Route::post('formAddLiburPoli','HolidayController@formAddLiburPoli')->name('formAddLiburPoliHoliday');
 			Route::post('Add','HolidayController@Add')->name('AddHoliday');
+			Route::post('AddKuotaPoli','HolidayController@AddKuotaPoli')->name('AddKuotaPoliHoliday');
+			Route::post('AddLiburPoli','HolidayController@AddLiburPoli')->name('AddLiburPoliHoliday');
 			Route::post('formUpdate','HolidayController@formUpdate')->name('formUpdateHoliday');
+			Route::post('formUpdateKuotaPoli','HolidayController@formUpdateKuotaPoli')->name('formUpdateKuotaPoliHoliday');
+			Route::post('formUpdateLiburPoli','HolidayController@formUpdateLiburPoli')->name('formUpdateLiburPoliHoliday');
 			Route::post('Updates','HolidayController@Updates')->name('UpdateHoliday');
+			Route::post('UpdatesKuotaPoli','HolidayController@UpdatesKuotaPoli')->name('UpdateKuotaPoliHoliday');
+			Route::post('UpdatesLiburPoli','HolidayController@UpdatesLiburPoli')->name('UpdateLiburPoliHoliday');
 			Route::post('delete','HolidayController@delete')->name('deleteHoliday');
+			Route::post('deleteKuotaPoli','HolidayController@deleteKuotaPoli')->name('deleteKuotaPoliHoliday');
+			Route::post('deleteLiburPoli','HolidayController@deleteLiburPoli')->name('deleteLiburPoliHoliday');
 		});
 
 		# Informasi Penyakit

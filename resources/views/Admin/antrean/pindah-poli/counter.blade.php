@@ -121,7 +121,7 @@ data-backdrop="static"
 										<option value="" disabled>-- PILIH POLI --</option>
 										@if($poli->count()!=0)
 										@foreach($poli as $poli)
-										<option @if($poli->kdpoli==$data->kode_poli) selected @endif value="{{$poli->kdpoli}}">{{$poli->NamaPoli}}</option>
+										<option @if($poli->kdpoli==$data->kode_poli) selected @endif value="{{$poli->kdpoli}}">{{$poli->kdpoli}} - {{$poli->NamaPoli}}</option>
 										@endforeach
 										@endif
 									</select>

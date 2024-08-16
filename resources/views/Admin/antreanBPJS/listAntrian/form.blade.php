@@ -317,7 +317,7 @@
 							<option value="">.:: Pilih Poli ::.</option>
 							@if($poli->count()!=0)
 							@foreach($poli as $poli)
-							<option @if($poli->kdpoli==$getAntrian->kode_poli) selected @endif value="{{$poli->kdpoli}}">{{$poli->NamaPoli}}</option>
+							<option @if($poli->kdpoli==$getAntrian->kode_poli) selected @endif value="{{$poli->kdpoli}}">{{$poli->kdpoli}} - {{$poli->NamaPoli}}</option>
 							@endforeach
 							@endif
 						</select>

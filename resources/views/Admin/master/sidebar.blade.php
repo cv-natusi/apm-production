@@ -65,17 +65,17 @@
 							<i class="fa fa-mobile"></i> <span>Device</span></i>
 						</a>
 					</li>
-					{{-- <li class=''>
-						<a href="{{ route('holiday') }}">
-							<i class="fa fa-calendar"></i> <span>Tanggal Libur</span></i>
-						</a>
-					</li> --}}
 					<li class=''>
 						<a href="{{ route('bantuan') }}">
 							<i class="fa fa-list"></i> <span>Data Bantuan</span></i>
 						</a>
 					</li>
 				</ul>
+			</li>
+			<li class=''>
+				<a href="{{ route('holiday') }}">
+					<i class="fa fa-calendar"></i> <span>Tanggal Libur</span></i>
+				</a>
 			</li>
 			<li class=''>
 				<a href="{{ route('apm') }}">

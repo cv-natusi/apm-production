@@ -1,32 +1,33 @@
 <div class="box box-warning" id='panel-add'>
-	<button type="button" class="btn btn-warning btn-cancel"><span class="fa fa-chevron-left"></span> Kembali</button>
+	<h4 style="margin-left: 15px">LIBUR NASIONAL</h4>
 	<hr>
 	<form method='post' action="{{ route('AddHoliday') }}" enctype='multipart/form-data'>
 		{{ csrf_field() }}
 		<div class="box-body">
-			<div class='col-lg-6 col-md-6 col-sm-12 col-xs-12 col-lg-offset-2 col-md-offset-2' style='padding:0px'>
-				<div class="form-group">
-					<label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12" id='label-input'>Tanggal Libur</label>
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 input-group" style="padding: 0 15px">
-						<div class="input-group-addon">
-							<i class="fa fa-calendar"></i>
+			<div class="row" style="padding: 5px">
+				<div class="col-md-12">
+					<div class="row" style="margin-bottom: 10px">
+						<div class="col-md-4">
+							<label for="">Tanggal Libur</label>
+							<input type="date" name="tanggal_libur" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off'>
+							{{-- <div class="input-group">
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+								<input type="text" name="tanggal_libur" id="form_datetime_today" data-date-format="dd-mm-yyyy" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off' required='required'>
+							</div> --}}
 						</div>
-						<input type="text" name='tanggal_libur' autocomplete='off' placeholder='dd-mm-yyyy' class="form-control pull-right"  id='form_datetime_today' data-date-format="dd-mm-yyyy" required='required'>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<label for="">Keterangan</label>
+							<textarea name="keterangan" id="keterangan" class="form-control" cols="30" rows="10"></textarea>
+						</div>
 					</div>
 				</div>
-				<div class='clearfix' style='padding-bottom:5px;'></div>
-				<div class="form-group">
-					<label class="control-label col-lg-12 col-md-12 col-sm-12 col-xs-12" id='label-input'>Keterangan Libur</label>
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-						<textarea rows='2' name='keterangan' maxlength='100' required="required" class='form-control input-sm customInput col-md-7 col-xs-12'></textarea>
-					</div>
-				</div>
-				<div class='clearfix' style='padding-bottom:2px;'></div>
 			</div>
-			<div class='clearfix' style='padding-bottom:5px'></div>
 		</div>
 		<div class="box-footer">
-			<button type="submit" class="btn btn-primary pull-right">Simpan <span class="fa fa-save"></span></button>
+			<button type="button" class="btn btn-warning btn-cancel"><span class="fa fa-chevron-left"></span> Kembali</button>
+			<button type="submit" class="btn btn-primary">Simpan <span class="fa fa-save"></span></button>
 		</div>
 	</form>
 </div>
@@ -63,4 +64,20 @@
         minView: 2,
         forceParse: 0,
     });
+
+	$( 'textarea#keterangan' ).ckeditor({width:'100%', height: '150px', toolbar: [
+        { name: 'document', groups: [ 'mode', 'document', 'doctools' ], items: ['NewPage', 'Preview', 'Print', '-', 'Templates' ] },
+        { name: 'clipboard', groups: [ 'clipboard', 'undo' ], items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ] },
+        { name: 'editing', groups: [ 'find', 'selection', 'spellchecker' ], items: [ 'Find', 'Replace', '-', 'SelectAll', '-'] },
+        { name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
+        { name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe' ] },
+        { name: 'tools', items: [ 'Maximize' ] },
+        '/',
+        { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ], items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat' ] },
+        { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+        { name: 'styles', items: [ 'Font', 'FontSize' ] },
+        { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
+        { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ], items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
+	]});
 </script>
+	
