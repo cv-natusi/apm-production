@@ -44,6 +44,7 @@
 						<input type="text" class="form-control" name="no_rm" id="no_rm" placeholder="Nomor RM" value="{{($getAntrian->no_rm=='00000000000')?'':$getAntrian->no_rm}}" readonly>
 					</div>
 					@endif
+					<input type="hidden" name="nomor_rm" id="nomor_rm">
 					<div class="col-md-3">
 						<label>Pendaftaran Melalui</label>
 						<input type="text" class="form-control" name="metode" id="metode" placeholder="Pendaftaran Melalui" value="{{$getAntrian->metode_ambil}}" readonly>
@@ -594,7 +595,7 @@
 			if(isConfirm){
 				$.post("{!! route('getDatapasien') !!}",{key:KodeCust,nobpjs:nobpjs}).done((res)=>{
 					if(res.status == 'success'){
-						$('.btn-cetak-rm').hide()
+						// $('.btn-cetak-rm').hide()
 						var ktp = $('#nik').val()
 						var tgl = formatDate(res.data.TglLahir)
 						var JK = res.data.JenisKel
@@ -602,9 +603,11 @@
 						var agama = res.data.Agama
 						var tempatLahir = res.data.Tempat
 						var bpjs = res.data.FieldCust1
-						var golDarah = res.data.goldarah;
-						var pekerjaan = res.data.Pekerjaan;
-						var sPerkawinan = res.data.status;
+						var golDarah = res.data.goldarah
+						var pekerjaan = res.data.Pekerjaan
+						var sPerkawinan = res.data.status
+						var rt = res.data.rt
+						var rw = res.data.rw
 						var prov = ''
 						var kab = ''
 						var kec = ''
@@ -629,6 +632,7 @@
 							loadDaerah('-','-','-')
 						}
 						// $('#no_rm').val(res.data.KodeCust)
+						$('#nomor_rm').val(res.data.KodeCust)
 						$('#nama').val(res.data.NamaCust)
 						if(res.data.NoKtp){
 							$('#nik').val(res.data.NoKtp)
@@ -731,14 +735,22 @@
 						if(bpjs){
 							$('#nobpjs').val(bpjs)
 						}
-						swal({
-							title: 'Berhasil',
-							type: 'success',
-							text: 'Data Berhasil Di Pilih.',
-							showConfirmButton: false,
-							showCancelButton: false,
-							timer: 1500
-						})
+						if(rt){
+							$('#rt').val(rt)
+						}
+						if(rw){
+							$('#rw').val(rw)
+						}
+						setTimeout(()=>{
+							swal({
+								title: 'Berhasil',
+								type: 'success',
+								text: 'Data Berhasil Di Pilih.',
+								showConfirmButton: false,
+								showCancelButton: false,
+								timer: 1200
+							})
+						},400)
 					}
 				})
 			}
@@ -990,125 +1002,6 @@
 					showConfirmButton: true,
 				})
 			})
-			return
-
-			// var data = new FormData($('.formAdd')[0]);
-			// $.ajax({
-			// 	url: "{{route('loket.sendToCounterPoli')}}",
-			// 	type: 'POST',
-			// 	data: obj,
-			// 	async: true,
-			// 	cache: false,
-			// 	contentType: false,
-			// 	processData: false
-			// }).then((data, status, xhr)=>{
-			// 	console.log(data)
-			// }).fail((e)=>{
-			// 	console.log('fail')
-			// })
-
-			// console.log('done')
-			// return
-			// if(jenis_pasien!='BPJS'){
-			// 	var url = "{{route('cetakRMAntrian')}}";
-			// 	$.post(url,{id:kodebooking,nik:nik}).done(function(res){
-			// 		if(res.status == 'success'){
-			// 			data.set('no_rm',res.nomor)
-			// 			let request = storeAntrian(data)
-			// 			if(request){
-			// 				let idAntrian = $('#id_antrian').val()
-			// 				let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
-			// 				const url = urlD.replace(":id", idAntrian)
-			// 				var win = window.open(url)
-			// 				var timer = setInterval(() => {
-			// 					if(win.closed){
-			// 						console.log('Cetak tracer berhasil')
-			// 						clearInterval(timer)
-			// 						swal({
-			// 							title: 'Berhasil',
-			// 							type: res.status,
-			// 							text: res.message,
-			// 							showConfirmButton: true,
-			// 						},function(isConfirm){
-			// 							// main-layer
-			// 							$('.other-page').fadeOut(function() {
-			// 								$('.other-page').empty()
-			// 								$('.main-layer').fadeIn()
-			// 								$('#dataTable').DataTable().ajax.reload()
-			// 							})
-			// 						})
-			// 					}
-			// 				}, 500)
-			// 			}
-
-			// 			// swal({
-			// 			// 	title: 'Berhasil',
-			// 			// 	type: data.status,
-			// 			// 	text: data.message,
-			// 			// 	showConfirmButton: true,
-			// 			// })
-			// 			// $('#no_rm').val(data.nomor);
-			// 			// $('.btn-cetak-rm').hide()
-			// 		}else{
-			// 			swal({
-			// 				title: 'Whoops',
-			// 				type: res.status,
-			// 				text: res.message,
-			// 			})
-			// 		}
-			// 	})
-			// }else{
-			// 	storeAntrian(data)
-			// }
-
-
-			// $.ajax({
-				// 	url: "{{route('saveListAntrian')}}",
-				// 	type: 'POST',
-				// 	data: data,
-				// 	async: true,
-				// 	cache: false,
-				// 	contentType: false,
-				// 	processData: false
-				// }).done(function(data) {
-				// 	return
-				// 	$('.formAdd').validate(data, 'has-error')
-				// 	if (data.code == 200) {
-				// 		var kd =  data.antrian.id
-				// 		$.post('{{route("loketToCounter")}}',{kode:kd}).done(async (res)=>{
-				// 			if(res.status == 'success'){
-				// 				let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
-				// 				const url = urlD.replace(":id", id)
-				// 				await window.open(url)
-				// 				// swal('Berhasil', 'Antrian Berhasil Mencetak Tracer.', 'success')
-				// 				await swal({
-				// 					title: 'Berhasil',
-				// 					type: res.status,
-				// 					text: res.message,
-				// 					showConfirmButton: true,
-				// 				})
-				// 				// main-layer
-				// 				$('.other-page').fadeOut(function() {
-				// 					$('.other-page').empty();
-				// 					$('.main-layer').fadeIn();
-				// 					$('#dataTable').DataTable().ajax.reload();
-				// 				});
-				// 			}else{
-				// 				swal({
-				// 					title: 'Whoops',
-				// 					type: res.status,
-				// 					text: res.message,
-				// 				})
-				// 				// location.reload();
-				// 			}
-				// 		})
-				// 	} else {
-				// 		swal("Warning!", "Data Gagal Disimpan", "error");
-				// 	}
-				// }).fail(function() {
-				// 	Swal.fire("MAAF!", "Terjadi Kesalahan, Silahkan Ulangi Kembali !!", "warning");
-				// 	$('.btn-store').val('Simpan').removeAttr('disabled');
-				// });
 		}
 	})
 	// function storeAntrian(obj){

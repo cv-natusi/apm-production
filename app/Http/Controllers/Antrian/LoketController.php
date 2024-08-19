@@ -157,8 +157,10 @@ class LoketController extends Controller{
 					]
 				], 500);
 			}
-			# Nik sudah dibuat
-			if($pasien = rsu_customer::where('NoKtp',$request->nik)->first(['KodeCust'])){
+
+			if($pasien = rsu_customer::where('NoKtp',$request->nik)->first(['KodeCust'])){ # Find by nik
+				$antrian->no_rm = $pasien->KodeCust;
+			}else if($request->nomor_rm && ($pasien = rsu_customer::where('KodeCust',$request->nomor_rm)->first(['KodeCust']))){ # Find by nomor rm
 				$antrian->no_rm = $pasien->KodeCust;
 			}else{ # Nik belum dibuat, generatekan RM baru
 				$getKode = DB::connection('dbrsud')->table('tm_customer')->max('KodeCust');
