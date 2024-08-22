@@ -100,7 +100,11 @@ class RiwayatAntrianKonterPoliController extends Controller{
 	function templateAction($data) {
 		$btn = "<div class='text-center'>";
 		$btn .= "<button class='btn btn-sm btn-primary' title='Cetak No Antrian' onclick='cetakNoAntri(`$data->id`)'><i class='fa fa-print' aria-hidden='true'></i></button>";
-		$btn .= $data->no_rm!='00000000000' ? "&nbsp; <button class='btn btn-sm btn-info' title='Cetak Tracer' onclick='cetakTracer(`$data->id`)'><i class='fa fa-print'></i></button> <br>" : "<br>";
+		if($data->no_rm!=='00000000000' && $data->nomor_antrian_poli!=""){
+			$btn .= "&nbsp; <button class='btn btn-sm btn-info' title='Cetak Tracer' onclick='cetakTracer(`$data->id`)'><i class='fa fa-print'></i></button> <br>";
+		}else{
+			$btn .= "<br>";
+		}
 		$btn .= "<button class='btn btn-sm btn-warning' style='margin-top: 5px;' title='Detail' onclick='detail(`$data->id`)'><i class='fa fa-eye' aria-hidden='true'></i></button>";
 		if($data->jenis_pasien=='BPJS'){
 			$btn .= "&nbsp; <button class='btn btn-sm btn-success' style='margin-top: 5px;' title='Buat SEP' onclick='buatSep(`$data->id`)'><i class='fa fa-file-text' aria-hidden='true'></i></button>";

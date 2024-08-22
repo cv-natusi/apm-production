@@ -60,20 +60,23 @@
 					<table class="printTable2" style="width:100%">
 						<tr>
 							<td style="width: 30%; font-weight: bold;">Tgl. Periksa</td>
-							<td style="width: 70%;">: {{$data['getAntrian']->tgl_periksa}}</td>
+							<td style="width: 70%;">: {{date('d/m/Y',strtotime($data['getAntrian']->tgl_periksa))}}</td>
 						</tr>
 						<tr>
 							<td style="width: 30%; font-weight: bold;">Poli Tujuan</td>
 							<td style="width: 70%;">: {{$data['getAntrian']->mapping_poli_bridging->tm_poli->NamaPoli}}</td>
 						</tr>
 						<tr>
-							{{-- <td style="width: 30%; font-weight: bold;">No. Daftar</td> --}}
+							<td style="width: 30%; font-weight: bold;">No. Daftar</td>
+							<td style="width: 70%;">: {{$data['register'] ? $data['register']->TransReg.'-'.$data['register']->No_Register : '-'}}</td>
+						</tr>
+						<tr>
 							<td style="width: 30%; font-weight: bold;">Jenis Pasien</td>
 							<td style="width: 70%;">: {{$data['getAntrian']->asuransi ? $data['getAntrian']->asuransi->nilaichar : '-'}}</td>
 						</tr>
 						<tr>
 							<td style="width: 30%; font-weight: bold;">No. Antrian</td>
-							<td style="width: 70%;">: {{$data['getAntrian']->no_antrian}}</td>
+							<td style="width: 70%;">: {{$data['getAntrian']->nomor_antrian_poli}}</td>
 						</tr>
 					</table>
 				</div>

@@ -46,6 +46,14 @@
 		.inner-action{
 			display: inline-block;
 		}
+
+		.select2-container--default .select2-selection--single .select2-selection__rendered {
+			color: #444;
+			line-height: unset !important;
+		}
+		.select2-container .select2-selection--single .select2-selection__rendered {
+			text-align: center;
+		}
 	</style>
 @stop
 

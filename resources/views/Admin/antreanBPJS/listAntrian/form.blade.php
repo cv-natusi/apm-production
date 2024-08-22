@@ -51,8 +51,8 @@
 					</div>
 					<div class="col-md-3">
 						<label>Jenis Pasien</label>
-						<select name="jenis_pasien" id="jenis_pasien" class="form-control" @if($view == 1) readonly disabled @endif>
-							<option value="">.:: Jenis Pasien ::.</option>
+						<select name="jenis_pasien" id="jenis_pasien" class="form-control select2" @if($view == 1) readonly disabled @endif>
+							<option value="">-- PILIH OPSI --</option>
 							<option @if(isset($getAntrian) && $getAntrian->jenis_pasien == 'UMUM') selected @endif value="UMUM">UMUM</option>
 							<option @if(isset($getAntrian) && $getAntrian->jenis_pasien == 'BPJS') selected @endif value="BPJS">BPJS</option>
 							<option @if(isset($getAntrian) && $getAntrian->jenis_pasien == 'ASURANSILAIN') selected @endif value="ASURANSILAIN">ASURANSI LAINNYA</option>
@@ -76,16 +76,16 @@
 					</div>
 					<div class="col-md-6">
 						<label>Pembayaran Pasien</label>
-						<select name="pembayaran_pasien" id="pembayaran_pasien" class="form-control" @if($view == 1) readonly disabled @endif>
-							<option value="">.:: Pembayaran Pasien ::.</option>
+						<select name="pembayaran_pasien" id="pembayaran_pasien" class="form-control select2" @if($view == 1) readonly disabled @endif>
+							<option value="">-- PILIH OPSI --</option>
 							@foreach($jenis_pasien as $jp)
 								<option
-									value="{{$jp->nilaichar}}"
+									value="{{$jp->subgroups}}"
 									{{
 										(
-											($getAntrian->jenis_pasien=='UMUM' && $jp->nilaichar==$getAntrian->jenis_pasien)
-											|| ($getAntrian->jenis_pasien=='BPJS' && $jp->nilaichar=='BPJS NON PBI ')
-											|| ($getAntrian->pembayaran_pasien==$jp->nilaichar)
+											($getAntrian->jenis_pasien=='UMUM' && $jp->subgroups=='1001')
+											|| ($getAntrian->jenis_pasien=='BPJS' && $jp->subgroups=='1008')
+											|| ($getAntrian->pembayaran_pasien==$jp->subgroups)
 										)
 										? 'selected' : ''
 									}}
@@ -225,8 +225,8 @@
 				<div class="row mb-3" style="margin-top: 1rem;">
 					<div class="col-md-3">
 						<label>Gol. Darah</label>
-						<select name="gol_darah" id="gol_darah" class="form-control" @if($view == 1) disabled @endif>
-							<option value="" readonly="">..:: Pilih Gol Darah ::..</option>
+						<select name="gol_darah" id="gol_darah" class="form-control select2" @if($view == 1) disabled @endif>
+							<option value="" readonly="">-- PILIH OPSI --</option>
 							<option @if(isset($getAntrian->tm_customer) && $getAntrian->tm_customer->goldarah == 'A') selected @endif value="A">A</option>
 							<option @if(isset($getAntrian->tm_customer) && $getAntrian->tm_customer->goldarah == 'B') selected @endif value="B">B</option>
 							<option @if(isset($getAntrian->tm_customer) && $getAntrian->tm_customer->goldarah == 'AB') selected @endif value="AB">AB</option>
@@ -235,8 +235,8 @@
 					</div>
 					<div class="col-md-3">
 						<label>Agama <span class="text-red" style="font-size: 14px;">*</span></label>
-						<select name="agama"  id="agama" class="form-control" @if($view == 1) disabled @endif>
-							<option value="" readonly="">..:: Pilih Agama ::..</option>
+						<select name="agama"  id="agama" class="form-control select2" @if($view == 1) disabled @endif>
+							<option value="" readonly="">-- PILIH OPSI --</option>
 							<option @if(isset($getAntrian->tm_customer) && $getAntrian->tm_customer->Agama == 'Islam') selected @endif value="Islam">Islam</option>
 							<option @if(isset($getAntrian->tm_customer) && $getAntrian->tm_customer->Agama == 'Protestan') selected @endif value="Protestan">Protestan</option>
 							<option @if(isset($getAntrian->tm_customer) && $getAntrian->tm_customer->Agama == 'Katolik') selected @endif value="Katolik">Katolik</option>
@@ -262,8 +262,8 @@
 				<div class="row mb-3" style="margin-top: 1rem;">
 					<div class="col-md-3">
 						<label>Pendidikan Terakhir</label>
-						<select name="pend_terakhir" id="pend_terakhir" class="form-control" @if($view == 1) disabled @endif>
-							<option value="" readonly="">..:: Pendidikan Terakhir ::..</option>
+						<select name="pend_terakhir" id="pend_terakhir" class="form-control select2" @if($view == 1) disabled @endif>
+							<option value="" readonly="">-- PILIH OPSI --</option>
 							<option @if(isset($getAntPasBaru->pend_terakhir) && $getAntPasBaru->pend_terakhir == 'SD') selected @endif value="SD">SD</option>
 							<option @if(isset($getAntPasBaru->pend_terakhir) && $getAntPasBaru->pend_terakhir == 'SMP') selected @endif value="SMP">SMP</option>
 							<option @if(isset($getAntPasBaru->pend_terakhir) && $getAntPasBaru->pend_terakhir == 'SMA / SMK') selected @endif value="SMA / SMK">SMA / SMK</option>
@@ -275,8 +275,8 @@
 					</div>
 					<div class="col-md-3">
 						<label>Status Perkawinan <span class="text-red" style="font-size: 14px;">*</span></label>
-						<select name="s_perkawinan" id="s_perkawinan" class="form-control" @if($view == 1) disabled @endif>
-							<option value="" readonly="">..:: Pilih Status Perkawinan ::..</option>
+						<select name="s_perkawinan" id="s_perkawinan" class="form-control select2" @if($view == 1) disabled @endif>
+							<option value="" readonly="">-- PILIH OPSI --</option>
 							<option @if(isset($getAntrian->tm_customer->status) && $getAntrian->tm_customer->status == 'Belum Menikah') selected @endif value="Belum Menikah">Belum Menikah</option>
 							<option @if(isset($getAntrian->tm_customer->status) && $getAntrian->tm_customer->status == 'Cerai') selected @endif value="Cerai"> Cerai </option>
 							<option @if(isset($getAntrian->tm_customer->status) && $getAntrian->tm_customer->status == 'Menikah') selected @endif value="Menikah">Sudah Menikah</option>
@@ -288,8 +288,8 @@
 					</div>
 					<div class="col-md-3">
 						<label>Penanggung Jawab</label>
-						<select name="pen_jawab" id="pen_jawab" class="form-control" @if($view == 1) disabled @endif>
-							<option value="" readonly="">..:: Penanggung Jawab ::..</option>
+						<select name="pen_jawab" id="pen_jawab" class="form-control select2" @if($view == 1) disabled @endif>
+							<option value="" readonly="">-- PILIH OPSI --</option>
 							<option @if(isset($getAntPasBaru->pen_jawab) && $getAntPasBaru->pen_jawab == 'Suami / Istri') selected @endif value="Suami / Istri">Suami / Istri</option>
 							<option @if(isset($getAntPasBaru->pen_jawab) && $getAntPasBaru->pen_jawab == 'Orang Tua') selected @endif value="Orang Tua">Orang Tua</option>
 							<option @if(isset($getAntPasBaru->pen_jawab) && $getAntPasBaru->pen_jawab == 'Saudara') selected @endif value="Saudara">Saudara</option>
@@ -314,8 +314,8 @@
 					</div>
 					<div class="col-md-6">
 						<label>Poli Tujuan</label>
-						<select name="poli" class="form-control" @if($view == 1) disabled @endif>
-							<option value="">.:: Pilih Poli ::.</option>
+						<select name="poli" class="form-control select2" @if($view == 1) disabled @endif>
+							<option value="">-- PILIH POLI --</option>
 							@if($poli->count()!=0)
 							@foreach($poli as $poli)
 							<option @if($poli->kdpoli==$getAntrian->kode_poli) selected @endif value="{{$poli->kdpoli}}">{{$poli->kdpoli}} - {{$poli->NamaPoli}}</option>
@@ -476,6 +476,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.2/js/bootstrap.min.js" integrity="sha512-5BqtYqlWfJemW5+v+TZUs22uigI8tXeVah5S/1Z6qBLVO7gakAOtkOzUtgq6dsIo5c0NJdmGPs0H9I+2OHUHVQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript">
+	$(document).ready(()=>{
+		$('.select2').select2()
+	})
+
 	$('.btnCaPas').click(function (e) {
 		e.preventDefault();
 		var nama = $('#nama').val()
@@ -963,28 +967,42 @@
 			var data = new FormData($('.formAdd')[0]);
 			sendToCounterPoli(data).then(async(data)=>{
 				if(data.metadata.code==200){
-					let idAntrian = $('#id_antrian').val()
-					let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
-					const url = urlD.replace(":id", idAntrian)
-					var win = await window.open(url)
-					var timer = setInterval(() => {
-						if(win.closed){
-							clearInterval(timer)
-							swal({
-								title: 'Berhasil',
-								type: data.metadata.status,
-								text: data.metadata.message,
-								showConfirmButton: true,
-							},function(isConfirm){
-								// main-layer
-								$('.other-page').fadeOut(function() {
-									$('.other-page').empty()
-									$('.main-layer').fadeIn()
-									$('#dataTable').DataTable().ajax.reload()
-								})
-							})
-						}
-					}, 500)
+					await swal({
+						title: 'Berhasil',
+						type: data.metadata.status,
+						text: data.metadata.message,
+						showConfirmButton: false,
+						timer: 1000
+					})
+					setTimeout(()=>{
+						$('.other-page').fadeOut(function() {
+							$('.other-page').empty()
+							$('.main-layer').fadeIn()
+							$('#dataTable').DataTable().ajax.reload()
+						})
+					},900)
+					// let idAntrian = $('#id_antrian').val()
+					// let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
+					// const url = urlD.replace(":id", idAntrian)
+					// var win = await window.open(url)
+					// var timer = setInterval(() => {
+					// 	if(win.closed){
+					// 		clearInterval(timer)
+					// 		swal({
+					// 			title: 'Berhasil',
+					// 			type: data.metadata.status,
+					// 			text: data.metadata.message,
+					// 			showConfirmButton: true,
+					// 		},function(isConfirm){
+					// 			// main-layer
+					// 			$('.other-page').fadeOut(function() {
+					// 				$('.other-page').empty()
+					// 				$('.main-layer').fadeIn()
+					// 				$('#dataTable').DataTable().ajax.reload()
+					// 			})
+					// 		})
+					// 	}
+					// }, 500)
 				}else{
 					swal({
 						title: 'Whoops..',
@@ -1004,45 +1022,6 @@
 			})
 		}
 	})
-	// function storeAntrian(obj){
-	// 	let exec = false
-	// 	// console.log(exec)
-	// 	// return exec;
-	// 	// console.log('tes')
-	// 	// let idAntrian = $('#id_antrian').val()
-	// 	$.ajax({
-	// 		url: "{{route('saveListAntrian')}}",
-	// 		type: 'POST',
-	// 		data: obj,
-	// 		async: true,
-	// 		cache: false,
-	// 		contentType: false,
-	// 		processData: false
-	// 	}).done(async function(data){
-	// 		// $('.formAdd').validate(data, 'has-error')
-	// 		if (data.code == 200) {
-	// 			var kd =  data.antrian.id
-	// 			await $.post('{{route("loketToCounter")}}',{kode:kd}).done(async (res)=>{
-	// 				if(res.status == 'success'){
-	// 					exec = true
-	// 					// swal('Berhasil', 'Antrian Berhasil Mencetak Tracer.', 'success')
-	// 				}else{
-	// 					swal({
-	// 						title: 'Whoops',
-	// 						type: res.status,
-	// 						text: res.message,
-	// 					})
-	// 				}
-	// 			})
-	// 		} else {
-	// 			swal("Warning!", "Data Gagal Disimpan", "error");
-	// 		}
-	// 	}).fail(function() {
-	// 		Swal.fire("MAAF!", "Terjadi Kesalahan, Silahkan Ulangi Kembali !!", "warning");
-	// 		$('.btn-store').val('Simpan').removeAttr('disabled');
-	// 	})
-	// 	return exec
-	// }
 
 	// BTN SEP
 	$('.btn-sep').click(function(e) {

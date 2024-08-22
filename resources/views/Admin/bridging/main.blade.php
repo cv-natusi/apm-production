@@ -1488,26 +1488,50 @@
 				var antrian = data.antrian;
 
 				if (antrian!='' && antrian.nomor_antrian_poli===null) {
-					let idAntrian = antrian.id
-					let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
-					const url = urlD.replace(":id", idAntrian)
-					var win = window.open(url)
-					var timer = setInterval(() => {
-						if(win.closed){
-							clearInterval(timer)
-							swal({
-								title: 'Berhasil',
-								type: 'success',
-								text: 'Data berhasil disimpan!',
-								showConfirmButton: true,
-							},function(isConfirm){
-								$('#nosepcetak').val(data.nosep);
-								$('#noarsip').val(data.noarsip);
-								$('#noKontrol').val(data.noKontrol);
-								$('#btn-print-sep').removeAttr('disabled');
-							})
-						}
-					}, 500)
+					await swal({
+						title: 'Berhasil',
+						type: 'success',
+						text: 'Data berhasil disimpan!',
+						showConfirmButton: false,
+						timer: 1000
+					})
+					setTimeout(()=>{
+						$('#nosepcetak').val(data.nosep);
+						$('#noarsip').val(data.noarsip);
+						$('#noKontrol').val(data.noKontrol);
+						$('#btn-print-sep').removeAttr('disabled');
+					},900)
+					// swal({
+					// 	title: 'Berhasil',
+					// 	type: 'success',
+					// 	text: 'Data berhasil disimpan!',
+					// 	showConfirmButton: true,
+					// },function(isConfirm){
+					// 	$('#nosepcetak').val(data.nosep);
+					// 	$('#noarsip').val(data.noarsip);
+					// 	$('#noKontrol').val(data.noKontrol);
+					// 	$('#btn-print-sep').removeAttr('disabled');
+					// })
+					// let idAntrian = antrian.id
+					// let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
+					// const url = urlD.replace(":id", idAntrian)
+					// var win = window.open(url)
+					// var timer = setInterval(() => {
+					// 	if(win.closed){
+					// 		clearInterval(timer)
+					// 		swal({
+					// 			title: 'Berhasil',
+					// 			type: 'success',
+					// 			text: 'Data berhasil disimpan!',
+					// 			showConfirmButton: true,
+					// 		},function(isConfirm){
+					// 			$('#nosepcetak').val(data.nosep);
+					// 			$('#noarsip').val(data.noarsip);
+					// 			$('#noKontrol').val(data.noKontrol);
+					// 			$('#btn-print-sep').removeAttr('disabled');
+					// 		})
+					// 	}
+					// }, 500)
 				}else if (antrian!='' && antrian.nomor_antrian_poli!==null) {
 					$.post('{{route("counterToPoli")}}',{kode:antrian.id}).done((res)=>{
 						if(res.status == 'success'){
@@ -1572,28 +1596,6 @@
 				// 			})
 				// 		}
 				// 	}, 500)
-				// 	// $.post('{{route("loketToCounter")}}',{kode:kd}).done((res)=>{
-				// 	// 	if(res.status == 'success'){
-				// 	// 		swal({
-				// 	// 			title: 'Berhasil',
-				// 	// 			type: res.status,
-				// 	// 			text: res.message,
-				// 	// 			showConfirmButton: true,
-				// 	// 			// timer: 1500
-				// 	// 		})
-				// 	// 		$('#nosepcetak').val(data.nosep);
-				// 	// 		$('#noarsip').val(data.noarsip);
-				// 	// 		$('#noKontrol').val(data.noKontrol);
-				// 	// 		$('#btn-print-sep').removeAttr('disabled');
-				// 	// 	}else{
-				// 	// 		swal({
-				// 	// 			title: 'Whoops',
-				// 	// 			type: res.status,
-				// 	// 			text: res.message,
-				// 	// 		})
-				// 	// 		// location.reload();
-				// 	// 	}
-				// 	// })
 				} else {
 					swal("Sukses!", "Data berhasil disimpan!", "success");
 					$('#nosepcetak').val(data.nosep);

@@ -719,7 +719,15 @@ class AntrianController extends Controller{
 	}
 
 	public function cetakTracerPasien($id){
-		$this->data['getAntrian'] = Antrian::with(['asuransi','tm_customer','mapping_poli_bridging.tm_poli'])->where('id',$id)->first();
+		$antrian = Antrian::with(['asuransi','tm_customer','mapping_poli_bridging.tm_poli'])->where('id',$id)->first();
+		$this->data['getAntrian'] = $antrian;
+		$this->data['register'] = DB::connection('dbrsud')->table('tr_registrasi')
+			->where([
+				'No_RM' => $antrian->no_rm,
+				'Kode_Poli1' => Rsu_Bridgingpoli::where('kdpoli',$antrian->kode_poli)->first()->kdpoli_rs
+			])
+			->whereDate('Tgl_Register','=',$antrian->tgl_periksa)
+			->first();
 		return view('cetak.cetakTracerPasien')->with('data', $this->data);
 	}
 
