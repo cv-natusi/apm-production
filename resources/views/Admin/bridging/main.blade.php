@@ -1488,7 +1488,7 @@
 				var antrian = data.antrian;
 
 				if (antrian!='' && antrian.nomor_antrian_poli===null) {
-					await swal({
+					swal({
 						title: 'Berhasil',
 						type: 'success',
 						text: 'Data berhasil disimpan!',
