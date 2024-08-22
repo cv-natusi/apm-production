@@ -719,7 +719,7 @@ class AntrianController extends Controller{
 	}
 
 	public function cetakTracerPasien($id){
-		$this->data['getAntrian'] = Antrian::with(['tm_customer','mapping_poli_bridging.tm_poli'])->where('id',$id)->first();
+		$this->data['getAntrian'] = Antrian::with(['asuransi','tm_customer','mapping_poli_bridging.tm_poli'])->where('id',$id)->first();
 		return view('cetak.cetakTracerPasien')->with('data', $this->data);
 	}
 

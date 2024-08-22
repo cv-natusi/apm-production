@@ -12,6 +12,10 @@ class Antrian extends Model{
 	protected $primaryKey = 'id';
 	public $timestamps = true;
 
+   public function asuransi(){
+      return $this->belongsTo('App\Http\Models\Rsu_setupall','pembayaran_pasien','subgroups');
+   }
+
 	public function task_id(){
 		return $this->hasMany('App\Http\Models\TaskId','kode_booking','kode_booking');
 	}

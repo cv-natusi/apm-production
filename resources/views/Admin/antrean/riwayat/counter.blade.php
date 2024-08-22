@@ -10,8 +10,32 @@
 			position: relative;
 			margin: 0 auto;
 		}
+		.loader-edit-antrian{
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+		}
 
-		/* LOADER 4 */
+		/* LOADER 1 */
+		#loader-2 span{
+			display: inline-block;
+			width: 30px;
+			height: 30px;
+			border-radius: 100%;
+			background-color: #7a6900;
+			margin: 5px;
+			opacity: 0;
+		}
+		#loader-2 span:nth-child(1){
+			animation: opacitychange 1s ease-in-out infinite;
+		}
+		#loader-2 span:nth-child(2){
+			animation: opacitychange 1s ease-in-out 0.33s infinite;
+		}
+		#loader-2 span:nth-child(3){
+			animation: opacitychange 1s ease-in-out 0.66s infinite;
+		}
+		/* LOADER 2 */
 		#loader-4 span{
 			display: inline-block;
 			width: 20px;
@@ -19,6 +43,7 @@
 			border-radius: 100%;
 			background-color: #3498db;
 			margin: 35px 5px;
+			/* margin: 5px; */
 			opacity: 0;
 		}
 		#loader-4 span:nth-child(1){
@@ -38,6 +63,24 @@
 			60%{
 				opacity: 1;
 			}
+		}
+		
+		.loading-modal .modal-dialog{
+			/* display: table;
+			position: relative;
+			margin: 0 auto;
+			top: calc(50% - 24px); */
+			display: flex;
+			top: calc(43% - 24px);
+			flex-wrap: wrap;
+			justify-content: center;
+			align-content: center;
+		}
+		
+		.loading-modal .modal-dialog .modal-content{
+			/* background-color: transparent; */
+			border: none;
+			border-radius: 20px;
 		}
 	</style>
 @stop
@@ -123,13 +166,17 @@
 		//initial run
 		loadTable($("#namaCounter").val(), today , today);
 		filterTableByCounter();
+
+		$.fn.loading = function(status){
+			this.modal(status)
+		}
 	});
 
 	function loadTable(namaCounter = null,tglAwal = null,tglAkhir = null){
 		var loading = '<div class="loader" id="loader-4"><span></span><span></span><span></span></div>'
 		var url = "{{route('riwayatAntrianKonterPoli')}}";
 		var x = $('#dataTable').dataTable({
-         destroy: true,
+			destroy: true,
 			scrollX: true,
 			bPaginate: true,
 			bFilter: true,

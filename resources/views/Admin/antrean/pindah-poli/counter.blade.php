@@ -1,8 +1,8 @@
 <div class="modal fade" id="pindah-poli" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" 
-{{-- data-bs-backdrop="static" --}}
-data-backdrop="static"
-{{-- data-keyboard="false" --}}
-{{-- data-bs-keyboard="true" --}}
+	{{-- data-bs-backdrop="static" --}}
+	data-backdrop="static"
+	{{-- data-keyboard="false" --}}
+	{{-- data-bs-keyboard="true" --}}
 >
 	<div class="modal-dialog" role="document" style="width:70%;">
 		<div class="modal-content">
@@ -15,6 +15,9 @@ data-backdrop="static"
 					<input type="hidden" name="id_antrian" id="id_antrian" value="{{ (isset($data) ? $data->id : '')}}">
 					<div class="col-md-12">
 						<table class="table table-striped">
+							{{-- <tr>
+								<td colspan="3"><div class="loader-edit-antrian" id="loader-2"><span></span><span></span><span></span></div></td>
+							</tr> --}}
 							<tr> {{-- nomor antrian --}}
 								<td>No. Antrian</td>
 								<td>:</td>
@@ -72,37 +75,39 @@ data-backdrop="static"
 								<td>:</td>
 								<td>{{$data->tm_customer ? $data->tm_customer->Telp : '-'}}</td>
 							</tr>
-                     {{-- jenis pasien --}}
-							{{-- <tr>
+							{{-- jenis pasien --}}
+							<tr>
 								<td>Jenis Pasien</td>
 								<td>:</td>
 								<td>
 									<input type="hidden" id="jenis-pasien" value="{{$data->jenis_pasien}}">
 									<input type="hidden" id="jenis-pasien-temp" value="{{$data->jenis_pasien}}">
 									<select name="jenis_pasien" id="jenis_pasien" class="form-control select2" style="width: 75%;">
-										<option value="">.:: Jenis Pasien ::.</option>
+										<option value="" disabled>-- JENIS PASIEN --</option>
 										<option @if(isset($data) && $data->jenis_pasien == 'UMUM') selected @endif value="UMUM">UMUM</option>
 										<option @if(isset($data) && $data->jenis_pasien == 'BPJS') selected @endif value="BPJS">BPJS</option>
 										<option @if(isset($data) && $data->jenis_pasien == 'ASURANSILAIN') selected @endif value="ASURANSILAIN">ASURANSI LAINNYA</option>
 									</select>
 								</td>
-							</tr> --}}
-                     {{-- pembayaran pasien --}}
-							{{-- <tr>
-								<td>Pembayaran Pasien</td>
+							</tr>
+							{{-- pembayaran pasien --}}
+							<tr>
+								<td>PEMBAYARAN PASIEN</td>
 								<td>:</td>
 								<td>
 									<input type="hidden" id="pembayaran-pasien" value="{{$data->pembayaran_pasien}}">
 									<input type="hidden" id="pembayaran-pasien-temp" value="{{$data->pembayaran_pasien}}">
 									<select name="pembayaran_pasien" id="pembayaran_pasien" class="form-control select2" style="width: 75%;">
-										<option value="">.:: Pembayaran Pasien ::.</option>
-										@foreach($jenis_pasien as $jp)
+										<option value="">-- PEMBAYARAN PASIEN --</option>
+										{{-- @foreach($jenis_pasien as $jp) --}}
+										@foreach($jenis_pasien_detail as $jp)
 											<option
-												value="{{$jp->nilaichar}}"
+												value="{{$jp->subgroups}}"
 												{{
 													(
-														($data->jenis_pasien=='BPJS' && $data->pembayaran_pasien=="" && $jp->nilaichar=='BPJS NON PBI ')
-														|| ($data->pembayaran_pasien==$jp->nilaichar)
+														// ($data->jenis_pasien=='BPJS' && $data->pembayaran_pasien=="" && $jp->nilaichar=='BPJS NON PBI ')
+														// ||
+														($data->pembayaran_pasien==$jp->subgroups)
 													)
 													? 'selected' : ''
 												}}
@@ -110,7 +115,7 @@ data-backdrop="static"
 										@endforeach
 									</select>
 								</td>
-							</tr> --}}
+							</tr>
 							<tr> {{-- poli tujuan --}}
 								<td>Poli Tujuan</td>
 								<td>:</td>
@@ -236,6 +241,25 @@ data-backdrop="static"
 	</div>
 </div>
 
+
+<div class="modal fade loading-modal" data-backdrop="static" data-keyboard="false" tabindex="-1">
+	<div class="modal-dialog modal-sm">
+		{{-- <div class="modal-content" style="width: 48px">
+			<span class="fa fa-spinner fa-spin fa-3x"></span> --}}
+		<div class="modal-content">
+			<div class="loader-edit-antrian" id="loader-2"><span></span><span></span><span></span></div>
+		</div>
+	</div>
+</div>
+{{-- <div class="modal" id="modal-loading" data-backdrop="static">
+	<div class="modal-dialog modal-sm">
+		<div class="modal-content">
+			<div class="modal-body text-center">
+				<div class="loader-edit-antrian" id="loader-2"><span></span><span></span><span></span></div>
+			</div>
+		</div>
+	</div>
+</div> --}}
 
 {{-- <div class="content col-lg-12 col-md-12 col-sm-12 col-xs-12" id="pindah-poli" style="min-height: 0px;">
 	<div class="box box-primary detailCounter">
@@ -388,6 +412,7 @@ data-backdrop="static"
 		$('#pindah-poli').modal('show')
 	})
 
+
 	// Remove focus select2
 	function hideSelect2Keyboard(e){
 		$('.select2-search input, :focus,input').prop('focus',false).blur();
@@ -399,43 +424,111 @@ data-backdrop="static"
 
 	$('#jenis_pasien').change(async(e)=>{
 		const $this = $(e.currentTarget)
-		jenisPasienAsli = $('#jenis-pasien').val()
-		jenisPasienTemp = $('#jenis-pasien-temp').val()
-		pembayaranPasienAsli = $('#pembayaran-pasien').val()
-		pembayaranPasienTemp = $('#pembayaran-pasien-temp').val()
+			jenisPasienAsli = $('#jenis-pasien').val()
+			jenisPasienTemp = $('#jenis-pasien-temp').val()
+			pembayaranPasienAsli = $('#pembayaran-pasien').val()
+			pembayaranPasienTemp = $('#pembayaran-pasien-temp').val()
+			jenisPasien = $this.val()
+		let data = {!!$jenis_pasien!!}
+		if(jenisPasien=='UMUM'){
+			data = $.grep(data, function(v){
+				// console.log(`${v.subgroups} - ${v.nilaichar}`)
+				if(v.subgroups=='1001'){
+					return v
+				}
+			})
+		}else if(jenisPasien=='BPJS'){
+			data = $.grep(data, function(v){
+				// console.log(`${v.subgroups} - ${v.nilaichar}`)
+				if(jQuery.inArray(v.subgroups,['1007','1008'])!==-1){
+					return v
+				}
+			})
+		}else if(jenisPasien=='ASURANSILAIN'){
+			data = $.grep(data, function(v){
+				// console.log(`${v.subgroups} - ${v.nilaichar}`)
+				if(jQuery.inArray(v.subgroups,['1001','1007','1008'])===-1){
+					return v
+				}
+			})
+		}
 
-		await hideSelect2Keyboard
-		if($this.val()!=jenisPasienAsli){
-			$('#btn-simpan').show()
-			// swal({
-			// 	title:"Konfirmasi!",
-			// 	text:"Apakah anda yakin ingin merubah poli tujuan?",
-			// 	type:"info",
-			// 	showCancelButton: true,
-			// 	confirmButtonColor: "#DD6B55",
-			// 	confirmButtonText: "Saya yakin!",
-			// 	cancelButtonText: "Batal!",
-			// 	allowOutsideClick: false,
-			// },
-			// function(isConfirm){
-			// 	if(isConfirm){
-			// 		$('#jenis-pasien-temp').val($this.val())
-			// 		if($this.val()=='BPJS'){
-			// 			$('#pembayaran_pasien').val('BPJS NON PBI ').trigger('change')
-			// 		}else{
-			// 			$('#pembayaran_pasien').val('').trigger('change')
-			// 		}
-			// 	}else{
-			// 		$this.val(jenisPasienTemp).trigger('change')
-			// 	}
-			// })
-		}else{
-			$('#btn-simpan').hide()
+		$("#pembayaran_pasien").empty().trigger('change')
+		let newStateVal = '-- PEMBAYARAN PASIEN --'
+			newState = new Option(newStateVal, '', true, true);
+		// Append it to the select
+		$("#pembayaran_pasien").append(newState)
+		$.each(data,(i,val)=>{
+			// Create the DOM option that is pre-selected by default
+			newStateStr = val.nilaichar
+			newStateVal = val.subgroups
+			newState = new Option(newStateStr, newStateVal, false, false);
+			// Append it to the select
+			$("#pembayaran_pasien").append(newState)
+		})
+		$("#pembayaran_pasien").val('').trigger('change')
+	})
+	$('#pembayaran_pasien').change((e)=>{
+		const $this = $(e.currentTarget)
+			idAntrian = $('#id_antrian').val()
+
+		let jenisPasien = $('#jenis_pasien').val()
+			pembayaranPasienAsli = $('#pembayaran-pasien').val()
+			pembayaranPasienTemp = $('#pembayaran-pasien-temp').val()
+
+		if($this.val() && $this.val()!=pembayaranPasienTemp){
+			swal({
+				title:"Konfirmasi!",
+				text:"Apakah anda yakin ingin merubah penjamin pasien?",
+				type:"info",
+				showCancelButton: true,
+				confirmButtonColor: "#DD6B55",
+				confirmButtonText: "Saya yakin!",
+				cancelButtonText: "Batal!",
+				allowOutsideClick: false,
+			},
+			function(isConfirm){
+				if(isConfirm){
+					const obj = {
+						id_antrian: idAntrian,
+						jenis_pasien: jenisPasien,
+						pembayaran_lama: pembayaranPasienAsli,
+						pembayaran_baru: $this.val()
+					}
+					$('.loading-modal').modal('show')
+					$.post('{{route("counter.gantiPenjamin")}}',obj).done((data, status, xhr)=>{
+						$('#pembayaran-pasien-temp').val($this.val())
+						setTimeout(() => {
+							$('.loading-modal').modal('hide')
+							let title = xhr.status==204 ? 'Whoops..' : 'Berhasil'
+								message = xhr.status==204 ? 'Antrian tidak ditemukan' : 'Penjamin berhasil dirubah'
+								type = xhr.status==204 ? 'warning' : 'success'
+							swal({
+								title: title,
+								text: message,
+								type: type,
+								showCancelButton: false,
+							})
+						}, 300)
+					}).fail((e)=>{
+						console.log(e)
+						$this.val(pembayaranPasienTemp).trigger('change')
+						setTimeout(() => {
+							$('.loading-modal').modal('hide')
+							swal({
+								title: 'Whoops..',
+								text: e.responseJSON.metadata.message,
+								type: e.status==500?'error':'warning',
+								showCancelButton: false,
+							})
+						}, 300)
+					})
+				}else{
+					$this.val(pembayaranPasienTemp).trigger('change')
+				}
+			})
 		}
 	})
-   $('#pembayaran_pasien').change((e)=>{
-      console.log('jenis pembayaran')
-   })
 
 	$('#poli').change(async(e)=>{
 		const $this = $(e.currentTarget)
@@ -455,9 +548,6 @@ data-backdrop="static"
 				confirmButtonText: "Saya yakin!",
 				cancelButtonText: "Batal!",
 				allowOutsideClick: false,
-				// allowEnterKey: true,
-				// focusConfirm: true,
-				// allowEscapeKey: false,
 			},
 			function(isConfirm){
 				if(isConfirm){
@@ -469,10 +559,12 @@ data-backdrop="static"
 						poli_bpjs_baru: $this.val()
 						// poli_bpjs_baru: $('#poli').val()
 					}
+					$('.loading-modal').modal('show')
 					$.post('{{route("counter.resetNomorAntrianPoli")}}',obj).done((data, status, xhr)=>{
 						$('#nopoli').html('-')
 						$('.btn-generate').show()
 						setTimeout(() => {
+							$('.loading-modal').modal('hide')
 							let title = xhr.status==204 ? 'Whoops..' : 'Berhasil'
 								message = xhr.status==204 ? 'Antrian tidak ditemukan' : 'Poli berhasil dipindah, silahkan generate nomor antrian poli!'
 								type = xhr.status==204 ? 'warning' : 'success'
@@ -486,6 +578,7 @@ data-backdrop="static"
 					}).fail((e)=>{
 						console.log(e)
 						setTimeout(() => {
+							$('.loading-modal').modal('hide')
 							swal({
 								title: 'Whoops..',
 								text: e.responseJSON.metadata.message,
@@ -513,11 +606,6 @@ data-backdrop="static"
 		}
 	})
 	$('#btn-batal,.close').click(()=>{
-		// if($('#btn-simpan').is(":visible")){
-		// 	console.log('buang perubahan?')
-		// }else{
-		// 	console.log('tidak ada perubahan')
-		// }
 		loadTable($("#namaCounter").val(), today , today)
 		setTimeout(()=>{
 			$('.other-page').empty()
@@ -653,31 +741,4 @@ data-backdrop="static"
 			})
 		}
 	}
-
-	// $('#poli').change(function(){
-	// 	var id = $('#id_antrian').val();
-	// 	var noPoli = $('#nomorAntrianPoli').val();
-	// 	swal({
-	// 		title:"Konfirmasi !",
-	// 		text:"Apakah anda yakin ingin merubah poli tujuan?",
-	// 		type:"info",
-	// 		showCancelButton: true,
-	// 		confirmButtonColor: "#DD6B55",
-	// 		confirmButtonText: "Saya yakin!",
-	// 		cancelButtonText: "Batal!",
-	// 	},
-	// 	function(){
-	// 		$.post("{!! route('resetCounter') !!}",{id:id, noPoli:noPoli}).done(function(data){
-	// 			if (data.status == 'success') {
-	// 				$('#nopoli').html('-')
-	// 				// $('#tempat-generate').empty()
-	// 				$('#tempat-generate').html('<button style="margin-left: 50px;" type="button" class="btn btn-sm btn-success btn-generate" onclick="generate(`'+id+'`)"> Generate No</button>')
-	// 				$('.btn-generate').show()
-	// 				swal('Berhasil', data.message, 'success');
-	// 			}else{
-	// 				swal('Gagal', data.message, 'error');
-	// 			}
-	// 		})
-	// 	})
-	// });
 </script>

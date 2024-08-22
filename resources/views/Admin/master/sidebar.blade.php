@@ -73,7 +73,7 @@
 				</ul>
 			</li>
 			<li class=''>
-				<a href="{{ route('holiday') }}">
+				<a href="{{ route('holiday.main') }}">
 					<i class="fa fa-calendar"></i> <span>Tanggal Libur</span></i>
 				</a>
 			</li>

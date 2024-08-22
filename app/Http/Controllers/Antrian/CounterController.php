@@ -113,13 +113,21 @@ class CounterController extends Controller{
 
 	public function pindahPoli(Request $request){
 		$data['data'] = Antrian::with(['tm_customer','mapping_poli_bridging.tm_poli'])
-		// ->where('kode_booking', $request->id)
 		->where('id', $request->id)
 		->first();
 
-		$data['poli'] = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
-		->get();
+		$data['poli'] = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')->get();
 		$data['jenis_pasien'] = Rsu_setupall::where('groups','Asuransi')->get();
+		$data['jenis_pasien_detail'] = collect($data['jenis_pasien'])->filter(function($item)use($data){
+			$jenisPasien = $data['data']->jenis_pasien;
+			if(
+				($jenisPasien=='ASURANSILAIN' && !in_array($item->subgroups,['1001','1007','1008']))
+				|| ($jenisPasien=='BPJS' && in_array($item->subgroups,['1007','1008']))
+				|| ($jenisPasien=='UMUM' && in_array($item->subgroups,['1001']))
+			){
+				return $item;
+			}
+		})->values();
 		// $id = $request->id;
 		$content = view('Admin.antrean.pindah-poli.counter',$data)->render();
 		return response()->json([
@@ -128,6 +136,7 @@ class CounterController extends Controller{
 				'message'=> 'Oke',
 			],
 			'response' => $content
+			// 'response' => $data
 		]);
 	}
 
@@ -135,14 +144,6 @@ class CounterController extends Controller{
 	 * @param string $request
 	 */
 	public function resetNomorAntrianPoli(Request $request){
-		// return response()->json([
-		// 	'metadata' => [
-		// 		'code' => 400,
-		// 		'message' => 'Poli tujuan tidak bisa dirubah, pasien sudah pernah berkunjung di poli tersebut hari ini',
-		// 	]
-		// ],200);
-		// return $request->all();
-		// {"id_antrian":"301758","kode_poli_lama":"JAN","kode_poli_baru":"BED"}
 		$poliBpjsLama = $request->poli_bpjs_lama;
 		$poliBpjsBaru = $request->poli_bpjs_baru;
 		try{
@@ -184,37 +185,15 @@ class CounterController extends Controller{
 				$kodeRS['poli_rs_baru'] = $kodeRS['poli_rs_lama'];
 			}
 			$request->merge($kodeRS);
-			// return $request->all();
-			// 'belum','panggil','counter','batal','panggilpoli','antripoli','antrifarmasi','akhirpoli','layanpoli','pangggilpoli','akhirfarmasi','panggilfarmasi'
-			// 'belum','panggil','counter','panggilpoli','antripoli','layanpoli','pangggilpoli'
-			// if(!in_array($antrian->status,['belum','panggil'])){
-			// 	$antrian->kode_poli = $request;
-			// }elseif(in_array($antrian->status,['antrifarmasi','panggilfarmasi','akhirfarmasi'])){
-			// }
 
-			// if(in_array($antrian->status,['belum','panggil','counter','panggilpoli','antripoli','layanpoli','pangggilpoli'])){
-			// 	# Code..
-			// }
 			$antrian->kode_poli = $poliBpjsBaru;
 			$antrian->nomor_antrian_poli = null;
 			if(in_array($antrian->status,['antripoli','panggilpoli','layanpoli'])){
 				$antrian->status = 'antripoli';
 			}
 			$antrian->save();
-			// DB::connection('dbrsud')->table('tr_registrasi')->select('Kode_Poli1')->where([
-			// 	'No_RM'=>$antrian->no_rm,
-			// 	'Kode_Poli1'=>$request->poli_rs_lama
-			// ])
-			// ->whereDate('Tgl_Register','=',$antrian->tgl_periksa)
-			// ->first();
-			// return response()->json([
-			// 	'metadata' => [
-			// 		'code' => 200,
-			// 		'message' => 'Oke'
-			// 	],
-			// 	'response' => $antrian
-			// 	// 'response' => $request->all()
-			// ],200);
+
+			# Update kode-poli-rs di tr_registrasi
 			DB::connection('dbrsud')->table('tr_registrasi')
 			->where([
 				'No_RM'=>$antrian->no_rm,
@@ -222,7 +201,6 @@ class CounterController extends Controller{
 			])
 			->whereDate('Tgl_Register','=',$antrian->tgl_periksa)
 			->update(['Kode_Poli1'=>"$request->poli_rs_baru"]);
-			// return response()->json($t);
 			return response()->json([
 				'metadata' => [
 					'code' => 200,
@@ -231,9 +209,6 @@ class CounterController extends Controller{
 				'response' => $antrian
 			],200);
 		}catch(\Throwable $e){
-			// $e->getFile(); # Get location file error
-			// $e->getMessage(); # Get error message
-			// $e->getLine(); # Get line error
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -241,7 +216,46 @@ class CounterController extends Controller{
 				],
 			],500);
 		}
-		// return Antrian::where('id',$request->id_antrian)->first();
-		return $request->all();
+	}
+
+	public function gantiPenjamin(Request $request){
+		try{
+			if(!($antrian = Antrian::where('id',$request->id_antrian)->first())){
+				return response()->json([
+					'metadata' => [
+						'code' => 204
+					]
+				],204);
+			}
+			$request->merge([
+				'poli_rs' => Rsu_Bridgingpoli::where('kdpoli',$antrian->kode_poli)->first()->kdpoli_rs
+			]);
+			$antrian->jenis_pasien = $request->jenis_pasien;
+			$antrian->pembayaran_pasien = $request->pembayaran_baru;
+			$antrian->save();
+
+			# Update penjamin di tr_registrasi
+			DB::connection('dbrsud')->table('tr_registrasi')
+				->where([
+					'No_RM'=>$antrian->no_rm,
+					'Kode_Poli1'=>$request->poli_rs
+				])
+				->whereDate('Tgl_Register','=',$antrian->tgl_periksa)
+				->update(['Kode_Ass'=>"$antrian->pembayaran_pasien"]);
+			return response()->json([
+				'metadata' => [
+					'code' => 200,
+					'message' => 'Oke'
+				],
+				'response' => $antrian
+			],200);
+		}catch(\Throwable $e){
+			return response()->json([
+				'metadata' => [
+					'code' => 500,
+					'message' => 'Terjadi kesalahan sistem'
+				],
+			],500);
+		}
 	}
 }

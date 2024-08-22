@@ -237,6 +237,7 @@ Route::group(['middleware' => 'auth'], function() {
 				Route::get('/','Antrian\CounterController@formListCounter')->name('formListCounter');
 				Route::post('pindah-poli','Antrian\CounterController@pindahPoli')->name('pindahPoli');
 				Route::post('reset-nomor-antrian-poli','Antrian\CounterController@resetNomorAntrianPoli')->name('resetNomorAntrianPoli');
+				Route::post('ganti-penjamin','Antrian\CounterController@gantiPenjamin')->name('gantiPenjamin');
 			});
 
 			Route::group(['prefix'=>'pasien'],function(){
@@ -499,8 +500,9 @@ Route::group(['middleware' => 'auth'], function() {
 		});
 
 		# Tanggal Libur
-		Route::group(['prefix'=>'tanggal-libur'], function(){
-			Route::get('/','HolidayController@main')->name('holiday');
+		Route::group(['prefix'=>'tanggal-libur', 'as'=>'holiday.'], function(){
+			Route::get('/','HolidayController@main')->name('main');
+			Route::post('form','HolidayController@form')->name('form');
 			Route::post('datagrid','HolidayController@datagrid')->name('holidayDatagrid');
 			Route::post('datagridKuotaPoli','HolidayController@datagridKuotaPoli')->name('holidayDatagridKuotaPoli');
 			Route::post('datagridLiburPoli','HolidayController@datagridLiburPoli')->name('holidayDatagridLiburPoli');
