@@ -1113,7 +1113,7 @@
 				// 						$pushToResJadDok = (object)[
 				// 							'kodesubspesialis' => $row['polibpjs'],
 				// 							'hari'=> 0,
-				// 							'kapasitaspasien'=> 50,
+				// 							'kapasitaspasien'=> 40,
 				// 							'libur'=> 0,
 				// 							'namahari'=> '',
 				// 							'jadwal'=> $timeDokter,
@@ -1209,7 +1209,7 @@
 					// 		$pushToResJadDok = (object)[
 					// 			'kodesubspesialis' => $paramRef[2]['polibpjs'],
 					// 			'hari'=> 0,
-					// 			'kapasitaspasien'=> 50,
+					// 			'kapasitaspasien'=> 40,
 					// 			'libur'=> 0,
 					// 			'namahari'=> '',
 					// 			'jadwal'=> $timeDokter,
@@ -1426,7 +1426,7 @@
 
 		$request->merge(['nama_hari' => date('D', strtotime($tanggal))]);
 		$namaHari = namaHari($request);
-		if(($namaHari=='Selasa' && $total >= 50) || ($namaHari=='Kamis' && $total >= 30)){
+		if(($namaHari=='Selasa' && $total >= 30) || ($namaHari=='Kamis' && $total >= 30)){
 			$ignorePoli .= ",'017'"; # 017 => onkologi
 		}
 		return $ignorePoli;
@@ -1482,7 +1482,7 @@
 				$num++;
 				$request->merge(['nama_hari' => $dt]);
 				$namaHari = namaHari($request);
-				$limit = $namaHari=='Selasa' ? 50 : 30;
+				$limit = $namaHari=='Selasa' ? 30 : 30;
 				$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
 			}else{
 				$num = $num> 0 ? $num-- : 0;
@@ -1852,7 +1852,7 @@
 			}else{
 				$msg = "Format Tanggal Lahir Tidak Sesuai!\n";
 			}
-			$msg .= "Copy Format Dibawah ini, isi Tanggal Lahir Anda (Cth. *Tanggal Lahir : 30-05-1995* , lalu kirim pesan).\n\n";
+			$msg .= "Copy Format Dibawah ini, isi Tanggal Lahir Anda (Cth. *Tanggal Lahir : 01-05-1995* , lalu kirim pesan).\n\n";
 			$msg .= "Tanggal Lahir : dd-mm-yyyy";
 		}else if($p1=='ibu'){
 			if($p2=='berhasil'){
@@ -1923,7 +1923,7 @@
 	}
 
 	function expPasienBaru($explode1){
-		//$waText = "Nama : Dwi\nNIK : 3515012710010001\nTanggal Lahir : 30-01-2022\nNama Ibu Kandung : Ibu Dwi\nAlamat : \nTanggal Rencana Berobat : 30-01-2022\nCara Bayar : UMUM";
+		//$waText = "Nama : Dwi\nNIK : 3515012710010001\nTanggal Lahir : 01-01-2022\nNama Ibu Kandung : Ibu Dwi\nAlamat : \nTanggal Rencana Berobat : 01-01-2022\nCara Bayar : UMUM";
 		$arr = [];
 		foreach($explode1 as $key => $val){
 			$explode2 = explode(":",$val)[1];
