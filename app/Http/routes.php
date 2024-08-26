@@ -502,6 +502,8 @@ Route::group(['middleware' => 'auth'], function() {
 		# Tanggal Libur
 		Route::group(['prefix'=>'tanggal-libur', 'as'=>'holiday.'], function(){
 			Route::get('/','HolidayController@main')->name('main');
+			Route::post('/','HolidayController@store')->name('store');
+			Route::post('data-table','HolidayController@dataTable')->name('dataTable');
 			Route::post('form','HolidayController@form')->name('form');
 			Route::post('datagrid','HolidayController@datagrid')->name('holidayDatagrid');
 			Route::post('datagridKuotaPoli','HolidayController@datagridKuotaPoli')->name('holidayDatagridKuotaPoli');

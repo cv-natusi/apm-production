@@ -108,7 +108,7 @@ class WablasController extends Controller{
 		$dataPasien = DB::connection('mysql')->table('bot_data_pasien')
 			->where([
 				'idBots'      => $request->id,
-				'tglBerobat'  => $dateCur
+				// 'tglBerobat'  => $dateCur
 			])->first();
 
 		if(!empty($dataBot)){
@@ -116,10 +116,10 @@ class WablasController extends Controller{
 			$cekPas = $dataBot->pasien_baru;
 			$data['phone'] = $dataBot->phone;
 			$bool = $timeCur2<$jamBuka && $tglBerobat==$dateCur;
-			if($dataPasien->kodePoli=='017' && $tglBerobat=='2024-08-05'){
-				$txt = "<p style='text-align:center; font-weight:600; font-size:2.5rem; margin-top:4%;'>MOHON MAAF, KUOTA POLI ONKOLOGI SAAT INI SUDAH PENUH</p>";
-				return $txt;
-			}
+			// if($dataPasien->kodePoli=='017' && $tglBerobat=='2024-08-05'){
+			// 	$txt = "<p style='text-align:center; font-weight:600; font-size:2.5rem; margin-top:4%;'>MOHON MAAF, KUOTA POLI ONKOLOGI SAAT INI SUDAH PENUH</p>";
+			// 	return $txt;
+			// }
 			if($tglBerobat > $dateCur || $bool){
 				$data['pesan1'] = "Mohon Maaf URL Belum Aktif!";
 				$data['pesan2'] = $bool ? "URL akan aktif pada jam $jamBuka WIB" : "URL hanya berlaku pada tanggal yang didaftarkan!";

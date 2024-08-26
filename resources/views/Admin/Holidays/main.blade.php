@@ -19,13 +19,13 @@
 	@if(session('kuota_poli'))
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
-				$('.btn-kuota-poli').click();
+				$('.btn-kuota-poli').click()
 			});
 		</script>
 	@elseif(session('libur_poli'))
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
-				$('.btn-libur-poli').click();
+				$('.btn-libur-poli').click()
 			});
 		</script>
 	@endif
@@ -83,6 +83,7 @@
 					<div class="modal-dialog"></div>
 				</div>
 			</div>
+
 			{{-- Kuota Poli --}}
 			<div class="kuota-poli" style="display: none">
 				<div class='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
@@ -130,6 +131,7 @@
 					<div class="modal-dialog"></div>
 				</div>
 			</div>
+
 			{{-- Libur Poli --}}
 			<div class="libur-poli" style="display: none">
 				<div class='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
@@ -202,16 +204,16 @@
 				{field: 'keterangan', title: 'Keterangan', editable: false, sortable: true, width: 150, align: 'left', search: true},
 				{field: 'edit', title: 'Edit', editable: false, sortable: true, width: 100, align: 'center', search: false,
 					rowStyler: function(rowData, rowIndex) {
-						return edit(rowData, rowIndex);
+						return edit(rowData, rowIndex)
 					}
 				},
 				{field: 'hapus', title: 'Delete', editable: false, sortable: true, width: 100, align: 'center', search: true,
 					rowStyler: function(rowData, rowIndex) {
-						return hapus(rowData, rowIndex);
+						return hapus(rowData, rowIndex)
 					}
 				}
 			]
-		});
+		})
 
 		var datagridKuotaPoli = $("#datagridKuotaPoli").datagrid({
 			url                     : "{!! route('holidayDatagridKuotaPoli') !!}",
@@ -231,16 +233,16 @@
 				{field: 'keterangan', title: 'Keterangan', editable: false, sortable: true, width: 150, align: 'left', search: true},
 				{field: 'edit', title: 'Edit', editable: false, sortable: true, width: 100, align: 'center', search: false,
 					rowStyler: function(rowData, rowIndex) {
-						return editKuotaPoli(rowData, rowIndex);
+						return editKuotaPoli(rowData, rowIndex)
 					}
 				},
 				{field: 'hapus', title: 'Delete', editable: false, sortable: true, width: 100, align: 'center', search: true,
 					rowStyler: function(rowData, rowIndex) {
-						return hapusKuotaPoli(rowData, rowIndex);
+						return hapusKuotaPoli(rowData, rowIndex)
 					}
 				}
 			]
-		});
+		})
 
 		var datagridLiburPoli = $("#datagridLiburPoli").datagrid({
 			url                     : "{!! route('holidayDatagridLiburPoli') !!}",
@@ -258,106 +260,106 @@
 				{field: 'keterangan', title: 'Keterangan', editable: false, sortable: true, width: 150, align: 'left', search: true},
 				{field: 'edit', title: 'Edit', editable: false, sortable: true, width: 100, align: 'center', search: false,
 					rowStyler: function(rowData, rowIndex) {
-						return editLiburPoli(rowData, rowIndex);
+						return editLiburPoli(rowData, rowIndex)
 					}
 				},
 				{field: 'hapus', title: 'Delete', editable: false, sortable: true, width: 100, align: 'center', search: true,
 					rowStyler: function(rowData, rowIndex) {
-						return hapusLiburPoli(rowData, rowIndex);
+						return hapusLiburPoli(rowData, rowIndex)
 					}
 				}
 			]
-		});
+		})
 
 		$(document).ready(function() {
-			datagrid.run();
-			datagridKuotaPoli.run();
-			datagridLiburPoli.run();
+			datagrid.run()
+			datagridKuotaPoli.run()
+			datagridLiburPoli.run()
 		});
 
 		$('#btn-add').click(function(){
-			$('.loading').show();
-			$('.main-layer').hide();
+			$('.loading').show()
+			$('.main-layer').hide()
 			$.post("{!! route('formAddHoliday') !!}").done(function(data){
 				if(data.status == 'success'){
-					$('.loading').hide();
-					$('.other-page').html(data.content).fadeIn();
+					$('.loading').hide()
+					$('.other-page').html(data.content).fadeIn()
 				} else {
-					$('.main-layer').show();
+					$('.main-layer').show()
 				}
-			});
-		});
+			})
+		})
 
 		$('#btn-add-kuota-poli').click(function(){
 			$('.loading').show();
 			$('.main-layer').hide();
 			$.post("{!! route('formAddKuotaPoliHoliday') !!}").done(function(data){
 				if(data.status == 'success'){
-					$('.loading').hide();
-					$('.other-page').html(data.content).fadeIn();
+					$('.loading').hide()
+					$('.other-page').html(data.content).fadeIn()
 				} else {
-					$('.main-layer').show();
+					$('.main-layer').show()
 				}
-			});
-		});
+			})
+		})
 
 		$('#btn-add-libur-poli').click(function(){
-			$('.loading').show();
-			$('.main-layer').hide();
+			$('.loading').show()
+			$('.main-layer').hide()
 			$.post("{!! route('formAddLiburPoliHoliday') !!}").done(function(data){
 				if(data.status == 'success'){
-					$('.loading').hide();
-					$('.other-page').html(data.content).fadeIn();
+					$('.loading').hide()
+					$('.other-page').html(data.content).fadeIn()
 				} else {
-					$('.main-layer').show();
+					$('.main-layer').show()
 				}
-			});
-		});
+			})
+		})
 
 		function updated(rowIndex){
-			var rowData = datagrid.getRowData(rowIndex);
-			$('.loading').show();
-			$('.main-layer').hide();
+			var rowData = datagrid.getRowData(rowIndex)
+			$('.loading').show()
+			$('.main-layer').hide()
 			$.post("{!! route('formUpdateHoliday') !!}", {id:rowData.id_holiday}).done(function(data){
 				if(data.status == 'success'){
-					$('.loading').hide();
-					$('.other-page').html(data.content).fadeIn();
+					$('.loading').hide()
+					$('.other-page').html(data.content).fadeIn()
 				} else {
-					$('.main-layer').show();
+					$('.main-layer').show()
 				}
-			});
+			})
 		}
 
 		function updatedKuotaPoli(rowIndex){
-			var rowData = datagridKuotaPoli.getRowData(rowIndex);
-			$('.loading').show();
-			$('.main-layer').hide();
+			var rowData = datagridKuotaPoli.getRowData(rowIndex)
+			$('.loading').show()
+			$('.main-layer').hide()
 			$.post("{!! route('formUpdateKuotaPoliHoliday') !!}", {id:rowData.id_holiday}).done(function(data){
 				if(data.status == 'success'){
-					$('.loading').hide();
-					$('.other-page').html(data.content).fadeIn();
+					$('.loading').hide()
+					$('.other-page').html(data.content).fadeIn()
 				} else {
-					$('.main-layer').show();
+					$('.main-layer').show()
 				}
-			});
+			})
 		}
 
 		function updatedLiburPoli(rowIndex){
-			var rowData = datagridLiburPoli.getRowData(rowIndex);
-			$('.loading').show();
-			$('.main-layer').hide();
+			var rowData = datagridLiburPoli.getRowData(rowIndex)
+			$('.loading').show()
+			$('.main-layer').hide()
 			$.post("{!! route('formUpdateLiburPoliHoliday') !!}", {id:rowData.id_holiday}).done(function(data){
 				if(data.status == 'success'){
-					$('.loading').hide();
-					$('.other-page').html(data.content).fadeIn();
+					$('.loading').hide()
+					$('.other-page').html(data.content).fadeIn()
 				} else {
-					$('.main-layer').show();
+					$('.main-layer').show()
 				}
-			});
+			})
 		}
 
 		function deleted(rowIndex) {
-			var rowData = datagrid.getRowData(rowIndex);
+			var rowData = datagrid.getRowData(rowIndex)
 			swal(
 				{
 					title: "Apa anda yakin Menghapus Tanggal Libur Ini?",
@@ -372,16 +374,16 @@
 				function(){
 					$.post("{!! route('deleteHoliday') !!}", {id:rowData.id_holiday}).done(function(data){
 						if(data.status == 'success'){
-							datagrid.reload();
-							swal("Success!", "Tanggal Berhasil Dihapus", "success");
+							datagrid.reload()
+							swal("Success!", "Tanggal Berhasil Dihapus", "success")
 						}
-					});
+					})
 				}
-			);
+			)
 		}
 
 		function deletedKuotaPoli(rowIndex) {
-			var rowData = datagridKuotaPoli.getRowData(rowIndex);
+			var rowData = datagridKuotaPoli.getRowData(rowIndex)
 			swal(
 				{
 					title: "Apa anda yakin Menghapus Tanggal Libur Ini?",
@@ -396,16 +398,16 @@
 				function(){
 					$.post("{!! route('deleteKuotaPoliHoliday') !!}", {id:rowData.id_holiday}).done(function(data){
 						if(data.status == 'success'){
-							datagridKuotaPoli.reload();
-							swal("Success!", "Tanggal Berhasil Dihapus", "success");
+							datagridKuotaPoli.reload()
+							swal("Success!", "Tanggal Berhasil Dihapus", "success")
 						}
-					});
+					})
 				}
-			);
+			)
 		}
 
 		function deletedLiburPoli(rowIndex) {
-			var rowData = datagridLiburPoli.getRowData(rowIndex);
+			var rowData = datagridLiburPoli.getRowData(rowIndex)
 			swal(
 				{
 					title: "Apa anda yakin Menghapus Tanggal Libur Ini?",
@@ -420,90 +422,83 @@
 				function(){
 					$.post("{!! route('deleteLiburPoliHoliday') !!}", {id:rowData.id_holiday}).done(function(data){
 						if(data.status == 'success'){
-							datagridLiburPoli.reload();
-							swal("Success!", "Tanggal Berhasil Dihapus", "success");
+							datagridLiburPoli.reload()
+							swal("Success!", "Tanggal Berhasil Dihapus", "success")
 						}
-					});
+					})
 				}
-			);
+			)
 		}
 
 		function edit(rowData, rowIndex) {
-			var tag = '<a href="javascript:void(0)" class="btn btn-sm btn-info m-0" onclick="updated('+rowIndex+')"><span class="fa fa-pencil"></span> &nbsp Edit</a>';
-			return tag;
+			return '<a href="javascript:void(0)" class="btn btn-sm btn-info m-0" onclick="updated('+rowIndex+')"><span class="fa fa-pencil"></span> &nbsp Edit</a>'
 		}
 
 		function editKuotaPoli(rowData, rowIndex) {
-			var tag = '<a href="javascript:void(0)" class="btn btn-sm btn-info m-0" onclick="updatedKuotaPoli('+rowIndex+')"><span class="fa fa-pencil"></span> &nbsp Edit</a>';
-			return tag;
+			return '<a href="javascript:void(0)" class="btn btn-sm btn-info m-0" onclick="updatedKuotaPoli('+rowIndex+')"><span class="fa fa-pencil"></span> &nbsp Edit</a>'
 		}
 
 		function editLiburPoli(rowData, rowIndex) {
-			var tag = '<a href="javascript:void(0)" class="btn btn-sm btn-info m-0" onclick="updatedLiburPoli('+rowIndex+')"><span class="fa fa-pencil"></span> &nbsp Edit</a>';
-			return tag;
+			return '<a href="javascript:void(0)" class="btn btn-sm btn-info m-0" onclick="updatedLiburPoli('+rowIndex+')"><span class="fa fa-pencil"></span> &nbsp Edit</a>'
 		}
 
 		function hapus(rowData, rowIndex) {
-			var tag = '<a href="javascript:void(0)" class="btn btn-sm btn-danger m-0" onclick="deleted('+rowIndex+')"><span class="fa fa-trash-o"></span> &nbsp Hapus</a>';
-			return tag;
+			return '<a href="javascript:void(0)" class="btn btn-sm btn-danger m-0" onclick="deleted('+rowIndex+')"><span class="fa fa-trash-o"></span> &nbsp Hapus</a>'
 		}
 
 		function hapusKuotaPoli(rowData, rowIndex) {
-			var tag = '<a href="javascript:void(0)" class="btn btn-sm btn-danger m-0" onclick="deletedKuotaPoli('+rowIndex+')"><span class="fa fa-trash-o"></span> &nbsp Hapus</a>';
-			return tag;
+			return '<a href="javascript:void(0)" class="btn btn-sm btn-danger m-0" onclick="deletedKuotaPoli('+rowIndex+')"><span class="fa fa-trash-o"></span> &nbsp Hapus</a>'
 		}
 
 		function hapusLiburPoli(rowData, rowIndex) {
-			var tag = '<a href="javascript:void(0)" class="btn btn-sm btn-danger m-0" onclick="deletedLiburPoli('+rowIndex+')"><span class="fa fa-trash-o"></span> &nbsp Hapus</a>';
-			return tag;
+			return '<a href="javascript:void(0)" class="btn btn-sm btn-danger m-0" onclick="deletedLiburPoli('+rowIndex+')"><span class="fa fa-trash-o"></span> &nbsp Hapus</a>'
 		}
 	</script>
 		
 	<script>	
 		$('.btn-libur-nasional').click(function(){
-			$('.libur-nasional').show();
-			$('.kuota-poli').hide();
-			$('.libur-poli').hide();
-		});
+			$('.libur-nasional').show()
+			$('.kuota-poli').hide()
+			$('.libur-poli').hide()
+		})
 		$('.btn-kuota-poli').click(function(){
-			$('.libur-nasional').hide();
-			$('.kuota-poli').show();
-			$('.libur-poli').hide();
+			$('.libur-nasional').hide()
+			$('.kuota-poli').show()
+			$('.libur-poli').hide()
 			$('.btn-libur-nasional').removeClass('btn-success').css({
 				'background-color': '#A9A9A9',
 				'border-color': '#A9A9A9'
-			});
+			})
 			$('.btn-kuota-poli').addClass('btn-success').css({
 				'background-color': '',
 				'border-color': ''
-			});
-		});
+			})
+		})
 		$('.btn-libur-poli').click(function(){
-			$('.libur-nasional').hide();
-			$('.kuota-poli').hide();
-			$('.libur-poli').show();
+			$('.libur-nasional').hide()
+			$('.kuota-poli').hide()
+			$('.libur-poli').show()
 			$('.btn-libur-nasional').removeClass('btn-success').css({
 				'background-color': '#A9A9A9',
 				'border-color': '#A9A9A9'
-			});
+			})
 			$('.btn-libur-poli').addClass('btn-success').css({
 				'background-color': '',
 				'border-color': ''
-			});
-		});
+			})
+		})
 
 		$(document).ready(function (){
 			$('.button button').click(function (){
 				$('.button button').removeClass('btn-success').css({
 					'background-color': '#A9A9A9',
 					'border-color': '#A9A9A9'
-				});
+				})
 				$(this).css({
 					'background-color': '',
 					'border-color': ''
-				}).addClass('btn-success');
+				}).addClass('btn-success')
 			})
-		});
+		})
 	</script>
-
 @stop
