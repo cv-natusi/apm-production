@@ -764,8 +764,9 @@ class RegistrationController extends Controller{
 				}
 			}
 			$tujuanpoli = Rsu_Bridgingpoli::with('tm_poli')->where('kdpoli', $request->kodepoli)->first();
-			# Poli tidak ter-cover BPJS
-			if(in_array($request->kodepoli, ['GIG','GIZ','MCU','PSY','VCT'])){
+
+			# Poli tidak ter-cover BPJS, tidak perlu hit TaskID ke bpsj
+			if(in_array($request->kodepoli, ['ANT','GIG','GIZ','MCU','PSY','VCT'])){
 				DB::commit();
 				return response()->json([
 					'status'=>'success',

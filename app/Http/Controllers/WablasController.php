@@ -492,7 +492,9 @@ class WablasController extends Controller{
 							$ifKode = $dataDokter->kode_poli_bpjs;
 							$conMysql->commit();
 							$conDbrsud->commit();
-							if(in_array($ifKode,['GIG','GIZ','MCU','PSY','VCT'])){
+
+							# Poli tidak ter-cover BPJS, tidak perlu hit TaskID ke bpsj
+							if(in_array($ifKode,['ANT','GIG','GIZ','MCU','PSY','VCT'])){
 								$ceked = 1; # Konfirmasi sukses
 							}else{
 								$addAntrian = new BridgBpjsController;
