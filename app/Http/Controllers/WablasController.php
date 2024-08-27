@@ -493,7 +493,7 @@ class WablasController extends Controller{
 							$conMysql->commit();
 							$conDbrsud->commit();
 
-							# Poli tidak ter-cover BPJS, tidak perlu hit TaskID ke bpsj
+							# Poli tidak ter-cover BPJS, tidak perlu hit TaskID ke bpjs
 							if(in_array($ifKode,['ANT','GIG','GIZ','MCU','PSY','VCT'])){
 								$ceked = 1; # Konfirmasi sukses
 							}else{

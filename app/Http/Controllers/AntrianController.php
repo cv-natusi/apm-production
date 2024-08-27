@@ -225,7 +225,9 @@ class AntrianController extends Controller{
 		//hit to BPJS antreanAdd and updateWaktu
 		try {
 			$ifPoli = $generateReqAntreanLocal['kode_poli'];
-			if(in_array($ifPoli,['GIG','PSY','GIZ','VCT','MCU'])){
+
+			# Poli tidak ter-cover BPJS, tidak perlu hit TaskID ke bpjs
+			if(in_array($ifPoli,['ANT','GIG','GIZ','MCU','PSY','VCT'])){
 				$postAntreanBpjs = 'poli internal';
 			}else{
 				$antreanBpjs = new BridgBpjsController();
