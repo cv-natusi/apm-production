@@ -3,6 +3,44 @@
 @section('extended_css')
 	<!-- DateTimePicker -->
 	<link href="{!! url('AssetsAdmin/datetimepicker/bootstrap-datetimepicker.min.css') !!}" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css" />
+	{{-- <link rel="stylesheet" type="text/css" href="https://select2.github.io/select2-bootstrap-theme/css/select2-bootstrap.css"> --}}
+	<style>
+		.select2-container--default .select2-selection--single .select2-selection__rendered {
+			color: #444;
+			line-height: unset !important;
+		}
+		.select2-container .select2-selection--single .select2-selection__rendered {
+			text-align: center;
+		}
+		.select2-container .select2-selection--single {
+			box-sizing: border-box;
+			cursor: pointer;
+			display: grid;
+			height: 33px;
+			user-select: none;
+			-webkit-user-select: none;
+			align-content: space-around;
+			justify-content: center;
+		}
+
+		/* position text selected select2 */
+		.select2-container .select2-selection--single .select2-selection__rendered {
+			padding-left: 0;
+			padding-right: 0;
+			height: auto;
+			margin-top: -1px;
+		}
+
+		/* arrow icon select2 */
+		.select2-container--default .select2-selection--single .select2-selection__arrow {
+			height: 26px;
+			position: absolute;
+			top: 3px;
+			right: 1px;
+			width: 20px;
+		}
+	</style>
 @stop
 
 @section('content')
@@ -53,6 +91,7 @@
 @stop
 
 @section('script')
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.min.js"></script>
 	<!-- DateTimePicker -->
 	<script src="{!! url('AssetsAdmin/dist/js/ckeditor1/ckeditor.js') !!}"></script>
 	<script src="{!! url('AssetsAdmin/dist/js/ckeditor1/adapters/jquery.js') !!}"></script>

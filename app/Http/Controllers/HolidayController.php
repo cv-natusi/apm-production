@@ -21,8 +21,16 @@ class HolidayController extends Controller{
 
 	public function form(Request $request){
 		// return $request->all();
-		// libur-poli
-		$content = view("Admin.Holidays.$request->jenis.form")->render();
+
+		// $request->merge(['nama_hari_en'=>date('D',strtotime('today'))]);
+		// $namaHariID = Help::namaHariID($request);
+		$poli = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
+			->whereNotIn('kdpoli',['ALG','UGD','ANU'])
+			->groupBy('mapping_poli_bridging.kdpoli_rs')
+			->orderBy('tm_poli.NamaPoli','ASC')
+			->get();
+		// $poli
+		$content = view("Admin.Holidays.$request->jenis.form",['poli'=>$poli])->render();
 		return response()->json([
 			'metadata' => [
 				'code' => 200,
@@ -30,6 +38,23 @@ class HolidayController extends Controller{
 			],
 			'response' => $content
 		],200);
+	}
+
+	public function store(Request $request){
+		// return $request->all();
+		$store = new Holidays;
+		$store->tanggal = $request->tanggal_libur;
+		$store->keterangan = $request->keterangan;
+		$store->jam = $request->jam;
+		$store->save();
+	}
+
+	public function dataTable(Request $request){
+		$data = Holidays::get();
+		return Datatables::of($data)
+		->addIndexColumn()
+		->make(true);
+		// return $request->all();
 	}
 	
 	public function datagrid(Request $request){
@@ -242,22 +267,5 @@ class HolidayController extends Controller{
 		}else{
 			return ['status'=>'error', 'message'=>'Invalid user.'];
 		}
-	}
-
-	public function store(Request $request){
-		// return $request->all();
-		$store = new Holidays;
-		$store->tanggal = $request->tanggal_libur;
-		$store->keterangan = $request->keterangan;
-		$store->jam = $request->jam;
-		$store->save();
-	}
-
-	public function dataTable(Request $request){
-      $data = Holidays::get();
-		return Datatables::of($data)
-      ->addIndexColumn()
-      ->make(true);
-		// return $request->all();
 	}
 }

@@ -26,7 +26,7 @@
 						<thead>
 							<tr>
 								<th>No</th>
-								<th>Tanggal</th>
+								<th>Tanggal / Hari</th>
 								<th>Poli</th>
 								<th>Kuota WA</th>
 								<th>Kuota KIOSK</th>
