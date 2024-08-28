@@ -698,6 +698,7 @@ Route::group(['prefix'=>'api'], function(){
 	Route::group(['prefix'=>'siramaerm'],function(){
 		Route::post('panggil','ApiSiramaErmController@panggil')->name('panggilPasien');
 		Route::post('taskBpjs','ApiSiramaErmController@updateTaskBpjs')->name('taskBpjs');
+		Route::post('batalTaskId','ApiSiramaErmController@updateBatalTaskId')->name('batalTaskId');
 		Route::post('updateTaskBpjsSirama','ApiSiramaErmController@updateTaskBpjsSirama')->name('updateTaskBpjsSirama');
 		Route::post('antreanAddFarmasi','ApiSiramaErmController@antreanAddFarmasi')->name('antreanAddFarmasi');
 	});

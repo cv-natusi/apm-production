@@ -913,6 +913,15 @@ class BridgBpjsController extends Controller{
 			"keterangan" => $request->keterangan,
 		];
 
+		#start local
+		// $dataLocal = [
+		// 	"kodebooking"=>$request->kodebooking,
+		// 	"taskid"=> "99",
+		// ];
+		// $taskLocal  = new TaskIdController;
+		// $saveTaskId = $taskLocal->store($dataLocal); # Simpan task id ke lokal
+		#end local
+
 		$url = $this->url."antrean/batal"; //url web dev service bpjs
 
 		$consID    = $this->consid; // customer ID RS

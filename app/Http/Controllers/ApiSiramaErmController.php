@@ -310,6 +310,38 @@ class ApiSiramaErmController extends Controller{
 		}
 	}
 
+	public function updateBatalTaskId(Request $request){
+		//proses update task
+		$taskId = "99";
+		try {
+			//panggil function dan post data BPJS
+			$antreanBpjs = new BridgBpjsController();
+			$postUpdateWaktuBpjs =  $antreanBpjs->batalAntrean($request);
+			//validasi jika gagal update
+			if ($postUpdateWaktuBpjs['metaData']->code != 200 ){
+				throw new \Exception($postUpdateWaktuBpjs['metaData']->message, (int)$postUpdateWaktuBpjs['metaData']->code);
+
+				//save logs bpjs
+				$dataLogs = [
+					'taskId' => $taskId,
+					'kodebooking' => $request->kodebooking,
+					'messageErr' => $postUpdateWaktuBpjs['metaData']->message,
+				];
+				Log::info('updateTaskBpjs - Error :', $dataLogs);
+			}
+			return ['status' => 'success', 'code' => 200, 'message' => 'Berhasil Update TaskId '.$taskId.' BPJS'];
+		} catch (\Exception $th) {
+			// savelogsbpjs
+			$dataLogs = [
+				'taskId' => $taskId,
+				'kodebooking' => $request->kodebooking,
+				'messageErr' => $th->getMessage(),
+			];
+			Log::info('updateTaskBpjs - Error :', $dataLogs);
+			return ['status' => 'success', 'code' => 500, 'message' => 'Gagal Update TaskId '.$taskId.' BPJS', 'message_err' => $th->getMessage() ];
+		}
+	}
+
 	public function antreanAddFarmasi(Request $request){
 		// return 'api sirama';
 		// return $request->all();
