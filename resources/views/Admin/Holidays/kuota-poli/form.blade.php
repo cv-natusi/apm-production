@@ -141,6 +141,9 @@
 			$('#container-tanggal-kuota-poli').show()
 		}
 	}
+   
+   $('#kuota-wa').setRules('0-9')
+   $('#kuota-kiosk').setRules('0-9')
 
 	$('#format-kuota-poli').change((e)=>{
 		const $this = $(e.currentTarget)

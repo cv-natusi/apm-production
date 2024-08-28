@@ -66,8 +66,6 @@
 
 {{-- datepicker vanillajs --}}
 {{-- <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker-full.min.js"></script> --}}
-<script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker-full.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css">
 {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css"> --}}
 <script type="text/javascript">
 	/*
@@ -144,6 +142,27 @@
 	$.fn.reinitInput = function(id='default'){
 		const name = id.replace(/-/g,"_")
 		this.empty().append(`<input type="text" class="form-control cs-default ${id}" name="${name}" id="${id}" readonly disabled>`)
+      return this
+	}
+
+   $.fn.setRules = function(rules='a-zA-Z0-9'){
+		this.on('keypress',(e)=>{
+			let regex = new RegExp(`^[${rules}\b]+$`) // Rules only [ numeric ]
+			let key = String.fromCharCode(!e.charCode ? e.which : e.charCode) // Get character on keypress
+			if(!regex.test(key)){ // Bool, cek "key", rules regex terpenuhi(value===true)
+				e.preventDefault()
+				return false
+			}
+		})
+		this.on('paste', function(){
+			let el = this
+			setTimeout(function(){
+				const re = new RegExp(`[^${rules}]`,'g')
+				let convert = $(el).val().replace(re, '')
+				$(el).val(convert)
+			}, 20)
+		})
+      return this
 	}
 </script>
 
