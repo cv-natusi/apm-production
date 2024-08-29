@@ -357,7 +357,7 @@ class RegistrationController extends Controller{
 				'kode_poli'=>'017',
 				'metode_ambil'=>'KIOSK',
 			])->count() >= 10
-			&& $dateNow != '2024-08-27'
+			&& $dateNow != '2024-08-29'
 		){
 			array_push($ignore,'017');
 		}
@@ -538,7 +538,7 @@ class RegistrationController extends Controller{
 				'kode_poli'=>'017',
 				'metode_ambil'=>'KIOSK',
 			])->count()) >= 10
-			&& $dateNow != '2024-08-27'
+			&& $dateNow != '2024-08-29'
 		){
 			return [
 				'status'=>'error',
