@@ -1426,7 +1426,7 @@
 
 		$request->merge(['nama_hari' => date('D', strtotime($tanggal))]);
 		$namaHari = namaHari($request);
-		if(($namaHari=='Selasa' && $total >= 30) || ($namaHari=='Kamis' && $total >= 30)){
+		if(($namaHari=='Selasa' && $total >= 50) || ($namaHari=='Kamis' && $total >= 30)){
 			$ignorePoli .= ",'017'"; # 017 => onkologi
 		}
 		return $ignorePoli;
@@ -1482,8 +1482,8 @@
 				$num++;
 				$request->merge(['nama_hari' => $dt]);
 				$namaHari = namaHari($request);
-				$limit = $namaHari=='Selasa' ? 30 : 30;
-				$total = $namaHari=='Selasa' ? 30 : $total;
+				$limit = $namaHari=='Selasa' ? 50 : 30;
+				// $total = $namaHari=='Selasa' ? 30 : $total;
 				$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
 			}else{
 				$num = $num> 0 ? $num-- : 0;
