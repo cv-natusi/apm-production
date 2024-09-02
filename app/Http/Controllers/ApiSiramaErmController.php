@@ -441,7 +441,7 @@ class ApiSiramaErmController extends Controller{
 				$insertAntrian->jenis_pasien = $registrasi->NamaAsuransi;
 				$insertAntrian->is_geriatri = ($registrasi->Umur > 60)?'Y':'N';
 				// $insertAntrian->metode_ambil = 'SIMRS';
-				$insertAntrian->metode_ambil = 'AMBIL OBAT';
+				$insertAntrian->metode_ambil = 'ANTRIAN FARMASI';
 				$insertAntrian->is_pasien_baru = $registrasi->Baru;
 				$insertAntrian->No_Register = $noregist;
 				$insertAntrian->save();
