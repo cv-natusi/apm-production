@@ -43,20 +43,12 @@ class HolidayController extends Controller{
 	}
 
 	public function store(Request $request){
-		// return response()->json([
-		// 	'metadata' => [
-		// 		'code' => 500,
-		// 		'message' => 'Data gagal disimpan'
-		// 	],
-		// 	'response' => $request->all(),
-		// ],500);
 		if($request->holiday_id){
 			$store = Holidays::find($request->holiday_id);
 		}else{
 			$store = new Holidays;
 			$store->is_active = true;
 		}
-		// return $store;
 		$ifHari = $request->format=='hari';
 		if($ifHari){
 			$store->hari = $request->hari;
@@ -74,8 +66,10 @@ class HolidayController extends Controller{
 		if(($wa = $request->kuota_wa)){
 			$store->kuota_wa = $wa;
 		}
+		if($mapping = Rsu_Bridgingpoli::where('kdpoli_rs',$request->kode_poli)->first()){
+			$store->poli_bpjs_id = $mapping->kdpoli;
+		}
 		$store->kategori = $request->kategori;
-		// return $store;
 		$store->save();
 		if($store){
 			return response()->json([
@@ -95,11 +89,8 @@ class HolidayController extends Controller{
 
 	public function dataTable(Request $request){
 		$data = Holidays::
-		// when($request->kategori)
 		where('kategori',$request->kategori)
 		->with('poli')->get();
-		// unset($data->poli);
-		// return $data;
 		return Datatables::of($data)
 			->addIndexColumn()
 			->addColumn('nama_poli',fn($row)=>$row->poli?$row->poli->NamaPoli:'-')
@@ -145,14 +136,6 @@ class HolidayController extends Controller{
 			->make(true);
 	}
 	public function updateStatus(Request $request){
-		// return $request->all();
-
-		// return response()->json([
-		// 	'metadata' => [
-		// 		'code' => 204,
-		// 		'message' => 'Data tidak ditemukan'
-		// 	],
-		// ],200);
 		if($data = Holidays::find($request->holiday_id)){
 			$data->is_active = $data->is_active==true ? false : true;
 			$data->save();
