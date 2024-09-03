@@ -60,10 +60,10 @@
 	// $wablas = mysqli_connect('103.55.39.180','rsudwahi_wablas','rsudwahi_wablas','rsudwahi_wablas');
 	// $wablas = mysqli_connect('localhost','client','Wahidin123','natusi_apm','3307');
 
-	// $wablas = mysqli_connect('192.168.1.5','client','Wahidin123','natusi_apm');
-	// $dbrsud = mysqli_connect('192.168.1.5','client','Wahidin123','dbsimars');
-	$wablas = mysqli_connect('core-mysql','dwialim','36b6BtSCzW^6','natusi_apm');
-	$dbrsud = mysqli_connect('core-mysql','dwialim','36b6BtSCzW^6','dbsimars_baru');
+	$wablas = mysqli_connect('192.168.1.5','client','Wahidin123','natusi_apm');
+	$dbrsud = mysqli_connect('192.168.1.5','client','Wahidin123','dbsimars');
+	// $wablas = mysqli_connect('core-mysql','dwialim','36b6BtSCzW^6','natusi_apm');
+	// $dbrsud = mysqli_connect('core-mysql','dwialim','36b6BtSCzW^6','dbsimars_baru');
 
 	$request = new Request([
 		'rsu_conn' => $dbrsud,
