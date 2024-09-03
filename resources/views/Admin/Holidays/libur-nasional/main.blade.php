@@ -1,4 +1,4 @@
-<div class="tab-pane fade" id="main-libur-nasional">
+<div class="tab-pane fade in active" id="main-libur-nasional">
 	<div
 		id="content-libur-nasional"
 	>
