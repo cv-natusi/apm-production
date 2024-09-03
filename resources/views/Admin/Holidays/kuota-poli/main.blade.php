@@ -1,4 +1,4 @@
-<div class="tab-pane fade in active" id="main-kuota-poli">
+<div class="tab-pane fade" id="main-kuota-poli">
 	<div
 		id="content-kuota-poli"
 	>

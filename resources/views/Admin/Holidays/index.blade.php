@@ -81,10 +81,10 @@
 			<div class="panel with-nav-tabs panel-default">
 				<div class="panel-heading">
 					<ul class="nav nav-tabs">
-						{{-- <li class="tab-libur-nasional active"><a href="#main-libur-nasional" data-toggle="tab"><b>Libur Nasional</b></a></li> --}}
-						<li class="tab-libur-nasional"><a href="#main-libur-nasional" data-toggle="tab"><b>Libur Nasional</b></a></li>
-						<li class="tab-kuota-poli active"><a href="#main-kuota-poli" data-toggle="tab"><b>Kuota Poli</b></a></li>
-						{{-- <li class="tab-kuota-poli"><a href="#main-kuota-poli" data-toggle="tab"><b>Kuota Poli</b></a></li> --}}
+						<li class="tab-libur-nasional active"><a href="#main-libur-nasional" data-toggle="tab"><b>Libur Nasional</b></a></li>
+						{{-- <li class="tab-libur-nasional"><a href="#main-libur-nasional" data-toggle="tab"><b>Libur Nasional</b></a></li> --}}
+						{{-- <li class="tab-kuota-poli active"><a href="#main-kuota-poli" data-toggle="tab"><b>Kuota Poli</b></a></li> --}}
+						<li class="tab-kuota-poli"><a href="#main-kuota-poli" data-toggle="tab"><b>Kuota Poli</b></a></li>
 						{{-- <li class="tab-libur-poli active"><a href="#main-libur-poli" data-toggle="tab"><b>Libur Poli</b></a></li> --}}
 						<li class="tab-libur-poli"><a href="#main-libur-poli" data-toggle="tab"><b>Libur Poli</b></a></li>
 						{{-- <li class="dropdown">
@@ -273,43 +273,17 @@
 					type: 'post',
 					data: {
 						kategori: kategori
-						// namaCounter : namaCounter,
-						// tglAwal : tglAwal,
-						// tglAkhir : tglAkhir
 					}
 				},
 				columns: columns,
-				// [
-				// 	{data: 'DT_Row_Index', name: 'DT_Row_Index'},
-				// 	{
-				// 		data: 'tanggal',
-				// 		name: 'tanggal',
-				// 	},
-				// 	{
-				// 		data: 'nama_poli',
-				// 		name: 'nama_poli',
-				// 	},
-				// 	{
-				// 		data: 'kuota_wa',
-				// 		name: 'kuota_wa',
-				// 	},
-				// 	{
-				// 		data: 'kuota_kiosk',
-				// 		name: 'kuota_kiosk',
-				// 	},
-				// 	{
-				// 		data: 'aksi',
-				// 		name: 'aksi',
-				// 	},
-				// ],
 			})
 
 			return this
 		}
 
 		$(document).ready(()=>{
-			// $('#table-libur-nasional').initDatatable()
-			$('#table-kuota-poli').initDatatable()
+			$('#table-libur-nasional').initDatatable()
+			// $('#table-kuota-poli').initDatatable()
 			// $('#table-libur-poli').initDatatable()
 		})
 		function addForm(str){
