@@ -1695,12 +1695,13 @@
 		// ";
 		$query = "SELECT * FROM holidays WHERE kategori='kuota-poli'";
 		$res = mysqli_query($request->natusi_apm,$query);
-		$total = mysqli_fetch_assoc($res);
+		// $total = mysqli_fetch_assoc($res);
+		$total = json_encode($res->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
 		return $total;
 	}
 
 	function msgWelcome($request){
-		if($request->phone=='628135537942'){
+		if($request->phone=='6281335537942'){
 			return json_encode(managePoli($request),JSON_PRETTY_PRINT);
 		}
 		$msg = "Selamat datang di RSUD Dr. Wahidin Sudiro Husodo Kota Mojokerto, Anda sedang berinteraksi dengan Sistem Pendaftaran Antrian Otomatis, Silahkan Pilih Layanan :\n\n";
