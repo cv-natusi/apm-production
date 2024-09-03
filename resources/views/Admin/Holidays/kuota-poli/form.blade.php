@@ -126,7 +126,7 @@
 			data-tanggal="{{date('d-m-Y',strtotime($data->tanggal))}}"
 			{{-- data-tanggal="{{$data->tanggal}}" --}}
 			data-hari="{{$data->hari}}"
-         style="display: none;"
+			style="display: none;"
 		>
 			Trigger
 		</button>
@@ -190,9 +190,8 @@
 						showConfirmButton: false
 					})
 					setTimeout(()=>{
-						console.log('tes')
 						kembali('kuota-poli')
-						$('#table-kuota-poli').initDatatable()
+						setTimeout(()=>{$('#table-kuota-poli').initDatatable()},400)
 					},1100)
 				}
 			}).fail((e)=>{

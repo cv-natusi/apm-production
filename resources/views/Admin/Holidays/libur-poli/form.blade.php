@@ -79,9 +79,7 @@
 					})
 					setTimeout(()=>{
 						kembali('libur-poli')
-						setTimeout(()=>{
-							$('#table-libur-poli').initDatatable()
-						},500)
+						setTimeout(()=>{$('#table-libur-poli').initDatatable()},400)
 					},1100)
 				}
 			}).fail((e)=>{
