@@ -26,9 +26,8 @@
 	}
 	$message = $data['message'];
 	$phone = $data['phone'];
-	// if($phone=='6281335537942'){
-	// 	echo 'sulap';die();
-	// }
+	// $phone = '6281335537942';
+
 	### Info maintenance server
 	// if($phone!='6281335537942'){ # Nomor untuk maintenance
 	// 	if($phone!=""){
@@ -60,8 +59,12 @@
 	### Koneksi database
 	// $wablas = mysqli_connect('103.55.39.180','rsudwahi_wablas','rsudwahi_wablas','rsudwahi_wablas');
 	// $wablas = mysqli_connect('localhost','client','Wahidin123','natusi_apm','3307');
-	$wablas = mysqli_connect('192.168.1.5','client','Wahidin123','natusi_apm');
-	$dbrsud = mysqli_connect('192.168.1.5','client','Wahidin123','dbsimars');
+
+	// $wablas = mysqli_connect('192.168.1.5','client','Wahidin123','natusi_apm');
+	// $dbrsud = mysqli_connect('192.168.1.5','client','Wahidin123','dbsimars');
+	$wablas = mysqli_connect('core-mysql','dwialim','36b6BtSCzW^6','natusi_apm');
+	$dbrsud = mysqli_connect('core-mysql','dwialim','36b6BtSCzW^6','dbsimars_baru');
+
 	$request = new Request([
 		'rsu_conn' => $dbrsud,
 		'apm_conn' => $wablas,
@@ -1683,7 +1686,23 @@
 		return $execQGetAntri;
 	}
 
+	function managePoli($request){
+		// $query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+		// 	JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+		// 	WHERE bp.tgl_periksa = '$whereDate'
+		// 	AND bp.statusChat='99'
+		// 	AND bdp.kodePoli='017'
+		// ";
+		$query = "SELECT * FROM holidays WHERE kategori='kuota-poli'";
+		$res = mysqli_query($request->natusi_apm,$query);
+		$total = mysqli_fetch_assoc($res);
+		return $total;
+	}
+
 	function msgWelcome($request){
+		if($request->phone=='628135537942'){
+			return json_encode(managePoli($request),JSON_PRETTY_PRINT);
+		}
 		$msg = "Selamat datang di RSUD Dr. Wahidin Sudiro Husodo Kota Mojokerto, Anda sedang berinteraksi dengan Sistem Pendaftaran Antrian Otomatis, Silahkan Pilih Layanan :\n\n";
 		$msg .= "A : Pendaftaran Antrian\n";
 		$msg .= "B : Promo Menarik\n\n";
