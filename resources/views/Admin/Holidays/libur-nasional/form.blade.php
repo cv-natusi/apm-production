@@ -1,12 +1,24 @@
-<form method='post' action="#" enctype='multipart/form-data'>
-	{{ csrf_field() }}
+<form method='post' enctype='multipart/form-data' id="form-libur-nasional">
+	{{-- {{ csrf_field() }} --}}
+
+	<input type="hidden" name="kategori" value="libur-nasional">
+	<input type="hidden" name="holiday_id" value="{{$data?$data->id_holiday:''}}">
+
 	<div class="box-body">
 		<div class="row" style="padding: 5px">
 			<div class="col-md-12">
 				<div class="row" style="margin-bottom: 10px">
-					<div class="col-md-4">
-						<label for="tanggal_libur">Tanggal Libur</label>
-						<input type="date" name="tanggal_libur" id="tanggal_libur" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off'>
+					<div class="col-md-6">
+						<label for="tanggal-libur-nasional">Tanggal Libur</label>
+						{{-- <input type="date" name="tanggal_libur" id="tanggal_libur" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off'> --}}
+						<input
+							type="text"
+							name="tanggal"
+							id="tanggal-libur-nasional"
+							class="form-control cs-pointer"
+							autocomplete="off"
+							readonly
+						>
 						{{-- <div class="input-group">
 							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 							<input type="text" name="tanggal_libur" id="form_datetime_today" data-date-format="dd-mm-yyyy" class="form-control" placeholder="dd-mm-yyyy" autocomplete='off' required='required'>
@@ -16,7 +28,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<label for="keterangan">Keterangan</label>
-						<textarea name="keterangan" id="keterangan" class="form-control keterangan" cols="30" rows="10"></textarea>
+						<textarea name="keterangan" id="keterangan" class="form-control keterangan" cols="30" rows="10">{{$data?$data->keterangan:''}}</textarea>
 					</div>
 				</div>
 			</div>
@@ -24,12 +36,51 @@
 	</div>
 	<div class="box-footer">
 		<button type="button" class="btn btn-warning btn-cancel" onclick="kembali('libur-nasional')"><span class="fa fa-chevron-left"></span> Kembali</button>
-		<button type="submit" class="btn btn-primary">Simpan <span class="fa fa-save"></span></button>
+		<button type="button" class="btn btn-primary simpan-libur-nasional">Simpan <span class="fa fa-save"></span></button>
 	</div>
 </form>
 
 <script>
 	$(document).ready(()=>{
+		$('#tanggal-libur-nasional').initDatePicker({date: "{{$data && $data->tanggal ?date('d-m-Y',strtotime($data->tanggal)):''}}"})
+
+		$('.simpan-libur-nasional').click((e)=>{
+			e.preventDefault()
+			const data = new FormData($("#form-libur-nasional")[0])
+			data.set('keterangan',CKEDITOR.instances.keterangan.getData())
+			$.ajax({
+				url: '{{route("holiday.store")}}',
+				type: 'POST',
+				data: data,
+				async: true,
+				cache: false,
+				contentType: false,
+				processData: false,
+				success: (data, status, xhr)=>{
+					swal({
+						title : 'Success',
+						type : 'success',
+						text : data.metadata.message,
+						timer: 1000,
+						showConfirmButton: false
+					})
+					setTimeout(()=>{
+						console.log('tes')
+						kembali('libur-nasional')
+						$('#table-libur-nasional').initDatatable()
+					},1100)
+				}
+			}).fail((e)=>{
+				console.log(e)
+				swal({
+					title : 'Whoops..',
+					type : 'error',
+					text : e.responseJSON.metadata.message,
+					showConfirmButton: true
+				})
+			})
+		})
+
 		// $( '.other-libur-nasional .keterangan' ).ckeditor({width:'100%', height: '150px', toolbar: [
 		// 	{ name: 'document', groups: [ 'mode', 'document', 'doctools' ], items: ['NewPage', 'Preview', 'Print', '-', 'Templates' ] },
 		// 	{ name: 'clipboard', groups: [ 'clipboard', 'undo' ], items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ] },

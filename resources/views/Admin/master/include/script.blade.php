@@ -64,88 +64,8 @@
 	@endif
 </script>
 
-{{-- datepicker vanillajs --}}
-{{-- <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker-full.min.js"></script> --}}
-{{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css"> --}}
 <script type="text/javascript">
-	/*
-	|--------------------------------------------------------------------------
-	| DOKUMENTASI DATEPICKER VANILLAJS
-	|--------------------------------------------------------------------------
-	| Official : https://mymth.github.io/vanillajs-datepicker
-	|
-	| Options:
-	|		~> autohide
-	|			- Type: Boolean
-	|			- Default: false
-	|		~> clearButton
-	|			- Type: Boolean
-	|			- Default: false
-	|		~> todayButton
-	|			- Type: Boolean
-	|			- Default: false
-	|		~> todayButtonMode
-	|			- Type: Number
-	|			- Default: 0
-	|			- Mode:
-	|				a. focus(0) Move the focused date to the current date without changing the selection
-	|				b. select(1) Select (or toggle the selection of) the current date
-	|		~> todayHighlight
-	|			- Type: Boolean
-	|			- Default: false
-	|		~> maxDate
-	|			- Type: String|Date|Number
-	|			- Default: null
-	|
-	| How to use: $('input').initDatePicker()
-	*/
-	function dateCurrent(){
-		let date = new Date()
-		let days = date.getDate().toString().padStart(2, 0)
-		let months = (date.getMonth() + 1).toString().padStart(2, 0)
-		let years = date.getFullYear().toString()
-		return `${days}-${months}-${years}`
-	}
-	$.fn.initDatePicker = function(params,type=dateCurrent()){
-		let str = type.split('-')
-			isThree = str.length===3;
-			str = isThree ? `${str[2]}-${str[1]}-${str[0]}` : '' // str => [0=>dd, 1=>mm, 2=>yyyy]
-			date = isThree ? new Date(str) : new Date();
-		let obj = {
-			format: 'dd-mm-yyyy',
-			autohide: true,
-			todayButton: true,
-			clearButton: true,
-			todayButtonMode: 1,
-			todayHighlight: true,
-			// maxDate: new Date(),
-		}
-		if(jQuery.inArray(params,['filter'])!==-1){
-			let days = date.getDate().toString().padStart(2, 0)
-			let months = (date.getMonth() + 1).toString().padStart(2, 0)
-			let years = date.getFullYear().toString()
-			this.val(`${days}-${months}-${years}`)
-
-			obj['clearButton'] = false
-		}
-
-		const datepicker = new Datepicker(this[0], obj)
-		return this
-		// for (const el of Object.keys(this)) {
-		// 	// console.log(el)
-		// 	const datepicker = new Datepicker(el, obj)
-		// }
-	}
-	// Datepicker vanillajs end
-
-
-	$.fn.reinitInput = function(id='default'){
-		const name = id.replace(/-/g,"_")
-		this.empty().append(`<input type="text" class="form-control cs-default ${id}" name="${name}" id="${id}" readonly disabled>`)
-      return this
-	}
-
-   $.fn.setRules = function(rules='a-zA-Z0-9'){
+	$.fn.setRules = function(rules='a-zA-Z0-9'){
 		this.on('keypress',(e)=>{
 			let regex = new RegExp(`^[${rules}\b]+$`) // Rules only [ numeric ]
 			let key = String.fromCharCode(!e.charCode ? e.which : e.charCode) // Get character on keypress
@@ -162,7 +82,7 @@
 				$(el).val(convert)
 			}, 20)
 		})
-      return this
+		return this
 	}
 </script>
 

@@ -504,6 +504,9 @@ Route::group(['middleware' => 'auth'], function() {
 			Route::get('/','HolidayController@main')->name('main');
 			Route::post('/','HolidayController@store')->name('store');
 			Route::post('data-table','HolidayController@dataTable')->name('dataTable');
+			Route::post('update-status','HolidayController@updateStatus')->name('updateStatus');
+			Route::post('destroy','HolidayController@destroy')->name('destroy');
+
 			Route::post('form','HolidayController@form')->name('form');
 			Route::post('datagrid','HolidayController@datagrid')->name('holidayDatagrid');
 			Route::post('datagridKuotaPoli','HolidayController@datagridKuotaPoli')->name('holidayDatagridKuotaPoli');

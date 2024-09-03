@@ -12,21 +12,32 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="table-responsive">
-					<table class="table table-striped b-t b-light" id="table-libur-poli">
+					<table
+						id="table-libur-poli"
+						class="table table-striped"
+						style="
+							width: 100%;
+							overflow-x: auto;
+							white-space: nowrap;
+						"
+					>
+					<thead>
 						<tr>
 							<th>No</th>
-							<th>Tanggal</th>
+							<th class="text-center">Tanggal</th>
 							<th>Poli</th>
-							<th>Keterangan</th>
-							<th>Action</th>
+							<th class="text-center">Status</th>
+							<th class="text-center">Action</th>
 						</tr>
+					</thead>
+					<tbody></tbody>
 					</table>
 				</div>
 			</div>
 		</div>
 	</div>
 	<div
-      class="other-libur-poli"
+		class="other-libur-poli"
 		id="other-libur-poli"
 		style="display: none;"
 	>

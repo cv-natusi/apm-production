@@ -26,12 +26,12 @@
 						<thead>
 							<tr>
 								<th>No</th>
-								<th>Tanggal / Hari</th>
+								<th class="text-center">Tanggal / Hari</th>
 								<th>Poli</th>
-								<th>Kuota WA</th>
-								<th>Kuota KIOSK</th>
-								<th>Keterangan</th>
-								<th>Action</th>
+								<th class="text-center">Kuota WA</th>
+								<th class="text-center">Kuota KIOSK</th>
+								<th class="text-center">Status</th>
+								<th class="text-center">Action</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
