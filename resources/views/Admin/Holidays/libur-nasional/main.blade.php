@@ -1,4 +1,4 @@
-<div class="tab-pane fade in" id="main-libur-nasional">
+<div class="tab-pane fade" id="main-libur-nasional">
 	<div
 		id="content-libur-nasional"
 	>
@@ -11,19 +11,26 @@
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				{{-- <div class="col-md-4 col-sm-4 col-xs-12 form-inline main-layer" style='padding:5px'>
-					<button type="button" class="btn btn-sm btn-primary" id="btn-add">
-						<span class="fa fa-plus"></span> &nbsp Libur Nasional
-					</button>
-				</div> --}}
 				<div class="table-responsive">
-					<table class="table table-striped b-t b-light" id="table-libur-nasional">
+					<table
+						id="table-libur-nasional"
+						class="table table-striped"
+						style="
+							width: 100%;
+							overflow-x: auto;
+							white-space: nowrap;
+						"
+					>
+					<thead>
 						<tr>
 							<th>No</th>
-							<th>Tanggal</th>
+							<th class="text-center">Tanggal</th>
 							<th>Keterangan</th>
-							<th>Action</th>
+                     <th class="text-center">Status</th>
+							<th class="text-center">Action</th>
 						</tr>
+					</thead>
+					<tbody></tbody>
 					</table>
 				</div>
 			</div>

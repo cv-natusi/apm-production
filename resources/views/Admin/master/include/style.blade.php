@@ -49,11 +49,11 @@ folder instead of downloading all of them to reduce the load.--}}
 
 {{-- extra css --}}
 <style>
-   .cs-pointer{
-      cursor: pointer !important;
-   }
-   .cs-default{
-      cursor: default !important;
-   }
+	.cs-pointer{
+		cursor: pointer !important;
+	}
+	.cs-default{
+		cursor: default !important;
+	}
 </style>
 @yield('extended_css')

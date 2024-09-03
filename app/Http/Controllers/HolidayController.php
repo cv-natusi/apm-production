@@ -29,8 +29,10 @@ class HolidayController extends Controller{
 			->groupBy('mapping_poli_bridging.kdpoli_rs')
 			->orderBy('tm_poli.NamaPoli','ASC')
 			->get();
-		// $poli
-		$content = view("Admin.Holidays.$request->jenis.form",['poli'=>$poli])->render();
+
+		$data = $request->id ? Holidays::find($request->id) : '';
+
+		$content = view("Admin.Holidays.$request->jenis.form",['poli'=>$poli, 'data'=>$data])->render();
 		return response()->json([
 			'metadata' => [
 				'code' => 200,
@@ -41,22 +43,164 @@ class HolidayController extends Controller{
 	}
 
 	public function store(Request $request){
-		// return $request->all();
-		$store = new Holidays;
-		$store->tanggal = $request->tanggal_libur;
+		// return response()->json([
+		// 	'metadata' => [
+		// 		'code' => 500,
+		// 		'message' => 'Data gagal disimpan'
+		// 	],
+		// 	'response' => $request->all(),
+		// ],500);
+		if($request->holiday_id){
+			$store = Holidays::find($request->holiday_id);
+		}else{
+			$store = new Holidays;
+			$store->is_active = true;
+		}
+		// return $store;
+		$ifHari = $request->format=='hari';
+		if($ifHari){
+			$store->hari = $request->hari;
+			$store->tanggal = null;
+		}else{
+			$store->tanggal = date('Y-m-d',strtotime($request->tanggal));
+			$store->hari = null;
+		}
+		$store->is_hari = $ifHari ? 1 : 0;
 		$store->keterangan = $request->keterangan;
-		$store->jam = $request->jam;
+		$store->poli_id = $request->kode_poli;
+		if(($kiosk = $request->kuota_kiosk)){
+			$store->kuota_kiosk = $kiosk;
+		}
+		if(($wa = $request->kuota_wa)){
+			$store->kuota_wa = $wa;
+		}
+		$store->kategori = $request->kategori;
+		// return $store;
 		$store->save();
+		if($store){
+			return response()->json([
+				'metadata' => [
+					'code' => 200,
+					'message' => 'Data berhasil disimpan'
+				],
+			],200);
+		}
+		return response()->json([
+			'metadata' => [
+				'code' => 500,
+				'message' => 'Data gagal disimpan'
+			],
+		],500);
 	}
 
 	public function dataTable(Request $request){
-		$data = Holidays::get();
+		$data = Holidays::
+		// when($request->kategori)
+		where('kategori',$request->kategori)
+		->with('poli')->get();
+		// unset($data->poli);
+		// return $data;
 		return Datatables::of($data)
-		->addIndexColumn()
-		->make(true);
-		// return $request->all();
+			->addIndexColumn()
+			->addColumn('nama_poli',fn($row)=>$row->poli?$row->poli->NamaPoli:'-')
+			->editColumn('tanggal',fn($row)=>$row->is_hari?ucfirst($row->hari):$row->tanggal)
+			->addColumn('status',function($row){
+				$status = $row->is_active==1 ? 'Aktif' : 'Tidak Aktif';
+				$class = $row->is_active==1 ? 'success' : 'secondary';
+				return "<span class='badge badge-$class'>$status</span>";
+			})
+			->addColumn('aksi',function($row){
+				// if($data->no_rm!='00000000000'){
+				// 	$btn .= "<button class='btn btn-sm btn-warning' title='Cetak Tracer' onclick='cetakTracer(`$data->id`)'><i class='fa fa-print'></i></button> &nbsp;";
+				// }
+				// $data = $row->map(function($rows){
+				// 	return collect($rows->toArray())
+				// 	->only(['kategori'])
+				// 	->all();
+				// });
+
+				$tanggal = $row->tanggal;
+				$jam = $row->jam;
+				$keterangan = $row->keterangan;
+				$poli = $row->poli;
+				unset($row->tanggal);
+				unset($row->keterangan);
+				unset($row->poli);
+				$data = json_encode($row);
+
+				// $btn = "<div class='text-center'>";
+				$btn = "<button class='btn btn-sm btn-info' title='Edit' onclick='editForm(`$data`)'><i class='fa fa-pencil' aria-hidden='true'></i></button> &nbsp;";
+				$title = $row->is_active ? 'Nonaktifkan' : 'Aktifkan';
+				$color = $row->is_active ? 'secondary' : 'success';
+				$btn .= "<button class='btn btn-sm btn-$color' title='$title' onclick='updateStatus(`$data`)'><i class='fa fa-power-off' aria-hidden='true'></i></button> &nbsp;";
+				$btn .= "<button class='btn btn-sm btn-danger' title='Hapus' onclick='destroy(`$data`)'><i class='fa fa-trash' aria-hidden='true'></i></button> &nbsp;";
+				// $btn .= "</div>";
+
+				$row->tanggal = $tanggal;
+				$row->jam = $jam;
+				$row->keterangan = $keterangan;
+				$row->poli = $poli;
+				return $btn;
+			})
+			->make(true);
 	}
-	
+	public function updateStatus(Request $request){
+		// return $request->all();
+
+		// return response()->json([
+		// 	'metadata' => [
+		// 		'code' => 204,
+		// 		'message' => 'Data tidak ditemukan'
+		// 	],
+		// ],200);
+		if($data = Holidays::find($request->holiday_id)){
+			$data->is_active = $data->is_active==true ? false : true;
+			$data->save();
+			return response()->json([
+				'metadata' => [
+					'code' => 200,
+					'message' => 'Data berhasil disimpan'
+				],
+			],200);
+		}
+		return response()->json([
+			'metadata' => [
+				'code' => 204,
+				'message' => 'Data tidak ditemukan'
+			],
+		],204);
+	}
+
+	public function destroy(Request $request){
+		if($data = Holidays::find($request->holiday_id)){
+			if($data->delete()){
+				return response()->json([
+					'metadata' => [
+						'code' => 200,
+						'message' => 'Data berhasil dihapus'
+					],
+				],200);
+			}
+			return response()->json([
+				'metadata' => [
+					'code' => 500,
+					'message' => 'Data gagal dihapus'
+				],
+			],500);
+		}
+		return response()->json([
+			'metadata' => [
+				'code' => 204,
+				'message' => 'Data tidak ditemukan'
+			],
+		],204);
+	}
+
+	public function testing(Request $request){
+		\Log::info('testing');
+	}
+
+
 	public function datagrid(Request $request){
 		$data = Holidays::getJson($request);
 		return response()->json($data);
