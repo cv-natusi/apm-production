@@ -65,9 +65,8 @@
 						showConfirmButton: false
 					})
 					setTimeout(()=>{
-						console.log('tes')
 						kembali('libur-nasional')
-						$('#table-libur-nasional').initDatatable()
+						setTimeout(()=>{$('#table-libur-nasional').initDatatable()},400)
 					},1100)
 				}
 			}).fail((e)=>{
