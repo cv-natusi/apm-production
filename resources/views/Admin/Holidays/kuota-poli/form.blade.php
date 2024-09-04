@@ -49,12 +49,12 @@
 							<label for="hari-kuota-poli">Tanggal / Hari</label>
 							<select name="hari" id="hari-kuota-poli" class="form-control select2" style="width:100%;">
 								<option value="">-- PILIH OPSI --</option>
-								<option value="senin">Senin</option>
-								<option value="selasa">Selasa</option>
-								<option value="rabu">Rabu</option>
-								<option value="kamis">Kamis</option>
-								<option value="jumat">Jum'at</option>
-								<option value="sabtu">Sabtu</option>
+								<option value="1">Senin</option>
+								<option value="2">Selasa</option>
+								<option value="3">Rabu</option>
+								<option value="4">Kamis</option>
+								<option value="5">Jum'at</option>
+								<option value="5">Sabtu</option>
 							</select>
 						</div>
 						<div id="container-tanggal-kuota-poli">

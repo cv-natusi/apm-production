@@ -1696,7 +1696,7 @@
 		$query = "SELECT * FROM holidays WHERE kategori='kuota-poli'";
 		$res = mysqli_query($request->natusi_apm,$query);
 		// $total = mysqli_fetch_assoc($res);
-		$total = json_encode($res->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
+		$total = $res->fetch_all(MYSQLI_ASSOC);
 		return $total;
 	}
 

@@ -10,7 +10,7 @@ use App\Http\Models\Holidays;
 use App\Http\Models\Rsu_Bridgingpoli;
 use App\Helpers\apm as Help;
 use File, Auth, Redirect, Validator,DB;
-use Datatables;
+use Datatables;# Helpers
 
 class HolidayController extends Controller{
 	public function main(Request $request){
@@ -94,7 +94,10 @@ class HolidayController extends Controller{
 		return Datatables::of($data)
 			->addIndexColumn()
 			->addColumn('nama_poli',fn($row)=>$row->poli?$row->poli->NamaPoli:'-')
-			->editColumn('tanggal',fn($row)=>$row->is_hari?ucfirst($row->hari):$row->tanggal)
+			->editColumn('tanggal',function($row)use($request){
+				$request->merge(['nama_hari_en'=>$row->hari]);
+				return $row->is_hari?ucfirst(Help::namaHariID($request)):$row->tanggal;
+			})
 			->addColumn('status',function($row){
 				$status = $row->is_active==1 ? 'Aktif' : 'Tidak Aktif';
 				$class = $row->is_active==1 ? 'success' : 'secondary';
