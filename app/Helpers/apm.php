@@ -142,23 +142,24 @@ class apm{
 		]);
 	}
 	public static function namaHariID($request){
-		switch ($request->nama_hari_en) {
-			case 'Mon':
+      $str = $request->nama_hari_en;
+		switch (true) {
+			case ($str==='Mon' || $str===1):
 				$hari = 'Senin';
 				break;
-			case 'Tue':
+			case $str==='Tue' || $str===2:
 				$hari = 'Selasa';
 				break;
-			case 'Wed':
+			case $str==='Wed' || $str===3:
 				$hari = 'Rabu';
 				break;
-			case 'Thu':
+			case $str==='Thu' || $str===4:
 				$hari = 'Kamis';
 				break;
-			case 'Fri':
+			case $str==='Fri' || $str===5:
 				$hari = "Jum'at";
 				break;
-			case 'Sat':
+			case $str==='Sat' || $str===6:
 				$hari = 'Sabtu';
 				break;
 			default:
