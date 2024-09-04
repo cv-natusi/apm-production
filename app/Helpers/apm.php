@@ -142,7 +142,7 @@ class apm{
 		]);
 	}
 	public static function namaHariID($request){
-      $str = $request->nama_hari_en;
+		$str = $request->nama_hari_en;
 		switch (true) {
 			case ($str==='Mon' || $str===1):
 				$hari = 'Senin';

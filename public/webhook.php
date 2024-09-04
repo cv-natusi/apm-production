@@ -1696,10 +1696,29 @@
 				OR (tanggal IS NULL AND hari IN ($request->array_hari))
 			)
 		";
-		$res = mysqli_query($request->natusi_apm,$query) or die($request->natusi_apm->error);
+		// $res = mysqli_query($request->natusi_apm,$query) or die($request->natusi_apm->error);
+		$exec = mysqli_query($request->natusi_apm,$query);
 		// $total = mysqli_fetch_assoc($res);
-		$total = $res->fetch_all(MYSQLI_ASSOC);
-		return $total;
+		// $total = $exec->fetch_all(MYSQLI_ASSOC);
+
+
+      // $text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
+
+      $num = 1;
+      // $msg
+		// $msg = "Silahkan Pilih *Nomor Poli Tujuan* Anda!\n";
+		while($row=$exec->fetch_assoc()){
+         $kodePoli = $row['poli_id'];
+         $query = "SELECT * FROM tm_poli WHERE KodePoli='$kodePoli'";
+         $res = mysqli_query($request->rsu_conn, $query);
+         $result = mysqli_fetch_assoc($res);
+         $msg = $row['keterangan']."\n";
+			$msg .= "*".$num.". ".$result->NamaPoli."*\n";
+			$num++;
+		}
+		// $msg .= "\nHanya Nomor, tanpa Nama POLI. Contoh : 1";
+		// return $msg;
+		// return $total;
 	}
 
 	function msgWelcome($request){
