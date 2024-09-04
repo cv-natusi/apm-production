@@ -1687,14 +1687,16 @@
 	}
 
 	function managePoli($request){
-		// $query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-		// 	JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-		// 	WHERE bp.tgl_periksa = '$whereDate'
-		// 	AND bp.statusChat='99'
-		// 	AND bdp.kodePoli='017'
-		// ";
-		$query = "SELECT * FROM holidays WHERE kategori='kuota-poli'";
-		$res = mysqli_query($request->natusi_apm,$query);
+		$date = date('Y-m-d');
+		$datePlus = date('Y-m-d',strtotime('today +3day'));
+		$query = "SELECT * FROM holidays
+			WHERE kategori='kuota-poli'
+			AND (
+				((tanggal BETWEEN '$date' AND '$datePlus') AND hari IS NULL)
+				OR (tanggal IS NULL AND hari IN ($request->array_hari))
+			)
+		";
+		$res = mysqli_query($request->natusi_apm,$query) or die($request->natusi_apm->error);
 		// $total = mysqli_fetch_assoc($res);
 		$total = $res->fetch_all(MYSQLI_ASSOC);
 		return $total;
@@ -1702,6 +1704,13 @@
 
 	function msgWelcome($request){
 		if($request->phone=='6281335537942'){
+			$arrayHari = [];
+			for($i=1; $i<=3; $i++){
+				$n = date('N',strtotime("today +$i day"));
+				array_push($arrayHari, $n);
+			}
+			$request->merge(['array_hari'=>implode(",",$arrayHari)]);
+
 			return json_encode(managePoli($request),JSON_PRETTY_PRINT);
 		}
 		$msg = "Selamat datang di RSUD Dr. Wahidin Sudiro Husodo Kota Mojokerto, Anda sedang berinteraksi dengan Sistem Pendaftaran Antrian Otomatis, Silahkan Pilih Layanan :\n\n";
