@@ -1691,6 +1691,7 @@
 		dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
 		$query = "SELECT * FROM holidays
 			WHERE kategori='kuota-poli'
+			AND is_active=1
 			AND (
 				((tanggal BETWEEN '$request->dt_now' AND '$request->dt_plus') AND hari IS NULL)
 				OR (tanggal IS NULL AND hari IN ($request->array_hari))
@@ -1805,43 +1806,37 @@
 	}
 
 	function kuotaPoliIgnore($request){
+		$request->merge(['tanggal_berobat'=>'2024-09-06']);
 		$tanggal = $request->tanggal_berobat;
 		$dataKuota = getKuotaPoli($request);
+		// echo json_encode($request->all(),JSON_PRETTY_PRINT);
+		// return;
+		// $ignorePoli = "'ALG','UGD','ANU','GIG'"; # Default ignore
+		$ignorePoli = ['ALG','UGD','ANU','GIG']; # Default ignore
 		foreach($dataKuota as $item){
-			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-				WHERE bp.tgl_periksa = '$tanggal'
-				AND bp.statusChat='99'
-				AND bdp.kodePoli='017'
-			";
-			$res = mysqli_query($request->natusi_apm,$query);
-			$total = mysqli_fetch_assoc($res)['total'];
+			$item = (object)$item;
+			$total = 0;
+			if(
+				(
+					$item->hari!="" && strtotime($request->tanggal_detail[$item->hari]->tanggal) == strtotime($tanggal)
+				)
+				|| strtotime($item->tanggal) == strtotime($tanggal)
+			){
+				$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+					JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+					WHERE bp.tgl_periksa = '$tanggal'
+					AND bp.statusChat='99'
+					AND bdp.kodePoli='$item->poli_bpjs_id'
+				";
+				$res = mysqli_query($request->natusi_apm,$query);
+				$total = mysqli_fetch_assoc($res)['total'];
+				if($total >= $item->kuota_wa){
+					array_push($ignorePoli, $item->poli_bpjs_id);
+				}
+			}
 		}
-		return ;
-
-
-
-		$ignorePoli = "'ALG','UGD','ANU','GIG'"; # Default ignore
-		// $ignorePoli .= ",'PSY'";
-		$tanggal = $request->tanggal_berobat;
-		$total = 0;
-		if($request->natusi_apm){
-			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-				WHERE bp.tgl_periksa = '$tanggal'
-				AND bp.statusChat='99'
-				AND bdp.kodePoli='017'
-			";
-			$res = mysqli_query($request->natusi_apm,$query);
-			$total = mysqli_fetch_assoc($res)['total'];
-		}
-
-		$request->merge(['nama_hari' => date('D', strtotime($tanggal))]);
-		$namaHari = namaHari($request);
-		if(($namaHari=='Selasa' && $total >= 50) || ($namaHari=='Kamis' && $total >= 30)){
-			$ignorePoli .= ",'017'"; # 017 => onkologi
-		}
-		return $ignorePoli;
+		// echo json_encode($ignorePoli,JSON_PRETTY_PRINT);
+		return "'".implode("','", $ignorePoli)."'";
 	}
 
 	function dateDetail($request){
@@ -1893,7 +1888,9 @@
 		// $msg .= msgJadwalPoli()."\n\n";
 		if($request->phone=='6281335537942' || $request->phone=='6281330003568'){
 			// dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
-			kuotaPoliIgnore($request);
+			// echo kuotaPoliIgnore($request);
+			// echo "\n\n\n";
+			echo kuotaPoliMessage($request);
 			die();
 			$msg .= kuotaPoliMessage($request);
 		}else{
