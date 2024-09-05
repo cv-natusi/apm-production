@@ -1728,7 +1728,8 @@
 		// return;
 
 		# Cetak pesan
-		$msg = "Untuk sementara waktu.\n";
+		$msg = "*Untuk sementara waktu.*\n";
+		$msg .= "*==============================*\n";
 		foreach ($data as $key => $datas) {
 			$num = 1;
 			$poliId = $datas['poli_id'];
@@ -1759,13 +1760,18 @@
 				$res = mysqli_query($request->apm_conn,$query);
 				$total = mysqli_fetch_assoc($res)['total'];
 
-				$msg .= "$num. $namaHari $tanggal, kuota terpakai $total/$limit".($keys+1 < count($datas['data']) ? "\n" : "\n\n");
+				$msg .= "$num. $namaHari $tanggal, kuota terpakai $total/$limit";
+				if($keys+1 < count($datas['data'])){
+					$msg .= "\n";
+				}elseif($key+1 < count($data)){
+					$msg .= "\n\n";
+				}
 				$num++;
 			}
 		}
 		// echo date('N',strtotime('now +4 day'));
 
-		return $msg;
+		return "$msg\n*==============================*\n\n";
 		return;
 		// echo json_encode($data,JSON_PRETTY_PRINT);
 		// $total = mysqli_fetch_assoc($res);
@@ -1821,7 +1827,7 @@
 
 		// $msg .= msgJadwalPolis($wablas)."\n\n";
 		// $msg .= msgJadwalPoli()."\n\n";
-		if($request->phone=='6281335537942'){
+		if($request->phone=='6281335537942' || $request->phone=='6281330003568'){
 			$arrayHari = [];
 			$arrayTanggal = [];
 			for($i=1; $i<=3; $i++){ # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
