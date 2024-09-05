@@ -418,11 +418,10 @@
 								}
 							}
 							updateStatusChat('statusChat',$idBots,$wablas,$dataIn);
-							$request->merge([
-								'tanggal_berobat' => $tglBerobat,
-							]);
-							// $notIn = "'ALG','UGD','ANU','GIG'$getIgnorePoli";
-							$getIgnorePoli = ignorePoli($request);
+
+							$request->merge(['tanggal_berobat' => $tglBerobat]);
+							$getIgnorePoli = kuotaPoliIgnore($request);
+
 							$notIn = "$getIgnorePoli";
 							// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
 							$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
@@ -813,12 +812,10 @@
 		// 	echo msgLibur();die();
 		// }
 
-		$request->merge([
-			'tanggal_berobat' => $rows['tgl_periksa'],
-		]);
-		$getIgnorePoli = ignorePoli($request);
+		$request->merge(['tanggal_berobat' => $rows['tgl_periksa']]);
+		$getIgnorePoli = kuotaPoliIgnore($request);
+
 		$notIn = "mp.kdpoli NOT IN ($getIgnorePoli)";
-		// $ignorePoli = "mp.kdpoli NOT IN ('ALG','UGD','ANU','GIG'$notInSementara)";
 		$poli = "
 			SELECT
 				tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli
@@ -1411,29 +1408,29 @@
 	}
 
 	# Tambahkan kode poli BPJS jika tidak poli tidak ingin ditampilkan
-	function ignorePoli($request){
-		$ignorePoli = "'ALG','UGD','ANU','GIG'"; # Default ignore
-		$ignorePoli .= ",'PSY'";
-		$tanggal = $request->tanggal_berobat;
-		$total = 0;
-		if($request->natusi_apm){
-			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-				WHERE bp.tgl_periksa = '$tanggal'
-				AND bp.statusChat='99'
-				AND bdp.kodePoli='017'
-			";
-			$res = mysqli_query($request->natusi_apm,$query);
-			$total = mysqli_fetch_assoc($res)['total'];
-		}
+	// function ignorePoli($request){
+	// 	$ignorePoli = "'ALG','UGD','ANU','GIG'"; # Default ignore
+	// 	$ignorePoli .= ",'PSY'";
+	// 	$tanggal = $request->tanggal_berobat;
+	// 	$total = 0;
+	// 	if($request->natusi_apm){
+	// 		$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+	// 			JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+	// 			WHERE bp.tgl_periksa = '$tanggal'
+	// 			AND bp.statusChat='99'
+	// 			AND bdp.kodePoli='017'
+	// 		";
+	// 		$res = mysqli_query($request->natusi_apm,$query);
+	// 		$total = mysqli_fetch_assoc($res)['total'];
+	// 	}
 
-		$request->merge(['nama_hari' => date('D', strtotime($tanggal))]);
-		$namaHari = namaHari($request);
-		if(($namaHari=='Selasa' && $total >= 50) || ($namaHari=='Kamis' && $total >= 30)){
-			$ignorePoli .= ",'017'"; # 017 => onkologi
-		}
-		return $ignorePoli;
-	}
+	// 	$request->merge(['nama_hari' => date('D', strtotime($tanggal))]);
+	// 	$namaHari = namaHari($request);
+	// 	if(($namaHari=='Selasa' && $total >= 50) || ($namaHari=='Kamis' && $total >= 30)){
+	// 		$ignorePoli .= ",'017'"; # 017 => onkologi
+	// 	}
+	// 	return $ignorePoli;
+	// }
 
 	# Message kuota poli
 	function pemberitahuanPoli($request){
@@ -1702,18 +1699,6 @@
 	}
 
 	function kuotaPoliMessage($request){
-		// $query = "SELECT * FROM holidays
-		// 	WHERE kategori='kuota-poli'
-		// 	AND (
-		// 		((tanggal BETWEEN '$request->dt_now' AND '$request->dt_plus') AND hari IS NULL)
-		// 		OR (tanggal IS NULL AND hari IN ($request->array_hari))
-		// 	)
-		// ";
-		// // $res = mysqli_query($request->natusi_apm,$query) or die($request->natusi_apm->error);
-		// $exec = mysqli_query($request->natusi_apm,$query);
-
-		// echo json_encode($exec->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
-
 		$groupedData = [];
 		// foreach ($exec->fetch_all(MYSQLI_ASSOC) as $item) {
 		$dataKuota = getKuotaPoli($request);
@@ -1783,34 +1768,18 @@
 		$num = 1;
 		// $msg = "Silahkan Pilih *Nomor Poli Tujuan* Anda!\n";
 		$msg = "Untuk sementara waktu.\n";
-		// while($row=$exec->fetch_assoc()){
-		// 	$kodePoli = $row['poli_id'];
-		// 	// echo "$kodePoli\n\n";
-		// 	// $keterangan = str_replace("<br />","\n",$row['keterangan']);
 		// 	$keterangan = str_replace('<br />', "\n", $row['keterangan']);
 		// 	$keterangan = str_replace('<p>', '', $keterangan);
 		// 	$keterangan = str_replace('</p>', '', $keterangan);
 		// 	$keterangan = str_replace('<strong>', '*', $keterangan);
 		// 	$keterangan = str_replace('</strong>', '*', $keterangan);
-		// 	$query = "SELECT * FROM tm_poli WHERE KodePoli='$kodePoli'";
-		// 	$res = mysqli_query($request->rsu_conn, $query);
-		// 	$result = mysqli_fetch_assoc($res);
-		// 	// $msg = $keterangan."\n";
-		// 	$msg .= "Pendaftaran terbatas ".$result['NamaPoli']." dengan kuota sebagai berikut:\n";
-		// 	$msg .= $num.". ".$result['NamaPoli']."\n\n";
-		// 	$num++;
-		// }
-		// echo $msg."\n\n";
-		// $msg .= "\nHanya Nomor, tanpa Nama POLI. Contoh : 1";
-		// return $exec->fetch_all(MYSQLI_ASSOC);
 	}
 
 	function kuotaPoliIgnore($request){
-		$request->merge(['tanggal_berobat'=>'2024-09-06']);
+		// $request->merge(['tanggal_berobat'=>'2024-09-06']);
 		$tanggal = $request->tanggal_berobat;
 		$dataKuota = getKuotaPoli($request);
-		// echo json_encode($request->all(),JSON_PRETTY_PRINT);
-		// return;
+
 		// $ignorePoli = "'ALG','UGD','ANU','GIG'"; # Default ignore
 		$ignorePoli = ['ALG','UGD','ANU','GIG']; # Default ignore
 		foreach($dataKuota as $item){
@@ -1835,7 +1804,6 @@
 				}
 			}
 		}
-		// echo json_encode($ignorePoli,JSON_PRETTY_PRINT);
 		return "'".implode("','", $ignorePoli)."'";
 	}
 

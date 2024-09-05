@@ -88,9 +88,12 @@ class HolidayController extends Controller{
 	}
 
 	public function dataTable(Request $request){
-		$data = Holidays::
-		where('kategori',$request->kategori)
-		->with('poli')->get();
+		$data = Holidays::where('kategori',$request->kategori)
+			->with('poli')
+			->orderBy('is_active','DESC')
+			->orderBy('tanggal','ASC')
+			->orderBy('hari','ASC')
+			->get();
 		return Datatables::of($data)
 			->addIndexColumn()
 			->addColumn('nama_poli',fn($row)=>$row->poli?$row->poli->NamaPoli:'-')
