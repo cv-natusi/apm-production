@@ -1687,7 +1687,7 @@
 		return $execQGetAntri;
 	}
 
-	function kuotaPoli($request){
+	function kuotaPoliMessage($request){
 		$date = date('Y-m-d');
 		$datePlus = date('Y-m-d',strtotime('today +3day'));
 		$query = "SELECT * FROM holidays
@@ -1756,7 +1756,7 @@
 					AND bp.statusChat='99'
 					AND bdp.kodePoli='$items->poli_bpjs_id'
 				";
-				$res = mysqli_query($wablas,$query);
+				$res = mysqli_query($request->apm_conn,$query);
 				$total = mysqli_fetch_assoc($res)['total'];
 
 				$msg .= "$num. $namaHari $tanggal, kuota terpakai $total/$limit".($keys+1 < count($datas['data']) ? "\n" : "\n\n");
@@ -1838,7 +1838,7 @@
 				'array_hari'=>implode(",",$arrayHari),
 				'tanggal_detail'=>$arrayTanggal,
 			]);
-			$msg .= kuotaPoli($request);
+			$msg .= kuotaPoliMessage($request);
 		}else{
 			$txt = pemberitahuanPoli($request);
 			$msg .= $txt !== false ? "$txt\n\n" : '';
