@@ -1726,6 +1726,8 @@
 		// echo json_encode($request->all(),JSON_PRETTY_PRINT);
 		// echo json_encode($request->tanggal_detail['7'],JSON_PRETTY_PRINT);
 		// return;
+
+		# Cetak pesan
 		$msg = "Untuk sementara waktu.\n";
 		foreach ($data as $key => $datas) {
 			$num = 1;
@@ -1746,7 +1748,18 @@
 				$namaHari = $tanggalDetail->nama_hari;
 				$tanggal = $tanggalDetail->tanggal;
 				$limit = $items->kuota_wa;
-				$msg .= "$num. $namaHari $tanggal, kuota terpakai 5/$limit".($keys+1 < count($datas['data']) ? "\n" : "\n\n");
+
+				$whereDate = date('Y-m-d',strtotime($tanggal));
+				$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+					JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+					WHERE bp.tgl_periksa = '$whereDate'
+					AND bp.statusChat='99'
+					AND bdp.kodePoli='$items->poli_bpjs_id'
+				";
+				$res = mysqli_query($wablas,$query);
+				$total = mysqli_fetch_assoc($res)['total'];
+
+				$msg .= "$num. $namaHari $tanggal, kuota terpakai $total/$limit".($keys+1 < count($datas['data']) ? "\n" : "\n\n");
 				$num++;
 			}
 		}
@@ -1811,7 +1824,7 @@
 		if($request->phone=='6281335537942'){
 			$arrayHari = [];
 			$arrayTanggal = [];
-			for($i=1; $i<=3; $i++){
+			for($i=1; $i<=3; $i++){ # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
 				$ts = strtotime("today +$i day");
 				$n = date('N',$ts);
 				array_push($arrayHari, $n);
@@ -1825,9 +1838,7 @@
 				'array_hari'=>implode(",",$arrayHari),
 				'tanggal_detail'=>$arrayTanggal,
 			]);
-			// json_encode(kuotaPoli($request),JSON_PRETTY_PRINT);
 			$msg .= kuotaPoli($request);
-			// die();
 		}else{
 			$txt = pemberitahuanPoli($request);
 			$msg .= $txt !== false ? "$txt\n\n" : '';
