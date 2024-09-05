@@ -1687,30 +1687,36 @@
 		return $execQGetAntri;
 	}
 
-	function kuotaPoliMessage($request){
-		$date = date('Y-m-d');
-		$datePlus = date('Y-m-d',strtotime('today +3day'));
+	function getKuotaPoli($request){
+		dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
 		$query = "SELECT * FROM holidays
 			WHERE kategori='kuota-poli'
 			AND (
-				((tanggal BETWEEN '$date' AND '$datePlus') AND hari IS NULL)
+				((tanggal BETWEEN '$request->dt_now' AND '$request->dt_plus') AND hari IS NULL)
 				OR (tanggal IS NULL AND hari IN ($request->array_hari))
 			)
 		";
-		// $res = mysqli_query($request->natusi_apm,$query) or die($request->natusi_apm->error);
 		$exec = mysqli_query($request->natusi_apm,$query);
+		return $exec->fetch_all(MYSQLI_ASSOC);
+	}
+
+	function kuotaPoliMessage($request){
+		// $query = "SELECT * FROM holidays
+		// 	WHERE kategori='kuota-poli'
+		// 	AND (
+		// 		((tanggal BETWEEN '$request->dt_now' AND '$request->dt_plus') AND hari IS NULL)
+		// 		OR (tanggal IS NULL AND hari IN ($request->array_hari))
+		// 	)
+		// ";
+		// // $res = mysqli_query($request->natusi_apm,$query) or die($request->natusi_apm->error);
+		// $exec = mysqli_query($request->natusi_apm,$query);
 
 		// echo json_encode($exec->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
 
 		$groupedData = [];
 		// foreach ($exec->fetch_all(MYSQLI_ASSOC) as $item) {
-		// 	$poliId = $item['poli_id'];
-		// 	if (!isset($groupedData[$poliId])) {
-		// 		$groupedData[$poliId] = [];
-		// 	}
-		// 	$groupedData[$poliId][] = $item;
-		// }
-		foreach ($exec->fetch_all(MYSQLI_ASSOC) as $item) {
+		$dataKuota = getKuotaPoli($request);
+		foreach ($dataKuota as $item) {
 			$poliId = $item['poli_id'];
 			if (!isset($groupedData[$poliId])) {
 				$groupedData[$poliId] = [
@@ -1721,11 +1727,6 @@
 			$groupedData[$poliId]['data'][] = $item;
 		}
 		$data = array_values($groupedData);
-		// echo json_encode($data,JSON_PRETTY_PRINT);
-		// return;
-		// echo json_encode($request->all(),JSON_PRETTY_PRINT);
-		// echo json_encode($request->tanggal_detail['7'],JSON_PRETTY_PRINT);
-		// return;
 
 		# Cetak pesan
 		$msg = "*Untuk sementara waktu.*\n";
@@ -1769,10 +1770,8 @@
 				$num++;
 			}
 		}
-		// echo date('N',strtotime('now +4 day'));
 
 		return "$msg\n*==============================*\n\n";
-		return;
 		// echo json_encode($data,JSON_PRETTY_PRINT);
 		// $total = mysqli_fetch_assoc($res);
 		// $total = $exec->fetch_all(MYSQLI_ASSOC);
@@ -1805,6 +1804,71 @@
 		// return $exec->fetch_all(MYSQLI_ASSOC);
 	}
 
+	function kuotaPoliIgnore($request){
+		$tanggal = $request->tanggal_berobat;
+		$dataKuota = getKuotaPoli($request);
+		foreach($dataKuota as $item){
+			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+				WHERE bp.tgl_periksa = '$tanggal'
+				AND bp.statusChat='99'
+				AND bdp.kodePoli='017'
+			";
+			$res = mysqli_query($request->natusi_apm,$query);
+			$total = mysqli_fetch_assoc($res)['total'];
+		}
+		return ;
+
+
+
+		$ignorePoli = "'ALG','UGD','ANU','GIG'"; # Default ignore
+		// $ignorePoli .= ",'PSY'";
+		$tanggal = $request->tanggal_berobat;
+		$total = 0;
+		if($request->natusi_apm){
+			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+				WHERE bp.tgl_periksa = '$tanggal'
+				AND bp.statusChat='99'
+				AND bdp.kodePoli='017'
+			";
+			$res = mysqli_query($request->natusi_apm,$query);
+			$total = mysqli_fetch_assoc($res)['total'];
+		}
+
+		$request->merge(['nama_hari' => date('D', strtotime($tanggal))]);
+		$namaHari = namaHari($request);
+		if(($namaHari=='Selasa' && $total >= 50) || ($namaHari=='Kamis' && $total >= 30)){
+			$ignorePoli .= ",'017'"; # 017 => onkologi
+		}
+		return $ignorePoli;
+	}
+
+	function dateDetail($request){
+		$arrayHari = [];
+		$arrayTanggal = [];
+		for($i=1; $i<=3; $i++){ # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
+			$ts = strtotime("today +$i day");
+			$n = date('N',$ts);
+			array_push($arrayHari, $n);
+			$request->merge(['nama_hari'=>(int)$n]);
+			$arrayTanggal[$n] = (object)[
+				'tanggal'=>date('d-m-Y',$ts),
+				'nama_hari'=>namaHari($request),
+			];
+		}
+		$tsNow = strtotime('now');
+		$tsPlus = strtotime('now +3day');
+		$request->merge([
+			'array_hari'=>implode(",",$arrayHari),
+			'tanggal_detail'=>$arrayTanggal,
+			'ts_now'=>$tsNow,
+			'ts_plus'=>$tsPlus,
+			'dt_now'=>date('Y-m-d'),
+			'dt_plus'=>date('Y-m-d',$tsPlus),
+		]);
+	}
+
 	function msgWelcome($request){
 		$msg = "Selamat datang di RSUD Dr. Wahidin Sudiro Husodo Kota Mojokerto, Anda sedang berinteraksi dengan Sistem Pendaftaran Antrian Otomatis, Silahkan Pilih Layanan :\n\n";
 		$msg .= "A : Pendaftaran Antrian\n";
@@ -1828,22 +1892,9 @@
 		// $msg .= msgJadwalPolis($wablas)."\n\n";
 		// $msg .= msgJadwalPoli()."\n\n";
 		if($request->phone=='6281335537942' || $request->phone=='6281330003568'){
-			$arrayHari = [];
-			$arrayTanggal = [];
-			for($i=1; $i<=3; $i++){ # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
-				$ts = strtotime("today +$i day");
-				$n = date('N',$ts);
-				array_push($arrayHari, $n);
-				$request->merge(['nama_hari'=>(int)$n]);
-				$arrayTanggal[$n] = (object)[
-					'tanggal'=>date('d-m-Y',$ts),
-					'nama_hari'=>namaHari($request),
-				];
-			}
-			$request->merge([
-				'array_hari'=>implode(",",$arrayHari),
-				'tanggal_detail'=>$arrayTanggal,
-			]);
+			// dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
+			kuotaPoliIgnore($request);
+			die();
 			$msg .= kuotaPoliMessage($request);
 		}else{
 			$txt = pemberitahuanPoli($request);
@@ -2037,31 +2088,6 @@
 			$msg .= "Copy Format Dibawah ini, isi Cara Bayar (Cth. *Bayar : UMUM* , lalu kirim pesan). *Note : Jika menggunakan asuransi lain, silahkan isi sesuai jenis asuransi yang digunakan sekarang.*\n\n";
 			$msg .= "Bayar : UMUM/BPJS/Asuransi Lain";
 		}
-		return $msg;
-	}
-
-	function pasienBaru($cek){
-		if($cek=='berhasil'){
-			$msg = "Masukkan Nama Lengkap Anda.\n";
-			$msg .= "Copy Format Dibawah ini, isi Nama Anda (Cth. *Nama : Ahmad Habibi* , lalu kirim pesan).\n\n";
-		}else{
-			$msg = "Pengiriman Data Gagal!\n";
-			$msg .= "Data Yang Dikirim Harus Sesuai Format!\n";
-			$msg .= "(Cth. *Nama : Ahmad Habibi* , lalu kirim pesan).*\n\n";
-		}
-		$msg .= "Nama : masukkan nama";
-		// $msg .= "Nama : ...\n";
-		// $msg .= "NIK : ...\n";
-		// $msg .= "Tanggal Lahir : ...\n";
-		// $msg .= "Nama Ibu Kandung : ...\n";
-		// $msg .= "Alamat : ...\n";
-		// $msg .= "Tanggal Rencana Berobat : Cth. 31-01-2002\n";
-		// $msg .= "Cara Bayar : UMUM / BPJS / Lainnya";
-		return $msg;
-	}
-
-	function pasienLama(){
-		$msg = 'Tuliskan  Nomor RM (Rekam Medis) Anda!';
 		return $msg;
 	}
 
@@ -2286,3 +2312,31 @@
 		return (object)$result;
 	}
 	// BRIDGING BPJS END
+
+
+
+
+	// function pasienBaru($cek){
+	// 	if($cek=='berhasil'){
+	// 		$msg = "Masukkan Nama Lengkap Anda.\n";
+	// 		$msg .= "Copy Format Dibawah ini, isi Nama Anda (Cth. *Nama : Ahmad Habibi* , lalu kirim pesan).\n\n";
+	// 	}else{
+	// 		$msg = "Pengiriman Data Gagal!\n";
+	// 		$msg .= "Data Yang Dikirim Harus Sesuai Format!\n";
+	// 		$msg .= "(Cth. *Nama : Ahmad Habibi* , lalu kirim pesan).*\n\n";
+	// 	}
+	// 	$msg .= "Nama : masukkan nama";
+	// 	// $msg .= "Nama : ...\n";
+	// 	// $msg .= "NIK : ...\n";
+	// 	// $msg .= "Tanggal Lahir : ...\n";
+	// 	// $msg .= "Nama Ibu Kandung : ...\n";
+	// 	// $msg .= "Alamat : ...\n";
+	// 	// $msg .= "Tanggal Rencana Berobat : Cth. 31-01-2002\n";
+	// 	// $msg .= "Cara Bayar : UMUM / BPJS / Lainnya";
+	// 	return $msg;
+	// }
+
+	// function pasienLama(){
+	// 	$msg = 'Tuliskan  Nomor RM (Rekam Medis) Anda!';
+	// 	return $msg;
+	// }
