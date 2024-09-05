@@ -1495,23 +1495,24 @@
 		return $num!==0 ? $text : false;
 	}
 	function namaHari($request){
-		switch ($request->nama_hari) {
-			case 'Mon':
+		$str = $request->nama_hari;
+		switch (true) {
+			case ($str==='Mon' || $str===1):
 				$hari = 'Senin';
 				break;
-			case 'Tue':
+			case ($str==='Tue' || $str===2):
 				$hari = 'Selasa';
 				break;
-			case 'Wed':
+			case ($str==='Wed' || $str===3):
 				$hari = 'Rabu';
 				break;
-			case 'Thu':
+			case ($str==='Thu' || $str===4):
 				$hari = 'Kamis';
 				break;
-			case 'Fri':
+			case ($str==='Fri' || $str===5):
 				$hari = "Jum'at";
 				break;
-			case 'Sat':
+			case ($str==='Sat' || $str===6):
 				$hari = 'Sabtu';
 				break;
 			default:
@@ -1686,7 +1687,7 @@
 		return $execQGetAntri;
 	}
 
-	function managePoli($request){
+	function kuotaPoli($request){
 		$date = date('Y-m-d');
 		$datePlus = date('Y-m-d',strtotime('today +3day'));
 		$query = "SELECT * FROM holidays
@@ -1698,39 +1699,122 @@
 		";
 		// $res = mysqli_query($request->natusi_apm,$query) or die($request->natusi_apm->error);
 		$exec = mysqli_query($request->natusi_apm,$query);
+
+		// echo json_encode($exec->fetch_all(MYSQLI_ASSOC),JSON_PRETTY_PRINT);
+
+		$groupedData = [];
+		// foreach ($exec->fetch_all(MYSQLI_ASSOC) as $item) {
+		// 	$poliId = $item['poli_id'];
+		// 	if (!isset($groupedData[$poliId])) {
+		// 		$groupedData[$poliId] = [];
+		// 	}
+		// 	$groupedData[$poliId][] = $item;
+		// }
+		foreach ($exec->fetch_all(MYSQLI_ASSOC) as $item) {
+			$poliId = $item['poli_id'];
+			if (!isset($groupedData[$poliId])) {
+				$groupedData[$poliId] = [
+					'poli_id' => $item['poli_id'],
+					'data' => []
+				];
+			}
+			$groupedData[$poliId]['data'][] = $item;
+		}
+		$data = array_values($groupedData);
+		// echo json_encode($data,JSON_PRETTY_PRINT);
+		// return;
+		// echo json_encode($request->all(),JSON_PRETTY_PRINT);
+		// echo json_encode($request->tanggal_detail['7'],JSON_PRETTY_PRINT);
+		// return;
+		$msg = "Untuk sementara waktu.\n\n";
+		foreach ($data as $key => $datas) {
+			$num = 1;
+			// echo $datas->hari;
+			
+			$poliId = $datas['poli_id'];
+			$query = "SELECT * FROM tm_poli WHERE KodePoli='$poliId'";
+			$exec = mysqli_query($request->rsu_conn, $query);
+			// $poli = $exec->fetch_all(MYSQLI_ASSOC);
+			$poli = (object)$exec->fetch_assoc();
+			// echo json_encode($poli,JSON_PRETTY_PRINT);
+			// return ;
+			$msg .= "Pendaftaran terbatas *$poli->NamaPoli* dengan kuota sebagai berikut:\n";
+			foreach ($datas['data'] as $keys => $items) {
+				$items = (object)$items;
+				// if(){
+				// 	$index = $items->hari;
+				// }else{
+				// 	// $request->merge(['nama_hari'=>(int)$n]);
+				// 	$index = (int)date('N',strtotime($items->tanggal));
+				// }
+				$idx = isset($request->tanggal_detail[$items->hari]) ? $items->hari : (int)date('N',strtotime($items->tanggal));
+				// $msg .= "$items->hari\n\n";
+				$tanggalDetail = $request->tanggal_detail[$idx];
+				$namaHari = $tanggalDetail->nama_hari;
+				$tanggal = $tanggalDetail->tanggal;
+				$limit = $items->kuota_wa;
+				$msg .= "$num. $namaHari $tanggal, kuota terpakai 5/$limit".($keys+1 < count($datas['data']) ? "\n" : "\n\n");
+				// $msg .= json_encode($request->tanggal_detail[$idx],JSON_PRETTY_PRINT)."\n\n";
+				// $msg .= json_encode($items,JSON_PRETTY_PRINT);
+				$num++;
+			}
+		}
+		// echo date('N',strtotime('now +4 day'));
+
+		echo $msg;
+		return;
+		// echo json_encode($data,JSON_PRETTY_PRINT);
 		// $total = mysqli_fetch_assoc($res);
 		// $total = $exec->fetch_all(MYSQLI_ASSOC);
 
 
-      // $text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
+		// $text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
 
-      $num = 1;
-      // $msg
+		$num = 1;
 		// $msg = "Silahkan Pilih *Nomor Poli Tujuan* Anda!\n";
-		while($row=$exec->fetch_assoc()){
-         $kodePoli = $row['poli_id'];
-         $query = "SELECT * FROM tm_poli WHERE KodePoli='$kodePoli'";
-         $res = mysqli_query($request->rsu_conn, $query);
-         $result = mysqli_fetch_assoc($res);
-         $msg = $row['keterangan']."\n";
-			$msg .= "*".$num.". ".$result->NamaPoli."*\n";
-			$num++;
-		}
+		$msg = "Untuk sementara waktu.\n";
+		// while($row=$exec->fetch_assoc()){
+		// 	$kodePoli = $row['poli_id'];
+		// 	// echo "$kodePoli\n\n";
+		// 	// $keterangan = str_replace("<br />","\n",$row['keterangan']);
+		// 	$keterangan = str_replace('<br />', "\n", $row['keterangan']);
+		// 	$keterangan = str_replace('<p>', '', $keterangan);
+		// 	$keterangan = str_replace('</p>', '', $keterangan);
+		// 	$keterangan = str_replace('<strong>', '*', $keterangan);
+		// 	$keterangan = str_replace('</strong>', '*', $keterangan);
+		// 	$query = "SELECT * FROM tm_poli WHERE KodePoli='$kodePoli'";
+		// 	$res = mysqli_query($request->rsu_conn, $query);
+		// 	$result = mysqli_fetch_assoc($res);
+		// 	// $msg = $keterangan."\n";
+		// 	$msg .= "Pendaftaran terbatas ".$result['NamaPoli']." dengan kuota sebagai berikut:\n";
+		// 	$msg .= $num.". ".$result['NamaPoli']."\n\n";
+		// 	$num++;
+		// }
+		// echo $msg."\n\n";
 		// $msg .= "\nHanya Nomor, tanpa Nama POLI. Contoh : 1";
-		// return $msg;
-		// return $total;
+		// return $exec->fetch_all(MYSQLI_ASSOC);
 	}
 
 	function msgWelcome($request){
 		if($request->phone=='6281335537942'){
 			$arrayHari = [];
+			$arrayTanggal = [];
 			for($i=1; $i<=3; $i++){
-				$n = date('N',strtotime("today +$i day"));
+				$ts = strtotime("today +$i day");
+				$n = date('N',$ts);
 				array_push($arrayHari, $n);
+				$request->merge(['nama_hari'=>(int)$n]);
+				$arrayTanggal[$n] = (object)[
+					'tanggal'=>date('d-m-Y',$ts),
+					'nama_hari'=>namaHari($request),
+				];
 			}
-			$request->merge(['array_hari'=>implode(",",$arrayHari)]);
-
-			return json_encode(managePoli($request),JSON_PRETTY_PRINT);
+			$request->merge([
+				'array_hari'=>implode(",",$arrayHari),
+				'tanggal_detail'=>$arrayTanggal,
+			]);
+			json_encode(kuotaPoli($request),JSON_PRETTY_PRINT);
+			die();
 		}
 		$msg = "Selamat datang di RSUD Dr. Wahidin Sudiro Husodo Kota Mojokerto, Anda sedang berinteraksi dengan Sistem Pendaftaran Antrian Otomatis, Silahkan Pilih Layanan :\n\n";
 		$msg .= "A : Pendaftaran Antrian\n";
