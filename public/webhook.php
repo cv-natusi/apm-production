@@ -1726,36 +1726,27 @@
 		// echo json_encode($request->all(),JSON_PRETTY_PRINT);
 		// echo json_encode($request->tanggal_detail['7'],JSON_PRETTY_PRINT);
 		// return;
-		$msg = "Untuk sementara waktu.\n\n";
+		$msg = "Untuk sementara waktu.\n";
 		foreach ($data as $key => $datas) {
 			$num = 1;
-			// echo $datas->hari;
-			
 			$poliId = $datas['poli_id'];
 			$query = "SELECT * FROM tm_poli WHERE KodePoli='$poliId'";
 			$exec = mysqli_query($request->rsu_conn, $query);
 			// $poli = $exec->fetch_all(MYSQLI_ASSOC);
 			$poli = (object)$exec->fetch_assoc();
-			// echo json_encode($poli,JSON_PRETTY_PRINT);
-			// return ;
 			$msg .= "Pendaftaran terbatas *$poli->NamaPoli* dengan kuota sebagai berikut:\n";
+
+			# Urutkan data berdasarkan hari/tanggal (ASC)
+			$columnSort = $datas['data'][0]['hari']!="" ? 'hari' : 'tanggal';
+			array_multisort(array_column($datas['data'], $columnSort), SORT_ASC, $datas['data']);
 			foreach ($datas['data'] as $keys => $items) {
 				$items = (object)$items;
-				// if(){
-				// 	$index = $items->hari;
-				// }else{
-				// 	// $request->merge(['nama_hari'=>(int)$n]);
-				// 	$index = (int)date('N',strtotime($items->tanggal));
-				// }
 				$idx = isset($request->tanggal_detail[$items->hari]) ? $items->hari : (int)date('N',strtotime($items->tanggal));
-				// $msg .= "$items->hari\n\n";
 				$tanggalDetail = $request->tanggal_detail[$idx];
 				$namaHari = $tanggalDetail->nama_hari;
 				$tanggal = $tanggalDetail->tanggal;
 				$limit = $items->kuota_wa;
 				$msg .= "$num. $namaHari $tanggal, kuota terpakai 5/$limit".($keys+1 < count($datas['data']) ? "\n" : "\n\n");
-				// $msg .= json_encode($request->tanggal_detail[$idx],JSON_PRETTY_PRINT)."\n\n";
-				// $msg .= json_encode($items,JSON_PRETTY_PRINT);
 				$num++;
 			}
 		}
