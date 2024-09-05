@@ -54,7 +54,7 @@
 								<option value="3">Rabu</option>
 								<option value="4">Kamis</option>
 								<option value="5">Jum'at</option>
-								<option value="5">Sabtu</option>
+								<option value="6">Sabtu</option>
 							</select>
 						</div>
 						<div id="container-tanggal-kuota-poli">
