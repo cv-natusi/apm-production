@@ -1752,7 +1752,7 @@
 		}
 		// echo date('N',strtotime('now +4 day'));
 
-		echo $msg;
+		return $msg;
 		return;
 		// echo json_encode($data,JSON_PRETTY_PRINT);
 		// $total = mysqli_fetch_assoc($res);
@@ -1787,26 +1787,6 @@
 	}
 
 	function msgWelcome($request){
-		if($request->phone=='6281335537942'){
-			$arrayHari = [];
-			$arrayTanggal = [];
-			for($i=1; $i<=3; $i++){
-				$ts = strtotime("today +$i day");
-				$n = date('N',$ts);
-				array_push($arrayHari, $n);
-				$request->merge(['nama_hari'=>(int)$n]);
-				$arrayTanggal[$n] = (object)[
-					'tanggal'=>date('d-m-Y',$ts),
-					'nama_hari'=>namaHari($request),
-				];
-			}
-			$request->merge([
-				'array_hari'=>implode(",",$arrayHari),
-				'tanggal_detail'=>$arrayTanggal,
-			]);
-			json_encode(kuotaPoli($request),JSON_PRETTY_PRINT);
-			die();
-		}
 		$msg = "Selamat datang di RSUD Dr. Wahidin Sudiro Husodo Kota Mojokerto, Anda sedang berinteraksi dengan Sistem Pendaftaran Antrian Otomatis, Silahkan Pilih Layanan :\n\n";
 		$msg .= "A : Pendaftaran Antrian\n";
 		$msg .= "B : Promo Menarik\n\n";
@@ -1828,8 +1808,30 @@
 
 		// $msg .= msgJadwalPolis($wablas)."\n\n";
 		// $msg .= msgJadwalPoli()."\n\n";
-		$txt = pemberitahuanPoli($request);
-		$msg .= $txt !== false ? "$txt\n\n" : '';
+		if($request->phone=='6281335537942'){
+			$arrayHari = [];
+			$arrayTanggal = [];
+			for($i=1; $i<=3; $i++){
+				$ts = strtotime("today +$i day");
+				$n = date('N',$ts);
+				array_push($arrayHari, $n);
+				$request->merge(['nama_hari'=>(int)$n]);
+				$arrayTanggal[$n] = (object)[
+					'tanggal'=>date('d-m-Y',$ts),
+					'nama_hari'=>namaHari($request),
+				];
+			}
+			$request->merge([
+				'array_hari'=>implode(",",$arrayHari),
+				'tanggal_detail'=>$arrayTanggal,
+			]);
+			// json_encode(kuotaPoli($request),JSON_PRETTY_PRINT);
+			$msg .= kuotaPoli($request);
+			// die();
+		}else{
+			$txt = pemberitahuanPoli($request);
+			$msg .= $txt !== false ? "$txt\n\n" : '';
+		}
 
 		$msg .= "Hotline 0815257200088 untuk mendapatkan bantuan apabila ada kendala pendaftaran.\n";
 		$msg .= "Video tutorial penggunaan antrian cek di : shorturl.at/dhqz8";
