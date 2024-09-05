@@ -1700,8 +1700,10 @@
 
 	function kuotaPoliMessage($request){
 		$groupedData = [];
-		// foreach ($exec->fetch_all(MYSQLI_ASSOC) as $item) {
 		$dataKuota = getKuotaPoli($request);
+		if(count($dataKuota)==0){ # Jangan cetak pesan jika data 0
+			return false;
+		}
 		foreach ($dataKuota as $item) {
 			$poliId = $item['poli_id'];
 			if (!isset($groupedData[$poliId])) {
@@ -1756,7 +1758,6 @@
 				$num++;
 			}
 		}
-
 		return "$msg\n*==============================*\n\n";
 		// echo json_encode($data,JSON_PRETTY_PRINT);
 		// $total = mysqli_fetch_assoc($res);
@@ -1854,17 +1855,19 @@
 
 		// $msg .= msgJadwalPolis($wablas)."\n\n";
 		// $msg .= msgJadwalPoli()."\n\n";
-		if($request->phone=='6281335537942' || $request->phone=='6281330003568'){
+		// if($request->phone=='6281335537942' || $request->phone=='6281330003568'){
 			// dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
 			// echo kuotaPoliIgnore($request);
 			// echo "\n\n\n";
-			echo kuotaPoliMessage($request);
-			die();
-			$msg .= kuotaPoliMessage($request);
-		}else{
-			$txt = pemberitahuanPoli($request);
-			$msg .= $txt !== false ? "$txt\n\n" : '';
-		}
+			$kuotaPoliMessage = kuotaPoliMessage($request);
+			$msg .= $kuotaPoliMessage!==false ? $kuotaPoliMessage : '';
+		// 	echo $msg;
+		// 	die();
+		// 	$msg .= kuotaPoliMessage($request);
+		// }else{
+		// 	$txt = pemberitahuanPoli($request);
+		// 	$msg .= $txt !== false ? "$txt\n\n" : '';
+		// }
 
 		$msg .= "Hotline 0815257200088 untuk mendapatkan bantuan apabila ada kendala pendaftaran.\n";
 		$msg .= "Video tutorial penggunaan antrian cek di : shorturl.at/dhqz8";
