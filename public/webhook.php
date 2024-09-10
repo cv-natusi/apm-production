@@ -1758,6 +1758,9 @@
 				}
 				$num++;
 			}
+			if($request->phone=='6281335537942'){
+				$msg .= "Tes";
+			}
 		}
 		return "$msg\n*==============================*\n\n";
 		// echo json_encode($data,JSON_PRETTY_PRINT);
