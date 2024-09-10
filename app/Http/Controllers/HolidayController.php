@@ -122,7 +122,6 @@ class HolidayController extends Controller{
 				],400);
 			}
 		}
-		return 'kosong';
 
 		if($ifHari){
 			$store->hari = $request->hari;
