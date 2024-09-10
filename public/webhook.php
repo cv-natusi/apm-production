@@ -1731,7 +1731,9 @@
 			# Urutkan data berdasarkan hari/tanggal (ASC)
 			$columnSort = $datas['data'][0]['hari']!="" ? 'hari' : 'tanggal';
 			array_multisort(array_column($datas['data'], $columnSort), SORT_ASC, $datas['data']);
+			$sudahDigunakan = [];
 			foreach ($datas['data'] as $keys => $items) {
+				$increment = $keys+1;
 				$items = (object)$items;
 				$idx = isset($request->tanggal_detail[$items->hari]) ? $items->hari : (int)date('N',strtotime($items->tanggal));
 				$tanggalDetail = $request->tanggal_detail[$idx];
@@ -1751,18 +1753,39 @@
 				$total = $total > $limit ? $limit : $total;
 
 				$msg .= "$num. $namaHari $tanggal, kuota terpakai $total/$limit";
-				if($keys+1 < count($datas['data'])){
+				foreach ($datas['data'] as $val) {
+					$keterangan = $val['keterangan'];
+					if(
+						$keterangan
+						&& $val['poli_id'] == $datas['poli_id']
+						&& !in_array($val['id_holiday'],$sudahDigunakan)
+						&& $increment == count($datas['data'])
+					){
+						$keterangan = str_replace("<br />", "\n", $keterangan);
+						$keterangan = str_replace("\r\n", "", $keterangan);
+						$keterangan = str_replace("&nbsp", '', $keterangan);
+						$keterangan = str_replace("<p>", '', $keterangan);
+						$keterangan = str_replace("</p>", '', $keterangan);
+						$keterangan = str_replace("<strong>", '*', $keterangan);
+						$keterangan = str_replace("</strong>", '*', $keterangan);
+						$msg .= "\n$keterangan";
+						array_push($sudahDigunakan,$val['id_holiday']);
+					}
+				}
+				// if($keys+1 < count($datas['data'])){
+				// 	$msg .= "\n";
+				// }elseif($key+1 < count($data)){
+				// 	$msg .= "\n\n";
+				// }
+				if($increment < count($datas['data']) || $key+1 == count($data)){
 					$msg .= "\n";
 				}elseif($key+1 < count($data)){
 					$msg .= "\n\n";
 				}
 				$num++;
 			}
-			if($request->phone=='6281335537942'){
-				$msg .= "Tes";
-			}
 		}
-		return "$msg\n*==============================*\n\n";
+		return "$msg*==============================*\n\n";
 		// echo json_encode($data,JSON_PRETTY_PRINT);
 		// $total = mysqli_fetch_assoc($res);
 		// $total = $exec->fetch_all(MYSQLI_ASSOC);
