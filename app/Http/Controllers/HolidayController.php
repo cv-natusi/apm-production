@@ -20,10 +20,6 @@ class HolidayController extends Controller{
 	}
 
 	public function form(Request $request){
-		// return $request->all();
-
-		// $request->merge(['nama_hari_en'=>date('D',strtotime('today'))]);
-		// $namaHariID = Help::namaHariID($request);
 		$poli = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
 			->whereNotIn('kdpoli',['ALG','UGD','ANU'])
 			->groupBy('mapping_poli_bridging.kdpoli_rs')
@@ -43,13 +39,91 @@ class HolidayController extends Controller{
 	}
 
 	public function store(Request $request){
+		$ifHari = $request->format=='hari';
+		$nRequest = $ifHari ? $request->hari : date('N',strtotime($request->tanggal));
+		$ifTanggal = $request->format=='tanggal';
 		if($request->holiday_id){
 			$store = Holidays::find($request->holiday_id);
 		}else{
 			$store = new Holidays;
 			$store->is_active = true;
 		}
-		$ifHari = $request->format=='hari';
+
+
+		$query = Holidays::where('kategori',$request->kategori);
+		if($request->holiday_id){
+			$query->where('id_holiday','!=',$request->holiday_id);
+		}
+		if($request->kode_poli){
+			$query->where('poli_id',$request->kode_poli);
+		}
+		if($ifHari){
+			$query->where('hari',$request->hari);
+		}
+		if($ifTanggal || $request->kategori=='libur-nasional'){
+			$query->where('tanggal',date('Y-m-d',strtotime($request->tanggal)));
+		}
+		$check = $query->first();
+		$count = 0;
+		if(
+			(
+				$request->kategori=='kuota-poli'
+				&& (
+					$count = count(
+						(
+							$kuotaPoli = Holidays::
+							where(
+								fn($q)=>$q->where(
+									fn($q)=>$q->whereNotNull('tanggal')->where('tanggal','>=',date('Y-m-d'))
+								)->orWhere(
+									fn($q)=>$q->where('hari',$nRequest)
+								)
+							)->
+							where('poli_id',$request->kode_poli)->
+							where('kategori',$request->kategori)->
+							get()
+						)
+					)
+				) > 0
+			)
+			|| $check
+		){
+			$break = false;
+			if($count){
+				foreach($kuotaPoli as $key => $val){
+					$dayInNum = $val->is_hari==true ? $val->hari : (int)date('N',strtotime($val->tanggal));
+					if(
+						$dayInNum == $nRequest
+						&& (
+							!$request->holiday_id
+							|| (
+								$request->holiday_id && (
+									$request->kode_poli != $store->poli_id
+									|| (
+										$request->kode_poli == $val->poli_id
+										&& $val->id_holiday != $store->id_holiday
+									)
+								)
+							)
+						)
+					){
+						$break = true;
+						break;
+					}
+				}
+			}
+			if($break || $request->kategori!='kuota-poli'){
+				return response()->json([
+					'metadata' => [
+						'code' => 400,
+						'message' => 'Data sudah pernah ditambahkan pada hari/tanggal yang sama'
+					],
+					'response' => $check,
+				],400);
+			}
+		}
+		return 'kosong';
+
 		if($ifHari){
 			$store->hari = $request->hari;
 			$store->tanggal = null;
@@ -107,15 +181,6 @@ class HolidayController extends Controller{
 				return "<span class='badge badge-$class'>$status</span>";
 			})
 			->addColumn('aksi',function($row){
-				// if($data->no_rm!='00000000000'){
-				// 	$btn .= "<button class='btn btn-sm btn-warning' title='Cetak Tracer' onclick='cetakTracer(`$data->id`)'><i class='fa fa-print'></i></button> &nbsp;";
-				// }
-				// $data = $row->map(function($rows){
-				// 	return collect($rows->toArray())
-				// 	->only(['kategori'])
-				// 	->all();
-				// });
-
 				$tanggal = $row->tanggal;
 				$jam = $row->jam;
 				$keterangan = $row->keterangan;

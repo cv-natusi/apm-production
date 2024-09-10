@@ -1748,6 +1748,7 @@
 				";
 				$res = mysqli_query($request->apm_conn,$query);
 				$total = mysqli_fetch_assoc($res)['total'];
+				$total = $total > $limit ? $limit : $total;
 
 				$msg .= "$num. $namaHari $tanggal, kuota terpakai $total/$limit";
 				if($keys+1 < count($datas['data'])){
@@ -1813,10 +1814,10 @@
 		$arrayTanggal = [];
 		for($i=1; $i<=3; $i++){ # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
 			$ts = strtotime("today +$i day");
-			$n = date('N',$ts);
-			array_push($arrayHari, $n);
-			$request->merge(['nama_hari'=>(int)$n]);
-			$arrayTanggal[$n] = (object)[
+			$dayInNum = date('N',$ts);
+			array_push($arrayHari, $dayInNum);
+			$request->merge(['nama_hari'=>(int)$dayInNum]);
+			$arrayTanggal[$dayInNum] = (object)[
 				'tanggal'=>date('d-m-Y',$ts),
 				'nama_hari'=>namaHari($request),
 			];

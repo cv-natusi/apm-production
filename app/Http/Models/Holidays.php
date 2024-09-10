@@ -10,6 +10,20 @@ class Holidays extends Model{
 	protected $table = 'holidays';
 	protected $primaryKey = 'id_holiday';
 	public $timestamps = false;
+	protected $fillable = [
+		'id_holiday',
+		'tanggal',
+		'keterangan',
+		'hari',
+		'is_hari',
+		'is_active',
+		'jam',
+		'poli_id',
+		'poli_bpjs_id',
+		'kuota_kiosk',
+		'kuota_wa',
+		'kategori',
+	];
 
 	/**
 	 * Get the poli that owns the Holidays
