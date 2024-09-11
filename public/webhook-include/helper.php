@@ -1,5 +1,6 @@
 <?php
-class Help{
+namespace Webhook\Helper;
+class Helper{
 	public static function namaHari($request){
 		$str = $request->nama_hari;
 		switch (true) {

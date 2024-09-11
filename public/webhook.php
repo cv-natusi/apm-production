@@ -5,9 +5,12 @@
 	use Illuminate\Http\Request;
 
 	require('../vendor/autoload.php');
-	require('webhook-include/management-poli/libur-nasional.php');
-	require('webhook-include/management-poli/libur-poli.php');
-	require('webhook-include/management-poli/kuota-poli.php');
+	// require('webhook-include/management-poli/LiburNasional.php');
+	require('webhook-include/management-poli/LiburPoli.php');
+	require('webhook-include/management-poli/KuotaPoli.php');
+
+	include "webhook-include/ManagementPoli.php";
+	use Webhook\ManagementPoli;
 
 	header("Content-Type: text/plain");
 	date_default_timezone_set("Asia/Jakarta");
@@ -75,10 +78,16 @@
 	]);
 
 
-   if($request->phone=='6281335537942'){
-      
-      die();
-   }
+	if($request->phone=='6281335537942'){
+		// $managementPoli = new ManagementPoli;
+		// echo json_encode($managementPoli::liburNasional($request),JSON_PRETTY_PRINT);
+		// echo json_encode(liburNasional($request),JSON_PRETTY_PRINT);
+		// echo MP::testing();
+		// $cs = new ManagementPoli();
+		echo ManagementPoli::testing();
+		// echo 'berhasil';
+		die();
+	}
 
 
 	if(!$wablas){
