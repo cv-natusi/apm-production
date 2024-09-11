@@ -1,4 +1,19 @@
 <?php
+
+function getKuotaPoli($request){
+   dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
+   $query = "SELECT * FROM holidays
+      WHERE kategori='kuota-poli'
+      AND is_active=1
+      AND (
+         ((tanggal BETWEEN '$request->dt_now' AND '$request->dt_plus') AND hari IS NULL)
+         OR (tanggal IS NULL AND hari IN ($request->array_hari))
+      )
+   ";
+   $exec = mysqli_query($request->natusi_apm,$query);
+   return $exec->fetch_all(MYSQLI_ASSOC);
+}
+
 function kuotaPoliMessage($request){
 	$groupedData = [];
 	$dataKuota = getKuotaPoli($request);
@@ -73,11 +88,6 @@ function kuotaPoliMessage($request){
 					array_push($sudahDigunakan,$val['id_holiday']);
 				}
 			}
-			// if($keys+1 < count($datas['data'])){
-			// 	$msg .= "\n";
-			// }elseif($key+1 < count($data)){
-			// 	$msg .= "\n\n";
-			// }
 			if($increment < count($datas['data']) || $key+1 == count($data)){
 				$msg .= "\n";
 			}elseif($key+1 < count($data)){
@@ -90,18 +100,6 @@ function kuotaPoliMessage($request){
 	// echo json_encode($data,JSON_PRETTY_PRINT);
 	// $total = mysqli_fetch_assoc($res);
 	// $total = $exec->fetch_all(MYSQLI_ASSOC);
-
-
-	// $text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
-
-	$num = 1;
-	// $msg = "Silahkan Pilih *Nomor Poli Tujuan* Anda!\n";
-	$msg = "Untuk sementara waktu.\n";
-	// 	$keterangan = str_replace('<br />', "\n", $row['keterangan']);
-	// 	$keterangan = str_replace('<p>', '', $keterangan);
-	// 	$keterangan = str_replace('</p>', '', $keterangan);
-	// 	$keterangan = str_replace('<strong>', '*', $keterangan);
-	// 	$keterangan = str_replace('</strong>', '*', $keterangan);
 }
 
 function kuotaPoliIgnore($request){
