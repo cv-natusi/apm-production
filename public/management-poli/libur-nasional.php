@@ -1,3 +1,6 @@
 <?php
 
-echo "\n\nTESTING\n\n";
+function liburNasional($request){
+	return $request->all();
+}
+// echo "\n\nTESTING\n\n";
