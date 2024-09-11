@@ -80,8 +80,6 @@
 
 	if($request->phone=='6281335537942'){
 		// $managementPoli = new ManagementPoli;
-		// echo json_encode($managementPoli::liburNasional($request),JSON_PRETTY_PRINT);
-		// echo json_encode(liburNasional($request),JSON_PRETTY_PRINT);
 		// echo MP::testing();
 		// $cs = new ManagementPoli();
 		echo ManagementPoli::testing();

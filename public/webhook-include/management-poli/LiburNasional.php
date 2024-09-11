@@ -1,7 +1,7 @@
 <?php
-require('ManagementPoli.php');
+include "../ManagementPoli.php";
 class LiburNasional extends ManagementPoli{
-	function liburNasional($request){
+	public static function liburNasional($request){
 		return $request->all();
 	}
 }
