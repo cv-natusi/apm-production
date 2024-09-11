@@ -78,6 +78,11 @@
 		die("tes Connection Failed".mysqli_connect_error());
 	}
 
+	if($request->phone=='6281335537942'){
+		require('management-poli/libur-nasional');
+		die();
+	}
+
 	$baseURL = "https://apm.rsuwahidinmojokerto.com/";
 
 	$waText = strtolower($message);
