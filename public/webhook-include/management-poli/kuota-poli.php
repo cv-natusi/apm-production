@@ -103,7 +103,6 @@ function kuotaPoliMessage($request){
 }
 
 function kuotaPoliIgnore($request){
-	// $request->merge(['tanggal_berobat'=>'2024-09-06']);
 	$tanggal = $request->tanggal_berobat;
 	$dataKuota = getKuotaPoli($request);
 

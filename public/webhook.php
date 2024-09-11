@@ -73,6 +73,14 @@
 		'natusi_apm' => $wablas,
 		'phone' => $phone,
 	]);
+
+
+   if($request->phone=='6281335537942'){
+      
+      die();
+   }
+
+
 	if(!$wablas){
 		die("tes Connection Failed".mysqli_connect_error());
 	}
@@ -1326,61 +1334,61 @@
 	}
 
 	# Message kuota poli
-	function pemberitahuanPoli($request){
-		$dateNow = date('Y-m-d');
-		$total=0;
+	// function pemberitahuanPoli($request){
+	// 	$dateNow = date('Y-m-d');
+	// 	$total=0;
 
-		$text = "*Untuk sementara waktu.*\n";
-		$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota sebagai berikut:*\n";
+	// 	$text = "*Untuk sementara waktu.*\n";
+	// 	$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota sebagai berikut:*\n";
 
-		$dt = date('D', strtotime($dateNow));
-		$request->merge(['nama_hari' => $dt]);
-		$namaHari = namaHari($request);
-		$tanggal = [];
-		// $tanggal = ['23-07-2024','25-07-2024'];
-		# 017 => kode poli onkologi
-		if($namaHari=='Senin'){ # selasa, rabu, kamis
-			array_push($tanggal,date("d-m-Y",strtotime("$dateNow +1day")),date("d-m-Y",strtotime("$dateNow +3day")));
-		}
-		else if($namaHari=='Selasa'){ # rabu, kamis, jumat
-			array_push($tanggal,date("d-m-Y",strtotime("$dateNow +2day")));
-		}
-		else if($namaHari=='Rabu'){ # kamis, jumat, sabtu
-			array_push($tanggal,date("d-m-Y",strtotime("$dateNow +1day")));
-		}
-		else if($namaHari=='Sabtu'){ # minggu, senin, selasa
-			array_push($tanggal,date("d-m-Y",strtotime("$dateNow +3day")));
-		}
-		else if($namaHari=='Minggu'){ # senin, selasa, rabu
-			array_push($tanggal,date("d-m-Y",strtotime("$dateNow +2day")));
-		}
-		$num = 0;
-		foreach($tanggal as $key => $val){
-			$dt = date('D', strtotime($val));
-			// $now = $request->phone=='6281335537942' ? strtotime('now +1day') : strtotime('now');
-			if(strtotime('now') < strtotime($val)){
-				$whereDate = date('Y-m-d',strtotime($val));
-				$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-					JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-					WHERE bp.tgl_periksa = '$whereDate'
-					AND bp.statusChat='99'
-					AND bdp.kodePoli='017'
-				";
-				$res = mysqli_query($request->natusi_apm,$query);
-				$total = mysqli_fetch_assoc($res)['total'];
+	// 	$dt = date('D', strtotime($dateNow));
+	// 	$request->merge(['nama_hari' => $dt]);
+	// 	$namaHari = namaHari($request);
+	// 	$tanggal = [];
+	// 	// $tanggal = ['23-07-2024','25-07-2024'];
+	// 	# 017 => kode poli onkologi
+	// 	if($namaHari=='Senin'){ # selasa, rabu, kamis
+	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +1day")),date("d-m-Y",strtotime("$dateNow +3day")));
+	// 	}
+	// 	else if($namaHari=='Selasa'){ # rabu, kamis, jumat
+	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +2day")));
+	// 	}
+	// 	else if($namaHari=='Rabu'){ # kamis, jumat, sabtu
+	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +1day")));
+	// 	}
+	// 	else if($namaHari=='Sabtu'){ # minggu, senin, selasa
+	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +3day")));
+	// 	}
+	// 	else if($namaHari=='Minggu'){ # senin, selasa, rabu
+	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +2day")));
+	// 	}
+	// 	$num = 0;
+	// 	foreach($tanggal as $key => $val){
+	// 		$dt = date('D', strtotime($val));
+	// 		// $now = $request->phone=='6281335537942' ? strtotime('now +1day') : strtotime('now');
+	// 		if(strtotime('now') < strtotime($val)){
+	// 			$whereDate = date('Y-m-d',strtotime($val));
+	// 			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+	// 				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+	// 				WHERE bp.tgl_periksa = '$whereDate'
+	// 				AND bp.statusChat='99'
+	// 				AND bdp.kodePoli='017'
+	// 			";
+	// 			$res = mysqli_query($request->natusi_apm,$query);
+	// 			$total = mysqli_fetch_assoc($res)['total'];
 
-				$num++;
-				$request->merge(['nama_hari' => $dt]);
-				$namaHari = namaHari($request);
-				$limit = $namaHari=='Selasa' ? 50 : 30;
-				// $total = $namaHari=='Selasa' ? 30 : $total;
-				$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
-			}else{
-				$num = $num> 0 ? $num-- : 0;
-			}
-		}
-		return $num!==0 ? $text : false;
-	}
+	// 			$num++;
+	// 			$request->merge(['nama_hari' => $dt]);
+	// 			$namaHari = namaHari($request);
+	// 			$limit = $namaHari=='Selasa' ? 50 : 30;
+	// 			// $total = $namaHari=='Selasa' ? 30 : $total;
+	// 			$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
+	// 		}else{
+	// 			$num = $num> 0 ? $num-- : 0;
+	// 		}
+	// 	}
+	// 	return $num!==0 ? $text : false;
+	// }
 	function namaHari($request){
 		$str = $request->nama_hari;
 		switch (true) {
