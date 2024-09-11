@@ -82,7 +82,8 @@
 		// $managementPoli = new ManagementPoli;
 		// echo MP::testing();
 		// $cs = new ManagementPoli();
-		echo ManagementPoli::testing();
+		// echo ManagementPoli::testing();
+		// echo ManagementPoli::liburNasional();
 		// echo 'berhasil';
 		die();
 	}
