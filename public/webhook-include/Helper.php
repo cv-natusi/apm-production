@@ -30,6 +30,7 @@ class Helper{
 	}
 
 	public static function dateDetail($request){
+		date_default_timezone_set("Asia/Jakarta");
 		$arrayHari = [];
 		$arrayTanggal = [];
 		for($i=1; $i<=3; $i++){ # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang

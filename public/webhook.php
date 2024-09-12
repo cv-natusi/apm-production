@@ -4,42 +4,24 @@
 	use App\Http\Models\rsu_dokter_bridging;
 	use Illuminate\Http\Request;
 
-	ini_set('display_errors', '1');
-	ini_set('display_startup_errors', '1');
-	error_reporting(E_ALL);
+	// ini_set('display_errors', '1');
+	// ini_set('display_startup_errors', '1');
+	// error_reporting(E_ALL);
 
 	require('../vendor/autoload.php');
 
 	### Management poli start
-	require_once "webhook-include/ManagementPoli.php";
+	require_once "webhook-include/ManagementPoli.php"; # Class utama
 	require_once "webhook-include/management-poli/LiburNasional.php";
 	require_once "webhook-include/management-poli/LiburPoli.php";
 	require_once "webhook-include/management-poli/KuotaPoli.php";
-	### Management poli end
 
 	use Webhook\ManagementPoli; # Class utama
 	use Webhook\ManagementPoli\LiburNasional;
 	use Webhook\ManagementPoli\LiburPoli;
 	use Webhook\ManagementPoli\KuotaPoli;
-	
-	// echo ManagementPoli::testing();
-	$request = new Request([
-		'nama' => 'dwi alim',
-		// 'nama_hari' => 8
-	]);
+	### Management poli end
 
-	### Init class utama untuk passing variable kedalam construct
-	$initManagementPoli = new ManagementPoli($request);
-	
-	$liburNasional = LiburNasional::liburNasional($request);
-	$liburPoli = LiburPoli::liburPoli($request);
-	$kuotaPoli = KuotaPoli::getKuotaPoli($request);
-	echo "<pre>";
-	print_r($kuotaPoli);
-	echo "</pre>";
-	// echo $echo;
-	// echo json_encode($echo, JSON_PRETTY_PRINT);
-	die();
 
 	header("Content-Type: text/plain");
 	date_default_timezone_set("Asia/Jakarta");
@@ -114,7 +96,7 @@
 		// echo ManagementPoli::testing();
 		// echo ManagementPoli::liburNasional();
 		// echo 'berhasil';
-		die();
+		// die();
 	}
 
 
@@ -153,6 +135,20 @@
 	}
 
 	$reset = stripos($waText,'reset')===false;
+
+	### Init class utama untuk passing variable kedalam construct
+	$initManagementPoli = new ManagementPoli($request);
+	if($request->phone=='6281335537942'){
+		$liburNasional = LiburNasional::liburNasional($request);
+		$liburPoli = LiburPoli::liburPoli($request);
+		// $kuotaPoli = KuotaPoli::message($request);
+		// $kuotaPoli = KuotaPoli::ignore($request);
+		// echo $liburNasional;
+		// echo is_array($liburNasional) ? json_encode($liburNasional,JSON_PRETTY_PRINT) : $liburNasional;
+		// echo "\n\n";
+		// echo is_array($liburPoli) ? json_encode($liburPoli,JSON_PRETTY_PRINT) : $liburPoli;
+		// die();
+	}
 
 	### Info pendaftaran
 	if($result->num_rows<1){
@@ -440,11 +436,11 @@
 							updateStatusChat('statusChat',$idBots,$wablas,$dataIn);
 
 							$request->merge(['tanggal_berobat' => $tglBerobat]);
-							$getIgnorePoli = kuotaPoliIgnore($request);
+							// $getIgnorePoli = kuotaPoliIgnore($request);
+							$getIgnorePoli = KuotaPoli::ignore($request);
 
-							$notIn = "$getIgnorePoli";
 							// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
-							$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($notIn) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
+							$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($getIgnorePoli) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
 							$resPoli = mysqli_query($dbrsud,$poli);
 							$msg = getPoli($resPoli);
 							mysqli_close($wablas);
@@ -823,7 +819,8 @@
 		// }
 
 		$request->merge(['tanggal_berobat' => $rows['tgl_periksa']]);
-		$getIgnorePoli = kuotaPoliIgnore($request);
+		// $getIgnorePoli = kuotaPoliIgnore($request);
+		$getIgnorePoli = KuotaPoli::ignore($request);
 
 		$notIn = "mp.kdpoli NOT IN ($getIgnorePoli)";
 		$poli = "
@@ -1370,89 +1367,35 @@
 		echo $msg;
 	}
 
-	# Message kuota poli
-	// function pemberitahuanPoli($request){
-	// 	$dateNow = date('Y-m-d');
-	// 	$total=0;
 
-	// 	$text = "*Untuk sementara waktu.*\n";
-	// 	$text .= "*Pendaftaran terbatas Poli Onkologi dengan Kuota sebagai berikut:*\n";
 
-	// 	$dt = date('D', strtotime($dateNow));
-	// 	$request->merge(['nama_hari' => $dt]);
-	// 	$namaHari = namaHari($request);
-	// 	$tanggal = [];
-	// 	// $tanggal = ['23-07-2024','25-07-2024'];
-	// 	# 017 => kode poli onkologi
-	// 	if($namaHari=='Senin'){ # selasa, rabu, kamis
-	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +1day")),date("d-m-Y",strtotime("$dateNow +3day")));
+	// function namaHari($request){
+	// 	$str = $request->nama_hari;
+	// 	switch (true) {
+	// 		case ($str==='Mon' || $str===1):
+	// 			$hari = 'Senin';
+	// 			break;
+	// 		case ($str==='Tue' || $str===2):
+	// 			$hari = 'Selasa';
+	// 			break;
+	// 		case ($str==='Wed' || $str===3):
+	// 			$hari = 'Rabu';
+	// 			break;
+	// 		case ($str==='Thu' || $str===4):
+	// 			$hari = 'Kamis';
+	// 			break;
+	// 		case ($str==='Fri' || $str===5):
+	// 			$hari = "Jum'at";
+	// 			break;
+	// 		case ($str==='Sat' || $str===6):
+	// 			$hari = 'Sabtu';
+	// 			break;
+	// 		default:
+	// 			$hari = 'Minggu';
+	// 			break;
 	// 	}
-	// 	else if($namaHari=='Selasa'){ # rabu, kamis, jumat
-	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +2day")));
-	// 	}
-	// 	else if($namaHari=='Rabu'){ # kamis, jumat, sabtu
-	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +1day")));
-	// 	}
-	// 	else if($namaHari=='Sabtu'){ # minggu, senin, selasa
-	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +3day")));
-	// 	}
-	// 	else if($namaHari=='Minggu'){ # senin, selasa, rabu
-	// 		array_push($tanggal,date("d-m-Y",strtotime("$dateNow +2day")));
-	// 	}
-	// 	$num = 0;
-	// 	foreach($tanggal as $key => $val){
-	// 		$dt = date('D', strtotime($val));
-	// 		// $now = $request->phone=='6281335537942' ? strtotime('now +1day') : strtotime('now');
-	// 		if(strtotime('now') < strtotime($val)){
-	// 			$whereDate = date('Y-m-d',strtotime($val));
-	// 			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
-	// 				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
-	// 				WHERE bp.tgl_periksa = '$whereDate'
-	// 				AND bp.statusChat='99'
-	// 				AND bdp.kodePoli='017'
-	// 			";
-	// 			$res = mysqli_query($request->natusi_apm,$query);
-	// 			$total = mysqli_fetch_assoc($res)['total'];
-
-	// 			$num++;
-	// 			$request->merge(['nama_hari' => $dt]);
-	// 			$namaHari = namaHari($request);
-	// 			$limit = $namaHari=='Selasa' ? 50 : 30;
-	// 			// $total = $namaHari=='Selasa' ? 30 : $total;
-	// 			$text .= "$num. $namaHari $val, kuota terpakai $total/$limit.".($key+1 < count($tanggal) ? "\n" : '');
-	// 		}else{
-	// 			$num = $num> 0 ? $num-- : 0;
-	// 		}
-	// 	}
-	// 	return $num!==0 ? $text : false;
+	// 	return $hari;
 	// }
-	function namaHari($request){
-		$str = $request->nama_hari;
-		switch (true) {
-			case ($str==='Mon' || $str===1):
-				$hari = 'Senin';
-				break;
-			case ($str==='Tue' || $str===2):
-				$hari = 'Selasa';
-				break;
-			case ($str==='Wed' || $str===3):
-				$hari = 'Rabu';
-				break;
-			case ($str==='Thu' || $str===4):
-				$hari = 'Kamis';
-				break;
-			case ($str==='Fri' || $str===5):
-				$hari = "Jum'at";
-				break;
-			case ($str==='Sat' || $str===6):
-				$hari = 'Sabtu';
-				break;
-			default:
-				$hari = 'Minggu';
-				break;
-		}
-		return $hari;
-	}
 
 	function msgJadwalPoli($kodePoli = ''){
 		$text = "*Untuk sementara waktu.*";
@@ -1597,30 +1540,163 @@
 		return $execQGetAntri;
 	}
 
-	function dateDetail($request){
-		$arrayHari = [];
-		$arrayTanggal = [];
-		for($i=1; $i<=3; $i++){ # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
-			$ts = strtotime("today +$i day");
-			$dayInNum = date('N',$ts);
-			array_push($arrayHari, $dayInNum);
-			$request->merge(['nama_hari'=>(int)$dayInNum]);
-			$arrayTanggal[$dayInNum] = (object)[
-				'tanggal'=>date('d-m-Y',$ts),
-				'nama_hari'=>namaHari($request),
-			];
-		}
-		$tsNow = strtotime('now');
-		$tsPlus = strtotime('now +3day');
-		$request->merge([
-			'array_hari'=>implode(",",$arrayHari),
-			'tanggal_detail'=>$arrayTanggal,
-			'ts_now'=>$tsNow,
-			'ts_plus'=>$tsPlus,
-			'dt_now'=>date('Y-m-d'),
-			'dt_plus'=>date('Y-m-d',$tsPlus),
-		]);
-	}
+	// function dateDetail($request){
+	// 	$arrayHari = [];
+	// 	$arrayTanggal = [];
+	// 	for($i=1; $i<=3; $i++){ # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
+	// 		$ts = strtotime("today +$i day");
+	// 		$dayInNum = date('N',$ts);
+	// 		array_push($arrayHari, $dayInNum);
+	// 		$request->merge(['nama_hari'=>(int)$dayInNum]);
+	// 		$arrayTanggal[$dayInNum] = (object)[
+	// 			'tanggal'=>date('d-m-Y',$ts),
+	// 			'nama_hari'=>namaHari($request),
+	// 		];
+	// 	}
+	// 	$tsNow = strtotime('now');
+	// 	$tsPlus = strtotime('now +3day');
+	// 	$request->merge([
+	// 		'array_hari'=>implode(",",$arrayHari),
+	// 		'tanggal_detail'=>$arrayTanggal,
+	// 		'ts_now'=>$tsNow,
+	// 		'ts_plus'=>$tsPlus,
+	// 		'dt_now'=>date('Y-m-d'),
+	// 		'dt_plus'=>date('Y-m-d',$tsPlus),
+	// 	]);
+	// }
+
+
+	// function getKuotaPoli($request){
+	// 	dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
+	// 	$query = "SELECT * FROM holidays
+	// 		WHERE kategori='kuota-poli'
+	// 		AND is_active=1
+	// 		AND (
+	// 			((tanggal BETWEEN '$request->dt_now' AND '$request->dt_plus') AND hari IS NULL)
+	// 			OR (tanggal IS NULL AND hari IN ($request->array_hari))
+	// 		)
+	// 	";
+	// 	$exec = mysqli_query($request->natusi_apm,$query);
+	// 	return $exec->fetch_all(MYSQLI_ASSOC);
+	// }
+
+	// function kuotaPoliMessage($request){
+	// 	$groupedData = [];
+	// 	$dataKuota = getKuotaPoli($request);
+	// 	if(count($dataKuota)==0){ # Jangan cetak pesan jika data 0
+	// 		return false;
+	// 	}
+	// 	foreach ($dataKuota as $item) {
+	// 		$poliId = $item['poli_id'];
+	// 		if (!isset($groupedData[$poliId])) {
+	// 			$groupedData[$poliId] = [
+	// 				'poli_id' => $item['poli_id'],
+	// 				'data' => []
+	// 			];
+	// 		}
+	// 		$groupedData[$poliId]['data'][] = $item;
+	// 	}
+	// 	$data = array_values($groupedData);
+
+	// 	# Cetak pesan
+	// 	$msg = "*Untuk sementara waktu.*\n";
+	// 	$msg .= "*==============================*\n";
+	// 	foreach ($data as $key => $datas) {
+	// 		$num = 1;
+	// 		$poliId = $datas['poli_id'];
+	// 		$query = "SELECT * FROM tm_poli WHERE KodePoli='$poliId'";
+	// 		$exec = mysqli_query($request->rsu_conn, $query);
+	// 		// $poli = $exec->fetch_all(MYSQLI_ASSOC);
+	// 		$poli = (object)$exec->fetch_assoc();
+	// 		$msg .= "Pendaftaran terbatas *$poli->NamaPoli* dengan kuota sebagai berikut:\n";
+
+	// 		# Urutkan data berdasarkan hari/tanggal (ASC)
+	// 		$columnSort = $datas['data'][0]['hari']!="" ? 'hari' : 'tanggal';
+	// 		array_multisort(array_column($datas['data'], $columnSort), SORT_ASC, $datas['data']);
+	// 		$sudahDigunakan = [];
+	// 		foreach ($datas['data'] as $keys => $items) {
+	// 			$increment = $keys+1;
+	// 			$items = (object)$items;
+	// 			$idx = isset($request->tanggal_detail[$items->hari]) ? $items->hari : (int)date('N',strtotime($items->tanggal));
+	// 			$tanggalDetail = $request->tanggal_detail[$idx];
+	// 			$namaHari = $tanggalDetail->nama_hari;
+	// 			$tanggal = $tanggalDetail->tanggal;
+	// 			$limit = $items->kuota_wa;
+
+	// 			$whereDate = date('Y-m-d',strtotime($tanggal));
+	// 			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+	// 				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+	// 				WHERE bp.tgl_periksa = '$whereDate'
+	// 				AND bp.statusChat='99'
+	// 				AND bdp.kodePoli='$items->poli_bpjs_id'
+	// 			";
+	// 			$res = mysqli_query($request->apm_conn,$query);
+	// 			$total = mysqli_fetch_assoc($res)['total'];
+	// 			$total = $total > $limit ? $limit : $total;
+
+	// 			$msg .= "$num. $namaHari $tanggal, kuota terpakai $total/$limit";
+	// 			foreach ($datas['data'] as $val) {
+	// 				$keterangan = $val['keterangan'];
+	// 				if(
+	// 					$keterangan
+	// 					&& $val['poli_id'] == $datas['poli_id']
+	// 					&& !in_array($val['id_holiday'],$sudahDigunakan)
+	// 					&& $increment == count($datas['data'])
+	// 				){
+	// 					$keterangan = str_replace("<br />", "\n", $keterangan);
+	// 					$keterangan = str_replace("\r\n", "", $keterangan);
+	// 					$keterangan = str_replace("&nbsp", '', $keterangan);
+	// 					$keterangan = str_replace("<p>", '', $keterangan);
+	// 					$keterangan = str_replace("</p>", '', $keterangan);
+	// 					$keterangan = str_replace("<strong>", '*', $keterangan);
+	// 					$keterangan = str_replace("</strong>", '*', $keterangan);
+	// 					$msg .= "\n$keterangan";
+	// 					array_push($sudahDigunakan,$val['id_holiday']);
+	// 				}
+	// 			}
+	// 			if($increment < count($datas['data']) || $key+1 == count($data)){
+	// 				$msg .= "\n";
+	// 			}elseif($key+1 < count($data)){
+	// 				$msg .= "\n\n";
+	// 			}
+	// 			$num++;
+	// 		}
+	// 	}
+	// 	return "$msg*==============================*\n\n";
+	// 	// echo json_encode($data,JSON_PRETTY_PRINT);
+	// 	// $total = mysqli_fetch_assoc($res);
+	// 	// $total = $exec->fetch_all(MYSQLI_ASSOC);
+	// }
+	// function kuotaPoliIgnore($request){
+	// 	$tanggal = $request->tanggal_berobat;
+	// 	$dataKuota = getKuotaPoli($request);
+
+	// 	// $ignorePoli = "'ALG','UGD','ANU','GIG'"; # Default ignore
+	// 	$ignorePoli = ['ALG','UGD','ANU','GIG']; # Default ignore
+	// 	foreach($dataKuota as $item){
+	// 		$item = (object)$item;
+	// 		$total = 0;
+	// 		if(
+	// 			(
+	// 				$item->hari!="" && strtotime($request->tanggal_detail[$item->hari]->tanggal) == strtotime($tanggal)
+	// 			)
+	// 			|| strtotime($item->tanggal) == strtotime($tanggal)
+	// 		){
+	// 			$query = "SELECT count(cust_id) as total FROM bot_pasien as bp
+	// 				JOIN bot_data_pasien as bdp ON bp.id = bdp.idBots
+	// 				WHERE bp.tgl_periksa = '$tanggal'
+	// 				AND bp.statusChat='99'
+	// 				AND bdp.kodePoli='$item->poli_bpjs_id'
+	// 			";
+	// 			$res = mysqli_query($request->natusi_apm,$query);
+	// 			$total = mysqli_fetch_assoc($res)['total'];
+	// 			if($total >= $item->kuota_wa){
+	// 				array_push($ignorePoli, $item->poli_bpjs_id);
+	// 			}
+	// 		}
+	// 	}
+	// 	return "'".implode("','", $ignorePoli)."'";
+	// }
 
 	function msgWelcome($request){
 		$msg = "Selamat datang di RSUD Dr. Wahidin Sudiro Husodo Kota Mojokerto, Anda sedang berinteraksi dengan Sistem Pendaftaran Antrian Otomatis, Silahkan Pilih Layanan :\n\n";
@@ -1642,20 +1718,9 @@
 		// $msg .= "*Silahkan mendaftar kembali di tanggal 01 Juli 2023*\n";
 		// $msg .= "*Terima Kasih*\n\n";
 
-		// $msg .= msgJadwalPoli()."\n\n";
-		// if($request->phone=='6281335537942' || $request->phone=='6281330003568'){
-			// dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
-			// echo kuotaPoliIgnore($request);
-			// echo "\n\n\n";
-			$kuotaPoliMessage = kuotaPoliMessage($request);
-			$msg .= $kuotaPoliMessage!==false ? $kuotaPoliMessage : '';
-		// 	echo $msg;
-		// 	die();
-		// 	$msg .= kuotaPoliMessage($request);
-		// }else{
-		// 	$txt = pemberitahuanPoli($request);
-		// 	$msg .= $txt !== false ? "$txt\n\n" : '';
-		// }
+		$msg .= KuotaPoli::message($request);
+		// 	$kuotaPoliMessage = kuotaPoliMessage($request);
+		// 	$msg .= $kuotaPoliMessage!==false ? $kuotaPoliMessage : '';
 
 		$msg .= "Hotline 0815257200088 untuk mendapatkan bantuan apabila ada kendala pendaftaran.\n";
 		$msg .= "Video tutorial penggunaan antrian cek di : shorturl.at/dhqz8";
