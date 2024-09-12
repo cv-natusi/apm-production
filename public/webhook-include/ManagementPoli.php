@@ -1,11 +1,12 @@
 <?php
 namespace Webhook;
-// include "management-poli/LiburNasional.php";
+require_once "webhook-include/Helper.php";
+use Webhook\Helper;
 class ManagementPoli{
-	public function __construct(){
-		
-	}
-	public static function testing(){
-		return 'HALLO DUNIA';
+	protected static $namaHari;
+
+	public function __construct($request){
+      Helper::dateDetail($request);
+		// self::$namaHari = Helper::namaHari($request);
 	}
 }

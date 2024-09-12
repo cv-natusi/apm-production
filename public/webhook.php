@@ -4,13 +4,42 @@
 	use App\Http\Models\rsu_dokter_bridging;
 	use Illuminate\Http\Request;
 
-	require('../vendor/autoload.php');
-	// require('webhook-include/management-poli/LiburNasional.php');
-	require('webhook-include/management-poli/LiburPoli.php');
-	require('webhook-include/management-poli/KuotaPoli.php');
+	ini_set('display_errors', '1');
+	ini_set('display_startup_errors', '1');
+	error_reporting(E_ALL);
 
-	include "webhook-include/ManagementPoli.php";
-	use Webhook\ManagementPoli;
+	require('../vendor/autoload.php');
+
+	### Management poli start
+	require_once "webhook-include/ManagementPoli.php";
+	require_once "webhook-include/management-poli/LiburNasional.php";
+	require_once "webhook-include/management-poli/LiburPoli.php";
+	require_once "webhook-include/management-poli/KuotaPoli.php";
+	### Management poli end
+
+	use Webhook\ManagementPoli; # Class utama
+	use Webhook\ManagementPoli\LiburNasional;
+	use Webhook\ManagementPoli\LiburPoli;
+	use Webhook\ManagementPoli\KuotaPoli;
+	
+	// echo ManagementPoli::testing();
+	$request = new Request([
+		'nama' => 'dwi alim',
+		// 'nama_hari' => 8
+	]);
+
+	### Init class utama untuk passing variable kedalam construct
+	$initManagementPoli = new ManagementPoli($request);
+	
+	$liburNasional = LiburNasional::liburNasional($request);
+	$liburPoli = LiburPoli::liburPoli($request);
+	$kuotaPoli = KuotaPoli::getKuotaPoli($request);
+	echo "<pre>";
+	print_r($kuotaPoli);
+	echo "</pre>";
+	// echo $echo;
+	// echo json_encode($echo, JSON_PRETTY_PRINT);
+	die();
 
 	header("Content-Type: text/plain");
 	date_default_timezone_set("Asia/Jakarta");
@@ -559,7 +588,7 @@
 			if(!empty($rowsDapas['nomor_kartu'])){
 				$cekStart = cekPeserta($rowsDapas['nomor_kartu'],'bpjs');
 				if($cekStart->code==200){
-               $resRujuk = rujukanMultiRecord($rowsDapas['nomor_kartu'],'bpjs');
+					$resRujuk = rujukanMultiRecord($rowsDapas['nomor_kartu'],'bpjs');
 					$setST = "";
 					if($resOK = $resRujuk->code==200){
 						$noRef = strtoupper($resRujuk->data['noRujuk']);
@@ -608,7 +637,7 @@
 						upBotDataPasien('noka',$idBots,$wablas,$dataIn); // update nomorBPJS bot_data_pasien
 					}
 
-               $resRujuk = rujukanMultiRecord($noka,'bpjs');
+					$resRujuk = rujukanMultiRecord($noka,'bpjs');
 					if($resRujuk->code==200){
 						$tglLahir = $resRujuk->data['tglLahir'];
 						updateTglLahir($tglLahir,$idPsn,$wablas); // update tanggal lahir
