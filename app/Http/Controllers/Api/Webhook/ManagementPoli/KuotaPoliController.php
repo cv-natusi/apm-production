@@ -293,8 +293,9 @@ class KuotaPoliController extends Controller
 			'payload' => "metode_ambil=$request->metode_ambil",
 		]);
 		if($exec = RequestorWaBot::managementPoli($request)){
-			$code = $exec->metadata->code;
-			$exec = $exec->response;
+         // return $exec;
+			// $code = $exec->metadata->code;
+			// $exec = $exec->response;
 			return response()->json($exec);
 		}
 

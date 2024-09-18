@@ -4,6 +4,7 @@ namespace App\Http\Libraries;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Client;
+use Env;
 class RequestorWaBot{
 	public static function setCurlBridg($url,$method='POST',$consID,$secretKey,$uk,$params)
 	{
@@ -172,11 +173,12 @@ class RequestorWaBot{
 
 	public static function managementPoli($request)
 	{
+		if (Env::status() === 'production') {
+			$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
+		} else {
+			$url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url?$request->payload";
+		}
 
-		// return '$request->all()';
-
-      $url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
-      $method = "GET";
 		$ch = curl_init();
 		curl_setopt_array($ch, array(
 			CURLOPT_URL  => $url,
@@ -185,19 +187,16 @@ class RequestorWaBot{
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_TIMEOUT        => 120,
 			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-			CURLOPT_CUSTOMREQUEST  => $method,
+			CURLOPT_CUSTOMREQUEST  => "GET",
 			CURLOPT_USERAGENT      => 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)',
 		));
-		// return json_encode($params);
-		// if($method != 'GET'){
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-		// } else {
-			curl_setopt($ch, CURLOPT_URL,$url);
-		// }
+		// curl_setopt($ch, CURLOPT_URL,$url);
+
 		$response = curl_exec($ch);
+
 		$errMsg = "Gagal terhubung ke server!";
-		if ($err = curl_error($ch)) {
-			$errMsg = $err;
+		if ($err = curl_errno($ch)) {
+			$errMsg = curl_error($ch);
 		}
 
 		curl_close($ch);

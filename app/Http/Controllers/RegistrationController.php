@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use App\Helpers\apm as Help;
 use App\Http\Controllers\Controller;
 use App\Http\Libraries\Requestor;
+use App\Http\Libraries\RequestorWaBot;
 use App\Http\Models\Identity;
 use App\Http\Models\Antrian;
 use App\Http\Models\AntPasienBaru;
@@ -345,44 +346,58 @@ class RegistrationController extends Controller{
 
 	public function indexAntrian(Request $request){
 		$dateNow = date('Y-m-d');
-		$dayInNum = date('N');
-		$id_kiosk = $request->id_kiosk;
-		$ignore = ['ALG','UGD','ANU'];
-
-		$dataKuotaPoli = Holidays::
-		select('poli_bpjs_id','kuota_kiosk')->
-		where('kategori','kuota-poli')
-		->where('is_active',1)
-		->where(fn($q)=>$q
-			->where(fn($q)=>$q->where('hari',$dayInNum)->whereNull('tanggal'))
-			->orWhere(fn($q)=>$q->where('tanggal',$dateNow)->whereNull('hari'))
-		)->get();
-		if(count($dataKuotaPoli)){
-			$kodeBpjs = array_map(function($item){
-				return $item['poli_bpjs_id'];
-			},$dataKuotaPoli->toArray());
-			$kuotaPoli = array_map(function($item){
-				return $item['kuota_kiosk'];
-			},$dataKuotaPoli->toArray());
-
-			$groupedData = [];
-			$antrian = Antrian::select('id','kode_poli')->where('tgl_periksa',$dateNow)->where('metode_ambil','KIOSK')->whereIn('kode_poli',$kodeBpjs)->get();
-			foreach ($antrian as $item) {
-				$kodePoli = $item['kode_poli'];
-				if (!isset($groupedData[$kodePoli])) {
-					$groupedData[$kodePoli] = [
-						'total' => 0
-					];
-				}
-				// $groupedData[$kodePoli]['data'][] = $item;
-				$groupedData[$kodePoli]['total']++;
-			}
-			foreach($kodeBpjs as $key => $val){
-				if(isset($groupedData[$val]) && $groupedData[$val]['total'] >= $kuotaPoli[$key]){
-					array_push($ignore,$val);
-				}
-			}
+		$ignorePoli = [];
+		$request->merge([
+			'url' => 'kuota-poli/ignore-poli',
+			'payload' => "metode_ambil=kiosk&tanggal_berobat=$dateNow",
+		]);
+		$exec = RequestorWaBot::managementPoli($request);
+		if ($exec && $exec->metadata->code==200) {
+			$ignorePoli = $exec->response;
 		}
+		// return $ignorePoli;
+
+		// $dayInNum = date('N');
+		$id_kiosk = $request->id_kiosk;
+		if(!is_numeric($id_kiosk) || $id_kiosk > 8){
+			return abort(404);
+		}
+		// $ignore = ['ALG','UGD','ANU'];
+
+		// $dataKuotaPoli = Holidays::
+		// select('poli_bpjs_id','kuota_kiosk')->
+		// where('kategori','kuota-poli')
+		// ->where('is_active',1)
+		// ->where(fn($q)=>$q
+		// 	->where(fn($q)=>$q->where('hari',$dayInNum)->whereNull('tanggal'))
+		// 	->orWhere(fn($q)=>$q->where('tanggal',$dateNow)->whereNull('hari'))
+		// )->get();
+		// if(count($dataKuotaPoli)){
+		// 	$kodeBpjs = array_map(function($item){
+		// 		return $item['poli_bpjs_id'];
+		// 	},$dataKuotaPoli->toArray());
+		// 	$kuotaPoli = array_map(function($item){
+		// 		return $item['kuota_kiosk'];
+		// 	},$dataKuotaPoli->toArray());
+
+		// 	$groupedData = [];
+		// 	$antrian = Antrian::select('id','kode_poli')->where('tgl_periksa',$dateNow)->where('metode_ambil','KIOSK')->whereIn('kode_poli',$kodeBpjs)->get();
+		// 	foreach ($antrian as $item) {
+		// 		$kodePoli = $item['kode_poli'];
+		// 		if (!isset($groupedData[$kodePoli])) {
+		// 			$groupedData[$kodePoli] = [
+		// 				'total' => 0
+		// 			];
+		// 		}
+		// 		// $groupedData[$kodePoli]['data'][] = $item;
+		// 		$groupedData[$kodePoli]['total']++;
+		// 	}
+		// 	foreach($kodeBpjs as $key => $val){
+		// 		if(isset($groupedData[$val]) && $groupedData[$val]['total'] >= $kuotaPoli[$key]){
+		// 			array_push($ignore,$val);
+		// 		}
+		// 	}
+		// }
 
 		// $request->merge(['nama_hari_en'=>date('D',strtotime('today'))]);
 		// $namaHariID = Help::namaHariID($request);
@@ -399,7 +414,7 @@ class RegistrationController extends Controller{
 		// }
 
 		$poli = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
-			->whereNotIn('kdpoli',$ignore)
+			->whereNotIn('kdpoli',$ignorePoli)
 			->groupBy('mapping_poli_bridging.kdpoli_rs')
 			->orderBy('tm_poli.NamaPoli','ASC')
 			->get();
@@ -409,10 +424,6 @@ class RegistrationController extends Controller{
 		// 	$jam = explode(':',$holiday->jam);
 		// 	$waktu = "$jam[0]:$jam[1]";
 		// }
-		
-		if(!is_numeric($id_kiosk) || $id_kiosk > 8){
-			return abort(404);
-		}
 
 		$generateCode = $this->generateQrCode($id_kiosk);
 		$getantrian = [
@@ -564,36 +575,37 @@ class RegistrationController extends Controller{
 	public function ambilAntrianSave(Request $request){
 		date_default_timezone_set("Asia/Jakarta");
 		$dateNow = date('Y-m-d');
-		$dayInNum = date('N');
+		// $dayInNum = date('N');
 
-		$dataKuotaPoli = Holidays::
-			select('poli_id','poli_bpjs_id','kuota_kiosk')->
-			where('kategori','kuota-poli')
-			->where('is_active',1)
-			->where('poli_bpjs_id',$request->kodepoli)
-			->where(fn($q)=>$q
-				->where(fn($q)=>$q->where('hari',$dayInNum)->whereNull('tanggal'))
-				->orWhere(fn($q)=>$q->where('tanggal',$dateNow)->whereNull('hari'))
-			)->first();
-		if(
-			$dataKuotaPoli
-			&& $dataKuotaPoli->kuota_kiosk <= ($cn = Antrian::where([
-				'tgl_periksa'=>$dateNow,
-				'kode_poli'=>$request->kodepoli,
-				'metode_ambil'=>'KIOSK',
-			])->count())
-		){
-			$namaPoli = rsu_poli::where('KodePoli',$dataKuotaPoli->poli_id)->first(['NamaPoli'])->NamaPoli;
-			$cn = $cn > $dataKuotaPoli->kuota_kiosk ? $dataKuotaPoli->kuota_kiosk : $cn;
-			return [
-				'status'=>'error',
-				'code'=>400,
-				'head_message'=>'Whoops!',
-				'message'=>"Kuota $namaPoli sudah penuh($cn/$dataKuotaPoli->kuota_kiosk)",
-				'data'=> '',
-				'poli'=> ''
-			];
-		}
+		// $dataKuotaPoli = Holidays::
+		// 	select('poli_id','poli_bpjs_id','kuota_kiosk')->
+		// 	where('kategori','kuota-poli')
+		// 	->where('is_active',1)
+		// 	->where('poli_bpjs_id',$request->kodepoli)
+		// 	->where(fn($q)=>$q
+		// 		->where(fn($q)=>$q->where('hari',$dayInNum)->whereNull('tanggal'))
+		// 		->orWhere(fn($q)=>$q->where('tanggal',$dateNow)->whereNull('hari'))
+		// 	)->first();
+		// if(
+		// 	$dataKuotaPoli
+		// 	&& $dataKuotaPoli->kuota_kiosk <= ($cn = Antrian::where([
+		// 		'tgl_periksa'=>$dateNow,
+		// 		'kode_poli'=>$request->kodepoli,
+		// 		'metode_ambil'=>'KIOSK',
+		// 	])->count())
+		// ){
+		// 	$namaPoli = rsu_poli::where('KodePoli',$dataKuotaPoli->poli_id)->first(['NamaPoli'])->NamaPoli;
+		// 	$cn = $cn > $dataKuotaPoli->kuota_kiosk ? $dataKuotaPoli->kuota_kiosk : $cn;
+		// 	return [
+		// 		'status'=>'error',
+		// 		'code'=>400,
+		// 		'head_message'=>'Whoops!',
+		// 		'message'=>"Kuota $namaPoli sudah penuh($cn/$dataKuotaPoli->kuota_kiosk)",
+		// 		'data'=> '',
+		// 		'poli'=> ''
+		// 	];
+		// }
+
 
 		// $request->merge(['nama_hari_en'=>date('D',strtotime('today'))]);
 		// $namaHariID = Help::namaHariID($request);
@@ -644,6 +656,32 @@ class RegistrationController extends Controller{
 					'poli'=> $tujuanpoli
 				];
 			}
+
+			### Management poli start
+			$ignorePoli = [];
+			$request->merge([
+				'url' => 'kuota-poli/ignore-poli',
+				'payload' => "metode_ambil=kiosk&tanggal_berobat=$dateNow",
+			]);
+			$exec = RequestorWaBot::managementPoli($request);
+			if ($exec && $exec->metadata->code==200) {
+				$ignorePoli = $exec->response;
+			}
+			if (in_array($request->kodepoli,$ignorePoli)) {
+				$kodePoliRs = Rsu_Bridgingpoli::where('kdpoli',$request->kodepoli)->first()->kdpoli_rs;
+				$namaPoli = rsu_poli::where('KodePoli',$kodePoliRs)->first(['NamaPoli'])->NamaPoli;
+				DB::rollback();
+				return [
+					'status'=>'error',
+					'code'=>400,
+					'head_message'=>'Whoops!',
+					'message'=>"Mohon maaf, Kuota $namaPoli sudah penuh",
+					'data'=> '',
+					'poli'=> ''
+				];
+			}
+			### Management poli end
+
 			$prefix = 'NB'; #UMUM/ASURANSI LAIN
 			if($request->jenis_pasien=='BPJS'){
 				$prefix = 'B';
