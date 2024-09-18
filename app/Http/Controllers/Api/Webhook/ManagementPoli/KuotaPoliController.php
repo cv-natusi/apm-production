@@ -8,6 +8,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
 use DB;
+use App\Http\Libraries\RequestorWaBot;
 
 ### Helpers
 use App\Helpers\apm as Help;
@@ -283,5 +284,25 @@ class KuotaPoliController extends Controller
 				],
 			],500);
 		}
+	}
+
+	public static function testing(Request $request)
+	{
+		$request->merge([
+			'url' => 'kuota-poli/ignore-poli',
+			'payload' => "metode_ambil=$request->metode_ambil",
+		]);
+		if($exec = RequestorWaBot::managementPoli($request)){
+			$code = $exec->metadata->code;
+			$exec = $exec->response;
+			return response()->json($exec);
+		}
+
+		return response()->json([
+			'metadata' => [
+				'code' => 500,
+				'message' => "Gagal terhubung ke server.",
+			]
+		],500);
 	}
 }

@@ -655,6 +655,7 @@ Route::get('mail',function(){
 
 Route::group(['prefix'=>'api'], function(){
 	Route::group(['prefix'=>'webhook'], function () {
+		Route::get('testing', 'Api\Webhook\ManagementPoli\KuotaPoliController@testing');
 		Route::group(['prefix'=>'management-poli'], function () {
 			Route::group(['prefix'=>'libur-nasional'], function () {
 				Route::get('get-data','Api\Webhook\ManagementPoli\LiburNasionalController@getData');
