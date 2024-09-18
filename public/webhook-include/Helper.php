@@ -75,9 +75,13 @@ class Helper{
 			CURLOPT_CUSTOMREQUEST  => "GET",
 			CURLOPT_USERAGENT      => 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)',
 		));
+		// curl_setopt($ch, CURLOPT_HEADER, true);
 		// curl_setopt($ch, CURLOPT_URL,$url);
 
 		$response = curl_exec($ch);
+		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		// return $response;
+		// return "$httpcode";
 
 		$errMsg = "Gagal terhubung ke server!";
 		if ($err = curl_errno($ch)) {
@@ -85,8 +89,10 @@ class Helper{
 		}
 
 		curl_close($ch);
+		// return $response;
 
-		if ($response && !$err) {
+		if (in_array($httpcode,[200,204])) {
+			// return $response;
 			return json_decode($response);
 		}
 

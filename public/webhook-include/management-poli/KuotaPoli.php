@@ -23,6 +23,16 @@ class KuotaPoli extends ManagementPoli
 
 	public static function message($request): string
 	{
+		$request->merge([
+			'url' => 'kuota-poli/message',
+		]);
+		$exec = Helper::curl($request);
+		if ($exec && $exec->metadata->code===200) {
+			return $exec->response;
+		}
+		return '';
+
+
 		if(count($dataKuota = self::getKuotaPoli($request))==0){ # Jangan cetak pesan jika data 0
 			return "";
 		}
@@ -113,6 +123,32 @@ class KuotaPoli extends ManagementPoli
 
 	public static function ignore($request): string
 	{
+		$payload = "
+			tanggal_berobat=$request->tanggal_berobat
+			&metode_ambil=wa
+		";
+		$replacements = [
+			"/\r\n\t\t\t/" => "",  # Ganti "\r\n\t\t\t" dengan string kosong
+			"/\r\n\t\t/" => "",    # Ganti "\r\n\t\t" dengan string kosong
+		];
+		foreach ($replacements as $pattern => $replacement) {
+			$payload = preg_replace(
+				$pattern,
+				$replacement,
+				$payload
+			);
+		}
+		$request->merge([
+			'url' => 'kuota-poli/ignore-poli',
+			'payload' => $payload,
+		]);
+		$exec = Helper::curl($request);
+		if ($exec && $exec->metadata->code===200) {
+			return "'".implode("','", $exec->response)."'";
+		}
+		return "'ALG','UGD','ANU','GIG'";
+
+
 		$tanggal = $request->tanggal_berobat;
 		$dataKuota = self::getKuotaPoli($request);
 
@@ -145,13 +181,33 @@ class KuotaPoli extends ManagementPoli
 
 	public static function testing($request)
 	{
-		$request->merge([
-			'url' => 'kuota-poli/message',
-		]);
-		$exec = Helper::curl($request);
-		if ($exec && $exec->metadata->code===200) {
-			return $exec->response;
+		$payload = "
+			tanggal_berobat=$request->tanggal_berobat
+			&metode_ambil=wa
+		";
+		$replacements = [
+			"/\r\n\t\t\t/" => "",  # Ganti "\r\n\t\t\t" dengan string kosong
+			"/\r\n\t\t/" => "",    # Ganti "\r\n\t\t" dengan string kosong
+		];
+		foreach ($replacements as $pattern => $replacement) {
+			$payload = preg_replace(
+				$pattern,
+				$replacement,
+				$payload
+			);
 		}
-		return '';
+		$request->merge([
+			// 'url' => 'kuota-poli/message',
+			'url' => 'kuota-poli/ignore-poli',
+			'payload' => $payload,
+		]);
+		// return $request->all();
+		$exec = Helper::curl($request);
+		// return $exec;
+		if ($exec && $exec->metadata->code===200) {
+			// return $exec->response;
+			return "'".implode("','", $exec->response)."'";
+		}
+		return "'ALG','UGD','ANU','GIG'";
 	}
 }
