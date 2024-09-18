@@ -172,7 +172,7 @@ class KuotaPoliController extends Controller
 				}
 
 				$text .= "*==============================*\n\n";
-				return $text;
+				// return $text;
 				### Print text end
 
 				return response()->json([

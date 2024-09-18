@@ -55,4 +55,46 @@ class Helper{
 			'dt_plus'=>date('Y-m-d',$tsPlus),
 		]);
 	}
+
+	public static function curl($request)
+	{
+		// if (Env::status() === 'production') {
+			$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
+		// } else {
+		// 	$url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url?$request->payload";
+		// }
+
+		$ch = curl_init();
+		curl_setopt_array($ch, array(
+			CURLOPT_URL  => $url,
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_SSL_VERIFYHOST => 0,
+			CURLOPT_SSL_VERIFYPEER => 0,
+			CURLOPT_TIMEOUT        => 120,
+			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST  => "GET",
+			CURLOPT_USERAGENT      => 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)',
+		));
+		// curl_setopt($ch, CURLOPT_URL,$url);
+
+		$response = curl_exec($ch);
+
+		$errMsg = "Gagal terhubung ke server!";
+		if ($err = curl_errno($ch)) {
+			$errMsg = curl_error($ch);
+		}
+
+		curl_close($ch);
+
+		if ($response && !$err) {
+			return json_decode($response);
+		}
+
+		return response()->json([
+			'metadata' => [
+				'code' => 500,
+				'message' => $errMsg,
+			]
+		],500);
+	}
 }

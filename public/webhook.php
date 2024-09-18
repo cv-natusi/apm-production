@@ -21,6 +21,17 @@
 	use Webhook\ManagementPoli\LiburPoli;
 	use Webhook\ManagementPoli\KuotaPoli;
 	### Management poli end
+	// echo Env::status();
+	$request = new Request([
+		// 'rsu_conn' => $dbrsud,
+		// 'apm_conn' => $wablas,
+		// 'natusi_apm' => $wablas,
+		'phone' => '$phone',
+	]);
+	echo "<pre>";
+	print_r(KuotaPoli::testing($request));
+	echo "</pre>";
+	die();
 
 
 	header("Content-Type: text/plain");

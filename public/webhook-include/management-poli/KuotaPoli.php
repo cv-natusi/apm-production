@@ -1,11 +1,13 @@
 <?php
 namespace Webhook\ManagementPoli;
+
+use Webhook\Helper;
 use Webhook\ManagementPoli;
 
 class KuotaPoli extends ManagementPoli
 {
 	public static function getKuotaPoli($request)
-   {
+	{
 		// dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
 		$query = "SELECT * FROM holidays
 			WHERE kategori='kuota-poli'
@@ -139,5 +141,17 @@ class KuotaPoli extends ManagementPoli
 			}
 		}
 		return "'".implode("','", $ignorePoli)."'";
+	}
+
+	public static function testing($request)
+	{
+		$request->merge([
+			'url' => 'kuota-poli/message',
+		]);
+		$exec = Helper::curl($request);
+		if ($exec && $exec->metadata->code===200) {
+			return $exec->response;
+		}
+		return '';
 	}
 }
