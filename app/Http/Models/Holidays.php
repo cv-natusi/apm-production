@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Libraries\Datagrid;
 use App\Http\Models\rsu_poli;
 
-class Holidays extends Model{
+use Illuminate\Http\Request;
+
+use App\Helpers\apm as Help;
+
+class Holidays extends Model
+{
 	protected $table = 'holidays';
 	protected $primaryKey = 'id_holiday';
 	public $timestamps = false;
@@ -24,18 +29,105 @@ class Holidays extends Model{
 		'kuota_wa',
 		'kategori',
 	];
+	protected $append = [
+		'hari_temp',
+		'tanggal_temp',
+		'timestamps',
+		'nama_hari',
+	];
 
 	/**
 	 * Get the poli that owns the Holidays
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function poli(){
+	public function poli()
+	{
 		return $this->belongsTo(rsu_poli::class, 'poli_id', 'KodePoli');
 	}
 
+	### Scope start
+	public function scopeWhereDateWhatsapp($query,$request)
+	{
+		return $query->where(
+			fn($q)=>$q->where(
+				fn($q) => $q->whereBetween('tanggal',[$request->dt_plus_1, $request->dt_plus_3])->whereNull('hari')
+			)->orWhere(
+				fn($q) => $q->whereNull('tanggal')->whereIn('hari',$request->array_hari)
+			)
+		);
+		return $query;
+	}
+	public function scopeWhereDateKiosk($query,$request)
+	{
+		$date = $request->tanggal_berobat ? date('Y-m-d',strtotime($request->tanggal_berobat)) : date('Y-m-d');
+		$request->merge(['date_num' => (int) date('N',strtotime($date))]);
+		$query->where(
+			fn($q)=>$q
+			// ->where(fn($q)=>$q->where('hari',$dayInNum)->whereNull('tanggal'))
+			// ->orWhere(fn($q)=>$q->where('tanggal',$dateNow)->whereNull('hari'))
+			->where(
+				fn($q)=>$q->where('hari',$request->date_num)->whereNull('tanggal')
+			)->orWhere(
+				fn($q)=>$q->where('tanggal',$date)->whereNull('hari')
+			)
+		);
+		// $query->where(
+		// 	fn($q)=>$q->where(
+		// 		fn($q) => $q->whereBetween('tanggal',[$request->dt_plus_1, $request->dt_plus_3])->whereNull('hari')
+		// 	)->orWhere(
+		// 		fn($q) => $q->whereNull('tanggal')->whereIn('hari',$request->array_hari)
+		// 	)
+		// );
+		return $query;
+	}
+	### Scope end
 
-	public static function getJson($input){
+	### Accessors start
+	public function getTanggalTempAttribute($value)
+	{
+		if ($this->attributes['is_hari'] === 1) {
+			return date(
+				'Y-m-d',
+				Help::numberToTimestamps(
+					new Request(['date_number' => $this->attributes['hari']])
+				)
+			);
+		}
+		return $this->attributes['tanggal'];
+	}
+	public function getTimestampsAttribute($value)
+	{
+		if ($this->attributes['is_hari'] === 1) {
+			return Help::numberToTimestamps(
+				new Request(['date_number' => $this->attributes['hari']])
+			);
+		}
+		return strtotime($this->attributes['tanggal']);
+	}
+	public function getNamaHariAttribute($value)
+	{
+		$tanggal = $this->attributes['tanggal'];
+		$hari = $this->attributes['hari'];
+
+		$num = (int) ($tanggal 
+			? date('N', strtotime($tanggal)) 
+			: $hari
+		);
+
+		return Help::namaHariID(new Request(['nama_hari_en' => $num]));
+	}
+	public function getHariTempAttribute($value)
+	{
+		return ($this->attributes['is_hari'] === 0 || $this->attributes['tanggal'])
+			? (int) date('N', strtotime($this->attributes['tanggal']))
+			: $this->attributes['hari'];
+	}
+	### Accessors end
+
+
+	public static function getJson($input)
+	{
 		$table  = 'holidays';
 		$select = 'holidays.*';
 		
@@ -56,7 +148,8 @@ class Holidays extends Model{
 		return $data;
 	}
 
-	public static function getJsonKuotaPoli($input){
+	public static function getJsonKuotaPoli($input)
+	{
 		$table  = 'holidays';
 		$select = '*';
 		
@@ -77,7 +170,8 @@ class Holidays extends Model{
 		return $data;
 	}
 
-	public static function getJsonLiburPoli($input){
+	public static function getJsonLiburPoli($input)
+	{
 		$table  = 'holidays';
 		$select = '*';
 		

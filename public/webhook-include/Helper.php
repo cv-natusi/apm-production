@@ -47,6 +47,7 @@ class Helper{
 		$tsPlus = strtotime('now +3day');
 		$request->merge([
 			'array_hari'=>implode(",",$arrayHari),
+			'array_hari2'=>$arrayHari,
 			'tanggal_detail'=>$arrayTanggal,
 			'ts_now'=>$tsNow,
 			'ts_plus'=>$tsPlus,

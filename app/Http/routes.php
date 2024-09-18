@@ -654,6 +654,26 @@ Route::get('mail',function(){
 // Route::get('cekurut','BridgingController@insertsep')->name('cariformpolirs'); // insert sep
 
 Route::group(['prefix'=>'api'], function(){
+	Route::group(['prefix'=>'webhook'], function () {
+		Route::group(['prefix'=>'management-poli'], function () {
+			Route::group(['prefix'=>'libur-nasional'], function () {
+				Route::get('get-data','Api\Webhook\ManagementPoli\LiburNasionalController@getData');
+				Route::get('message','Api\Webhook\ManagementPoli\LiburNasionalController@message');
+				Route::get('ignore-poli','Api\Webhook\ManagementPoli\LiburNasionalController@ignorePoli');
+			});
+			Route::group(['prefix'=>'libur-poli'], function () {
+				Route::get('get-data','Api\Webhook\ManagementPoli\LiburPoliController@getData');
+				Route::get('message','Api\Webhook\ManagementPoli\LiburPoliController@message');
+				Route::get('ignore-poli','Api\Webhook\ManagementPoli\LiburPoliController@ignorePoli');
+			});
+			Route::group(['prefix'=>'kuota-poli'], function () {
+				Route::get('get-data','Api\Webhook\ManagementPoli\KuotaPoliController@getData');
+				Route::get('message','Api\Webhook\ManagementPoli\KuotaPoliController@message');
+				Route::get('ignore-poli','Api\Webhook\ManagementPoli\KuotaPoliController@ignorePoli');
+			});
+		});
+	});
+
 	Route::group(['prefix'=>'antreanBPJS'],function(){
 		Route::any('refPoli','BridgBpjsController@refPoli');
 		Route::any('refDokter','BridgBpjsController@refDokter');

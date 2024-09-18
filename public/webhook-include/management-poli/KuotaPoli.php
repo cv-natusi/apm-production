@@ -2,8 +2,10 @@
 namespace Webhook\ManagementPoli;
 use Webhook\ManagementPoli;
 
-class KuotaPoli extends ManagementPoli{
-	public static function getKuotaPoli($request){
+class KuotaPoli extends ManagementPoli
+{
+	public static function getKuotaPoli($request)
+   {
 		// dateDetail($request); # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
 		$query = "SELECT * FROM holidays
 			WHERE kategori='kuota-poli'

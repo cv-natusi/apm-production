@@ -141,25 +141,26 @@ class apm{
 			],
 		]);
 	}
-	public static function namaHariID($request){
+	public static function namaHariID($request)
+	{
 		$str = $request->nama_hari_en;
 		switch (true) {
 			case ($str==='Mon' || $str===1):
 				$hari = 'Senin';
 				break;
-			case $str==='Tue' || $str===2:
+			case ($str==='Tue' || $str===2):
 				$hari = 'Selasa';
 				break;
-			case $str==='Wed' || $str===3:
+			case ($str==='Wed' || $str===3):
 				$hari = 'Rabu';
 				break;
-			case $str==='Thu' || $str===4:
+			case ($str==='Thu' || $str===4):
 				$hari = 'Kamis';
 				break;
-			case $str==='Fri' || $str===5:
+			case ($str==='Fri' || $str===5):
 				$hari = "Jum'at";
 				break;
-			case $str==='Sat' || $str===6:
+			case ($str==='Sat' || $str===6):
 				$hari = 'Sabtu';
 				break;
 			default:
@@ -167,5 +168,62 @@ class apm{
 				break;
 		}
 		return $hari;
+	}
+	public static function kuotaWa($request)
+	{
+		return DB::table('bot_pasien as bp')
+			->join('bot_data_pasien as bdp', 'bp.id', '=', 'bdp.idBots')
+			->whereDate('bp.tgl_periksa', '=', date('Y-m-d', $request->timestamps))
+			->where([
+				'bp.statusChat' => 99,
+				'bdp.kodePoli' => $request->poli_bpjs_id
+			])->count();
+	}
+	public static function numberToTimestamps($request)
+	{
+		date_default_timezone_set('Asia/Jakarta');
+		$date = (int)$request->date_number;
+		$numCurrent = (int)date('N',strtotime('now'));
+		$numPayload = $date;
+		// return "$numCurrent || $numPayload";
+		$count =  ($numCurrent <= $numPayload ? '+' : '').($numPayload - $numCurrent).' day';
+		// return "$numCurrent || $numPayload || $count";
+		$timestamps = strtotime("now $count");
+		return $timestamps;
+		// return date('d-m-Y',$timestamps);
+	}
+	public static function dateWhatsApp($request)
+	{
+		date_default_timezone_set("Asia/Jakarta");
+		$arrayHari = [];
+		$arrayTanggal = [];
+		for($i=1; $i<=3; $i++){ # Ambil tanggal dan nama hari untuk 3 hari kedepan, dari tanggal sekarang
+			$ts = strtotime("today +$i day");
+			$dayInNum = date('N',$ts);
+			array_push($arrayHari, $dayInNum);
+
+			$request->merge(['nama_hari_en'=>(int)$dayInNum]);
+
+			$arrayTanggal[$dayInNum] = (object)[
+				'tanggal'=>date('d-m-Y',$ts),
+				'nama_hari'=>self::namaHariID($request),
+			];
+
+			$request->request->remove('nama_hari_en');
+		}
+		$tsNow = strtotime('now');
+		$tsPlus1 = strtotime('now +1day');
+		$tsPlus3 = strtotime('now +3day');
+		$request->merge([
+			// 'array_hari'=>implode(",",$arrayHari),
+			'array_hari'=>$arrayHari,
+			'tanggal_detail'=>$arrayTanggal,
+			'ts_now'=>$tsNow,
+			'ts_plus_1'=>$tsPlus1,
+			'ts_plus_3'=>$tsPlus3,
+			'dt_now'=>date('Y-m-d'),
+			'dt_plus_1'=>date('Y-m-d',$tsPlus1),
+			'dt_plus_3'=>date('Y-m-d',$tsPlus3),
+		]);
 	}
 }

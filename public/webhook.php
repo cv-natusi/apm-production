@@ -89,17 +89,6 @@
 	]);
 
 
-	if($request->phone=='6281335537942'){
-		// $managementPoli = new ManagementPoli;
-		// echo MP::testing();
-		// $cs = new ManagementPoli();
-		// echo ManagementPoli::testing();
-		// echo ManagementPoli::liburNasional();
-		// echo 'berhasil';
-		// die();
-	}
-
-
 	if(!$wablas){
 		die("tes Connection Failed".mysqli_connect_error());
 	}
@@ -139,8 +128,8 @@
 	### Init class utama untuk passing variable kedalam construct
 	$initManagementPoli = new ManagementPoli($request);
 	if($request->phone=='6281335537942'){
-		$liburNasional = LiburNasional::liburNasional($request);
-		$liburPoli = LiburPoli::liburPoli($request);
+		// $liburNasional = LiburNasional::liburNasional($request);
+		// $liburPoli = LiburPoli::liburPoli($request);
 		// $kuotaPoli = KuotaPoli::message($request);
 		// $kuotaPoli = KuotaPoli::ignore($request);
 		// echo $liburNasional;

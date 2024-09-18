@@ -6,7 +6,6 @@ class ManagementPoli{
 	protected static $namaHari;
 
 	public function __construct($request){
-      Helper::dateDetail($request);
-		// self::$namaHari = Helper::namaHari($request);
+      Helper::dateDetail($request); # Add variable to request object
 	}
 }
