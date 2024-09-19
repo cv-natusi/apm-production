@@ -38,7 +38,7 @@ class KuotaPoliController extends Controller
 				'is_active'=>1,
 			]);
 
-			if ($request->jenis==='message-wa') {
+			if ($request->metode_ambil==='wa') {
 				Help::dateWhatsApp($request); # Add variable tanggal to request object
 				$query->whereDateWhatsapp($request);
 			} else {
@@ -93,7 +93,7 @@ class KuotaPoliController extends Controller
 	public static function message(Request $request)
 	{
 		try {
-			$request->merge(['jenis' => 'message-wa']);
+			$request->merge(['metode_ambil' => 'wa']);
 			$exec = self::getData($request);
 			$data = $exec->getData();
 
@@ -172,7 +172,6 @@ class KuotaPoliController extends Controller
 				}
 
 				$text .= "*==============================*\n\n";
-				// return $text;
 				### Print text end
 
 				return response()->json([

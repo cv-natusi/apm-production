@@ -29,10 +29,16 @@ class LiburPoliController extends Controller
 				'is_active'=>1,
 			]);
 
+			// if ($request->metode_ambil==='wa') {
+			// 	$query->whereBetween('tanggal',[$request->date_start, $request->date_end]);
+			// } else {
+			// 	$query->whereDate('tanggal','=',date('Y-m-d'));
+			// }
 			if ($request->metode_ambil==='wa') {
-				$query->whereBetween('tanggal',[$request->date_start, $request->date_end]);
+				Help::dateWhatsApp($request); # Add variable tanggal to request object
+				$query->whereDateWhatsapp($request);
 			} else {
-				$query->whereDate('tanggal','=',date('Y-m-d'));
+				$query->whereDateKiosk($request);
 			}
 
 			$data = $query->get();
@@ -64,6 +70,7 @@ class LiburPoliController extends Controller
 	public static function message(Request $request)
 	{
 		try {
+			$request->merge(['metode_ambil' => 'wa']);
 			$exec = self::getData($request);
 			$data = $exec->getData();
 			if ($data->metadata->code==200) {
@@ -106,18 +113,24 @@ class LiburPoliController extends Controller
 	public static function ignorePoli(Request $request)
 	{
 		try {
+			$ignorePoli = ['ALG','UGD','ANU']; # Default ignore
+			if ($request->metode_ambil !== 'kiosk') {
+				array_push($ignorePoli, 'GIG');
+			}
+
 			$exec = self::getData($request);
 			$data = $exec->getData();
+
 			if ($data->metadata->code==200) {
 				### Mapping array => cek duplikat => reindex array
-				$kodePoli = array_values(array_unique(array_map(fn($item)=>$item->poli_bpjs_id, $data->response)));
+				$ignorePoli = array_merge($ignorePoli, array_values(array_unique(array_map(fn($item)=>$item->poli_bpjs_id, $data->response))));
 
 				return response()->json([
 					'metadata' => [
 						'code' => 200,
 						'message' => 'Ok',
 					],
-					'response' => $kodePoli
+					'response' => $ignorePoli
 				],200);
 			}
 			return $exec;

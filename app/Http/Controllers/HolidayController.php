@@ -60,10 +60,11 @@ class HolidayController extends Controller{
 		if($ifHari){
 			$query->where('hari',$request->hari);
 		}
-		if($ifTanggal || $request->kategori=='libur-nasional'){
+		if($ifTanggal || $request->kategori!='kuota-poli'){
 			$query->where('tanggal',date('Y-m-d',strtotime($request->tanggal)));
 		}
 		$check = $query->first();
+		// return $check;
 		$count = 0;
 		if(
 			(
@@ -86,10 +87,17 @@ class HolidayController extends Controller{
 					)
 				) > 0
 			)
-			|| $check
+			|| (
+				$request->kategori!='kuota-poli'
+				&& (
+					(!$request->holiday_id && $check) 
+					|| $check
+				)
+			)
 		){
+			return $check;
 			$break = false;
-			if($count){
+			if ($count) {
 				foreach($kuotaPoli as $key => $val){
 					$dayInNum = $val->is_hari==true ? $val->hari : (int)date('N',strtotime($val->tanggal));
 					if(
@@ -122,6 +130,7 @@ class HolidayController extends Controller{
 				],400);
 			}
 		}
+		return $request->all();
 
 		if($ifHari){
 			$store->hari = $request->hari;
