@@ -44,22 +44,30 @@
 	$message = $data['message'];
 	$phone = $data['phone'];
 
-	// if ($phone=='6281335537942') {
-	// 	// echo Env::status();
-	// 	$request = new Request([
-	// 		// 'rsu_conn' => $dbrsud,
-	// 		// 'apm_conn' => $wablas,
-	// 		// 'natusi_apm' => $wablas,
-	// 		'phone' => '$phone',
-	// 		'tanggal_berobat' => '2024-09-19'
-	// 	]);
-	// 	echo json_encode(KuotaPoli::testing($request),JSON_PRETTY_PRINT);
-	// 	// echo KuotaPoli::testing($request);
-	// 	// echo "<pre>";
-	// 	// print_r(KuotaPoli::testing($request));
-	// 	// echo "</pre>";
-	// 	die();
-	// }
+	if ($phone=='6281335537942') {
+		// echo Env::status();
+		$request = new Request([
+			// 'rsu_conn' => $dbrsud,
+			// 'apm_conn' => $wablas,
+			// 'natusi_apm' => $wablas,
+			'phone' => '$phone',
+			'tanggal_berobat' => '2024-09-20'
+		]);
+		// echo json_encode(KuotaPoli::testing($request),JSON_PRETTY_PRINT);
+		// echo json_encode(KuotaPoli::ignore($request),JSON_PRETTY_PRINT);
+
+		// echo LiburPoli::message($request);
+		// echo json_encode(LiburPoli::message($request),JSON_PRETTY_PRINT);
+
+		// echo json_encode(ManagementPoli::ignorePoli($request),JSON_PRETTY_PRINT);
+		echo ManagementPoli::messagePoli($request);
+
+		// echo KuotaPoli::testing($request);
+		// echo "<pre>";
+		// print_r(KuotaPoli::testing($request));
+		// echo "</pre>";
+		die();
+	}
 
 	### Info maintenance server
 	// if($phone!='6281335537942'){ # Nomor untuk maintenance

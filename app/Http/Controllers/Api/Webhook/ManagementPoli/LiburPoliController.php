@@ -34,7 +34,7 @@ class LiburPoliController extends Controller
 			// } else {
 			// 	$query->whereDate('tanggal','=',date('Y-m-d'));
 			// }
-			if ($request->metode_ambil==='wa') {
+			if ($request->metode_ambil === 'wa' && $request->jenis === 'message') {
 				Help::dateWhatsApp($request); # Add variable tanggal to request object
 				$query->whereDateWhatsapp($request);
 			} else {
@@ -70,14 +70,18 @@ class LiburPoliController extends Controller
 	public static function message(Request $request)
 	{
 		try {
-			$request->merge(['metode_ambil' => 'wa']);
+			$request->merge([
+				'metode_ambil' => 'wa',
+				'jenis' => 'message',
+			]);
 			$exec = self::getData($request);
 			$data = $exec->getData();
 			if ($data->metadata->code==200) {
 				### Print text start
-				$text = "LIBUR POLI :\n";
+				$text = "List poli sedang libur sementara waktu:\n";
 				$num = 1;
-				foreach($data->response as $key => $val){
+				$data = collect($data->response)->sortBy('tanggal')->values();
+				foreach($data as $key => $val){
 					if ($poli = rsu_poli::where('KodePoli',$val->poli_id)->first()) {
 						$request->merge([
 							'nama_hari_en' => (int)date('N',strtotime($val->tanggal))
@@ -86,7 +90,7 @@ class LiburPoliController extends Controller
 						$namaPoli = strtoupper($poli->NamaPoli);
 						$namaHari = Help::namaHariID($request);
 						$text .= "$num. $namaHari $tanggal, $namaPoli";
-						$text .= $key+1 < count($data->response)  ? "\n" : "";
+						$text .= $key+1 < count($data) ? "\n" : "";
 						$num++;
 					}
 				}

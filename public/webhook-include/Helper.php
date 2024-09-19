@@ -58,6 +58,8 @@ class Helper{
 
 	public static function curl($request)
 	{
+		header('Content-Type: application/json; charset=utf-8');
+
 		// if (Env::status() === 'production') {
 			$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
 		// } else {
@@ -95,12 +97,11 @@ class Helper{
 			// return $response;
 			return json_decode($response);
 		}
-
-		return response()->json([
+		return json_decode(json_encode([
 			'metadata' => [
 				'code' => 500,
 				'message' => $errMsg,
 			]
-		],500);
+		]));
 	}
 }

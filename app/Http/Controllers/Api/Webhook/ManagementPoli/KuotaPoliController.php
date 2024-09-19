@@ -33,7 +33,7 @@ class KuotaPoliController extends Controller
 				'is_active'=>1,
 			]);
 
-			if ($request->metode_ambil==='wa') {
+			if ($request->metode_ambil === 'wa' && $request->jenis === 'message') {
 				Help::dateWhatsApp($request); # Add variable tanggal to request object
 				$query->whereDateWhatsapp($request);
 			} else {
@@ -88,7 +88,10 @@ class KuotaPoliController extends Controller
 	public static function message(Request $request)
 	{
 		try {
-			$request->merge(['metode_ambil' => 'wa']);
+			$request->merge([
+				'metode_ambil' => 'wa',
+				'jenis' => 'message',
+			]);
 			$exec = self::getData($request);
 			$data = $exec->getData();
 
@@ -116,8 +119,9 @@ class KuotaPoliController extends Controller
 				});
 
 				### Print text start
-				$text = "*Untuk sementara waktu.*\n";
-				$text .= "*==============================*\n";
+				// $text = "*Untuk sementara waktu.*\n";
+				// $text .= "*==============================*\n";
+				$text = "";
 
 				foreach ($data as $key => $item) {
 					$num = 1;
@@ -166,7 +170,7 @@ class KuotaPoliController extends Controller
 					}
 				}
 
-				$text .= "*==============================*\n\n";
+				// $text .= "*==============================*\n\n";
 				### Print text end
 
 				return response()->json([
