@@ -12,14 +12,17 @@ use App\Helpers\apm as Help;
 use File, Auth, Redirect, Validator,DB;
 use Datatables;# Helpers
 
-class HolidayController extends Controller{
-	public function main(Request $request){
+class HolidayController extends Controller
+{
+	public function main(Request $request)
+	{
 		$this->data['classtutup'] = '';
 		// return view('Admin.Holidays.main')->with('data', $this->data);
 		return view('Admin.Holidays.index')->with('data', $this->data);
 	}
 
-	public function form(Request $request){
+	public function form(Request $request)
+	{
 		$poli = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
 			->whereNotIn('kdpoli',['ALG','UGD','ANU'])
 			->groupBy('mapping_poli_bridging.kdpoli_rs')
@@ -38,7 +41,8 @@ class HolidayController extends Controller{
 		],200);
 	}
 
-	public function store(Request $request){
+	public function store(Request $request)
+	{
 		$ifHari = $request->format=='hari';
 		$nRequest = $ifHari ? $request->hari : date('N',strtotime($request->tanggal));
 		$ifTanggal = $request->format=='tanggal';
@@ -51,38 +55,37 @@ class HolidayController extends Controller{
 
 
 		$query = Holidays::where('kategori',$request->kategori);
-		if($request->holiday_id){
+		if ($request->holiday_id) {
 			$query->where('id_holiday','!=',$request->holiday_id);
 		}
-		if($request->kode_poli){
+
+		if ($request->kode_poli) {
 			$query->where('poli_id',$request->kode_poli);
 		}
-		if($ifHari){
+		if ($ifHari) {
 			$query->where('hari',$request->hari);
 		}
-		if($ifTanggal || $request->kategori!='kuota-poli'){
+		if ($ifTanggal || $request->kategori != 'kuota-poli') {
 			$query->where('tanggal',date('Y-m-d',strtotime($request->tanggal)));
 		}
 		$check = $query->first();
-		// return $check;
 		$count = 0;
-		if(
+		if (
 			(
 				$request->kategori=='kuota-poli'
 				&& (
 					$count = count(
 						(
 							$kuotaPoli = Holidays::
-							where(
-								fn($q)=>$q->where(
-									fn($q)=>$q->whereNotNull('tanggal')->where('tanggal','>=',date('Y-m-d'))
-								)->orWhere(
-									fn($q)=>$q->where('hari',$nRequest)
-								)
-							)->
-							where('poli_id',$request->kode_poli)->
-							where('kategori',$request->kategori)->
-							get()
+								where(
+									fn($q)=>$q->where(
+										fn($q)=>$q->whereNotNull('tanggal')->where('tanggal','>=',date('Y-m-d'))
+									)->orWhere(
+										fn($q)=>$q->where('hari',$nRequest)
+									)
+								)->where('poli_id',$request->kode_poli)
+								->where('kategori',$request->kategori)
+								->get()
 						)
 					)
 				) > 0
@@ -94,8 +97,7 @@ class HolidayController extends Controller{
 					|| $check
 				)
 			)
-		){
-			return $check;
+		) {
 			$break = false;
 			if ($count) {
 				foreach($kuotaPoli as $key => $val){
@@ -120,7 +122,7 @@ class HolidayController extends Controller{
 					}
 				}
 			}
-			if($break || $request->kategori!='kuota-poli'){
+			if ($break || $request->kategori!='kuota-poli') {
 				return response()->json([
 					'metadata' => [
 						'code' => 400,
@@ -130,30 +132,35 @@ class HolidayController extends Controller{
 				],400);
 			}
 		}
-		return $request->all();
 
-		if($ifHari){
+		if ($ifHari) {
 			$store->hari = $request->hari;
 			$store->tanggal = null;
-		}else{
+		} else {
 			$store->tanggal = date('Y-m-d',strtotime($request->tanggal));
 			$store->hari = null;
 		}
+
 		$store->is_hari = $ifHari ? 1 : 0;
 		$store->keterangan = $request->keterangan;
 		$store->poli_id = $request->kode_poli;
-		if(($kiosk = $request->kuota_kiosk)){
+
+		if (($kiosk = $request->kuota_kiosk)) {
 			$store->kuota_kiosk = $kiosk;
 		}
-		if(($wa = $request->kuota_wa)){
+		
+		if (($wa = $request->kuota_wa)) {
 			$store->kuota_wa = $wa;
 		}
-		if($mapping = Rsu_Bridgingpoli::where('kdpoli_rs',$request->kode_poli)->first()){
+
+		if( $mapping = Rsu_Bridgingpoli::where('kdpoli_rs',$request->kode_poli)->first()) {
 			$store->poli_bpjs_id = $mapping->kdpoli;
 		}
+
 		$store->kategori = $request->kategori;
 		$store->save();
-		if($store){
+
+		if ($store) {
 			return response()->json([
 				'metadata' => [
 					'code' => 200,
@@ -161,6 +168,7 @@ class HolidayController extends Controller{
 				],
 			],200);
 		}
+
 		return response()->json([
 			'metadata' => [
 				'code' => 500,
@@ -169,7 +177,8 @@ class HolidayController extends Controller{
 		],500);
 	}
 
-	public function dataTable(Request $request){
+	public function dataTable(Request $request)
+	{
 		$data = Holidays::where('kategori',$request->kategori)
 			->with('poli')
 			->orderBy('is_active','DESC')
@@ -214,7 +223,9 @@ class HolidayController extends Controller{
 			})
 			->make(true);
 	}
-	public function updateStatus(Request $request){
+
+	public function updateStatus(Request $request)
+	{
 		if($data = Holidays::find($request->holiday_id)){
 			$data->is_active = $data->is_active==true ? false : true;
 			$data->save();
@@ -233,7 +244,8 @@ class HolidayController extends Controller{
 		],204);
 	}
 
-	public function destroy(Request $request){
+	public function destroy(Request $request)
+	{
 		if($data = Holidays::find($request->holiday_id)){
 			if($data->delete()){
 				return response()->json([
@@ -258,17 +270,20 @@ class HolidayController extends Controller{
 		],204);
 	}
 
-	public function testing(Request $request){
+	public function testing(Request $request)
+	{
 		\Log::info('testing');
 	}
 
 
-	public function datagrid(Request $request){
+	public function datagrid(Request $request)
+	{
 		$data = Holidays::getJson($request);
 		return response()->json($data);
 	}
 	
-	public function datagridKuotaPoli(Request $request){
+	public function datagridKuotaPoli(Request $request)
+	{
 		try {
 			$data = Holidays::getJsonKuotaPoli($request);
 			return response()->json($data);
@@ -279,29 +294,34 @@ class HolidayController extends Controller{
 		}
 	}
 	
-	public function datagridLiburPoli(Request $request){
+	public function datagridLiburPoli(Request $request)
+	{
 		$data = Holidays::getJsonLiburPoli($request);
 		return response()->json($data);
 	}
 	
-	public function formAdd(Request $request){
+	public function formAdd(Request $request)
+	{
 		$content = view('Admin.Holidays.formAdd')->render();
 		return ['status' => 'success', 'content' => $content];
 	}
 	
-	public function formAddKuotaPoli(Request $request){
+	public function formAddKuotaPoli(Request $request)
+	{
 		$data['poli'] = DB::connection('dbrsud')->table('tm_poli as p')->join('mapping_poli_bridging as bp','bp.kdpoli_rs','=','p.KodePoli')->get();
 		$content = view('Admin.Holidays.formAddKuotaPoli', $data)->render();
 		return ['status' => 'success', 'content' => $content];
 	}
 	
-	public function formAddLiburPoli(Request $request){
+	public function formAddLiburPoli(Request $request)
+	{
 		$data['poli'] = DB::connection('dbrsud')->table('tm_poli as p')->join('mapping_poli_bridging as bp', 'bp.kdpoli_rs', '=', 'p.KodePoli')->get();
 		$content = view('Admin.Holidays.formAddLiburPoli', $data)->render();
 		return ['status' => 'success', 'content' => $content];
 	}
 	
-	public function Add(Request $request){
+	public function Add(Request $request)
+	{
 		// $cekHoliday = Holidays::where('tanggal',date('Y-m-d',strtotime($request->tanggal_libur)))->first();
 		// if (!empty($cekHoliday)) {
 		$holiday = new Holidays;
@@ -320,7 +340,8 @@ class HolidayController extends Controller{
 		// }
 	}
 	
-	public function AddKuotaPoli(Request $request){
+	public function AddKuotaPoli(Request $request)
+	{
 		// $cekHoliday = Holidays::where('tanggal',date('Y-m-d',strtotime($request->tanggal_libur)))->first();
 		// if (!empty($cekHoliday)) {
 		$holiday = new Holidays;
@@ -342,7 +363,8 @@ class HolidayController extends Controller{
 		// }
 	}
 	
-	public function AddLiburPoli(Request $request){
+	public function AddLiburPoli(Request $request)
+	{
 		// $cekHoliday = Holidays::where('tanggal',date('Y-m-d',strtotime($request->tanggal_libur)))->first();
 		// if (!empty($cekHoliday)) {
 		$holiday = new Holidays;
@@ -362,13 +384,15 @@ class HolidayController extends Controller{
 		// }
 	}
 	
-	public function formUpdate(Request $request){
+	public function formUpdate(Request $request)
+	{
 		$data['holiday'] = Holidays::find($request->id);
 		$content = view('Admin.Holidays.formUpdate',$data)->render();
 		return ['status' => 'success', 'content' => $content];
 	}
 	
-	public function formUpdateKuotaPoli(Request $request){
+	public function formUpdateKuotaPoli(Request $request)
+	{
 		try {
 			$data['poli'] = DB::connection('dbrsud')->table('tm_poli as p')->join('mapping_poli_bridging as bp','bp.kdpoli_rs','=','p.KodePoli')->get();
 			$data['holiday'] = Holidays::find($request->id);
@@ -382,14 +406,16 @@ class HolidayController extends Controller{
 		
 	}
 	
-	public function formUpdateLiburPoli(Request $request){
+	public function formUpdateLiburPoli(Request $request)
+	{
 		$data['poli'] = DB::connection('dbrsud')->table('tm_poli as p')->join('mapping_poli_bridging as bp','bp.kdpoli_rs','=','p.KodePoli')->get();
 		$data['holiday'] = Holidays::find($request->id);
 		$content = view('Admin.Holidays.formUpdateLiburPoli',$data)->render();
 		return ['status' => 'success', 'content' => $content];
 	}
 	
-	public function Updates(Request $request){
+	public function Updates(Request $request)
+	{
 		$cekHoliday = Holidays::where('id_holiday','=',$request->id_holiday)->first();
 		if ($cekHoliday) {
 			$holiday = Holidays::find($request->id_holiday);
@@ -405,7 +431,8 @@ class HolidayController extends Controller{
 		return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Sudah Di Pilih Sebagai Tanggal Libur')->with('type', 'error');
 	}
 	
-	public function UpdatesKuotaPoli(Request $request){
+	public function UpdatesKuotaPoli(Request $request)
+	{
 		$cekHoliday = Holidays::where('id_holiday','=',$request->id_holiday)->first();
 		if (!empty($cekHoliday)) {
 			$holiday = Holidays::find($request->id_holiday);
@@ -426,7 +453,8 @@ class HolidayController extends Controller{
 		}
 	}
 	
-	public function UpdatesLiburPoli(Request $request){
+	public function UpdatesLiburPoli(Request $request)
+	{
 		$cekHoliday = Holidays::where('id_holiday', '=', $request->id_holiday)->first();
 		if (!empty($cekHoliday)) {
 			$holiday = Holidays::find($request->id_holiday);
@@ -445,7 +473,8 @@ class HolidayController extends Controller{
 		}
 	}
 	
-	public function delete(Request $request){
+	public function delete(Request $request)
+	{
 		$holiday = Holidays::find($request->id);
 		if(!empty($holiday)){
 			$holiday->delete();
@@ -455,7 +484,8 @@ class HolidayController extends Controller{
 		}
 	}
 	
-	public function deleteKuotaPoli(Request $request){
+	public function deleteKuotaPoli(Request $request)
+	{
 		$holiday = Holidays::find($request->id);
 		if(!empty($holiday)){
 			$holiday->delete();
@@ -465,7 +495,8 @@ class HolidayController extends Controller{
 		}
 	}
 	
-	public function deleteLiburPoli(Request $request){
+	public function deleteLiburPoli(Request $request)
+	{
 		$holiday = Holidays::find($request->id);
 		if(!empty($holiday)){
 			$holiday->delete();
