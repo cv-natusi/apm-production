@@ -27,11 +27,6 @@ class KuotaPoliController extends Controller
 	 */
 	public static function getData(Request $request)
 	{
-		// return [
-		// 	date('d-m-Y',strtotime('now')),
-		// 	date('w',strtotime('now +5day')), # Minggu = 0, Senin = 1
-		// 	date('N',strtotime('now +5day')), # Minggu = 7, Senin = 1
-		// ];
 		try {
 			$query = Holidays::where([
 				'kategori'=>'kuota-poli',
@@ -156,7 +151,7 @@ class KuotaPoliController extends Controller
 								&& $item->poli_id == $items->poli_id
 								&& $increment == count($item->data)
 							) {
-								$keterangan = self::replaceHtmlTagsWithSeparator($keterangan);
+								$keterangan = Help::replaceHtmlTagsWithSeparator($keterangan);
 								$text .= "\n$keterangan";
 							}
 						}
@@ -194,36 +189,7 @@ class KuotaPoliController extends Controller
 		}
 	}
 
-	public static function replaceHtmlTagsWithSeparator($inputString)
-	{
-		# Daftar penggantian tag HTML
-		$replacements = [
-			"/<strong>/" => "*",    # Ganti tag <strong> dengan string kosong
-			"/<\/strong>/" => "*",  # Ganti tag </strong> dengan string kosong
-			"/<p[^>]*>/" => "",     # Ganti tag <p> dengan string kosong
-			"/<\/p>/" => "",        # Ganti tag </p> dengan string kosong
-			"/<s[^>]*>/" => "",     # Ganti tag <s> dengan string kosong
-			"/<\/s[^>]*>/" => "",   # Ganti tag </s> dengan string kosong
-			"/<u>/" => "",          # Ganti tag <u> dengan string kosong
-			"/<\/u>/" => "",        # Ganti tag </u> dengan string kosong
-			"/<em>/" => "_",        # Ganti tag <em> dengan karakter _
-			"/<\/em>/" => "_",      # Ganti tag </em> dengan karakter _
-			"/<br\s*\/?>/" => "\n", # Ganti tag <br> dengan newline
-			'/\r\n\r\n/' => "\n",   # Ganti "\r\n\r\n" dengan newline
-			'/\r\n/' => "",         # Ganti "\r\n" dengan string kosong
-		];
-	
-		# Loop melalui array penggantian dan ganti tag HTML
-		foreach ($replacements as $pattern => $replacement) {
-			$inputString = preg_replace(
-				$pattern,
-				$replacement,
-				$inputString
-			);
-		}
-	
-		return $inputString;
-	}
+
 
 	public static function ignorePoli(Request $request)
 	{
@@ -292,7 +258,7 @@ class KuotaPoliController extends Controller
 			'payload' => "metode_ambil=$request->metode_ambil",
 		]);
 		if($exec = RequestorWaBot::managementPoli($request)){
-         // return $exec;
+			// return $exec;
 			// $code = $exec->metadata->code;
 			// $exec = $exec->response;
 			return response()->json($exec);

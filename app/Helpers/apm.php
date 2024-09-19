@@ -169,6 +169,7 @@ class apm{
 		}
 		return $hari;
 	}
+
 	public static function kuotaWa($request)
 	{
 		return DB::table('bot_pasien as bp')
@@ -225,5 +226,35 @@ class apm{
 			'dt_plus_1'=>date('Y-m-d',$tsPlus1),
 			'dt_plus_3'=>date('Y-m-d',$tsPlus3),
 		]);
+	}
+   public static function replaceHtmlTagsWithSeparator($inputString)
+	{
+		# Daftar penggantian tag HTML
+		$replacements = [
+			"/<strong>/" => "*",    # Ganti tag <strong> dengan string kosong
+			"/<\/strong>/" => "*",  # Ganti tag </strong> dengan string kosong
+			"/<p[^>]*>/" => "",     # Ganti tag <p> dengan string kosong
+			"/<\/p>/" => "",        # Ganti tag </p> dengan string kosong
+			"/<s[^>]*>/" => "",     # Ganti tag <s> dengan string kosong
+			"/<\/s[^>]*>/" => "",   # Ganti tag </s> dengan string kosong
+			"/<u>/" => "",          # Ganti tag <u> dengan string kosong
+			"/<\/u>/" => "",        # Ganti tag </u> dengan string kosong
+			"/<em>/" => "_",        # Ganti tag <em> dengan karakter _
+			"/<\/em>/" => "_",      # Ganti tag </em> dengan karakter _
+			"/<br\s*\/?>/" => "\n", # Ganti tag <br> dengan newline
+			'/\r\n\r\n/' => "\n",   # Ganti "\r\n\r\n" dengan newline
+			'/\r\n/' => "",         # Ganti "\r\n" dengan string kosong
+		];
+	
+		# Loop melalui array penggantian dan ganti tag HTML
+		foreach ($replacements as $pattern => $replacement) {
+			$inputString = preg_replace(
+				$pattern,
+				$replacement,
+				$inputString
+			);
+		}
+	
+		return $inputString;
 	}
 }
