@@ -53,6 +53,10 @@ class LiburPoliController extends Controller
 				],
 			],204);
 		} catch (\Throwable $e) {
+			\Log::error(json_encode([
+				'title' => 'LIBUR POLI GET DATA',
+				'message' => $e->getMessage()
+			]));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -123,6 +127,10 @@ class LiburPoliController extends Controller
 			}
 			return $exec;
 		} catch (\Throwable $e) {
+			\Log::error(json_encode([
+				'title' => 'LIBUR POLI MESSAGE',
+				'message' => $e->getMessage()
+			]));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -157,6 +165,10 @@ class LiburPoliController extends Controller
 			}
 			return $exec;
 		} catch (\Throwable $e) {
+			\Log::error(json_encode([
+				'title' => 'LIBUR POLI IGNORE',
+				'message' => $e->getMessage()
+			]));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,

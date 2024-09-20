@@ -96,12 +96,11 @@ class Helper{
 		}
 
 		curl_close($ch);
-		// return $response;
 
 		if (in_array($httpcode,[200,204])) {
-			// return $response;
 			return json_decode($response);
 		}
+
 		return json_decode(json_encode([
 			'metadata' => [
 				'code' => 500,

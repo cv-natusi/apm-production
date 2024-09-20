@@ -347,6 +347,7 @@ class RegistrationController extends Controller{
 	public function indexAntrian(Request $request){
 		$dateNow = date('Y-m-d');
 		$ignorePoli = [];
+		$payload = (object)[];
 		$request->merge([
 			'url' => 'kuota-poli/ignore-poli',
 			'payload' => "metode_ambil=kiosk&tanggal_berobat=$dateNow",
@@ -355,7 +356,51 @@ class RegistrationController extends Controller{
 		if ($exec && $exec->metadata->code==200) {
 			$ignorePoli = $exec->response;
 		}
-		// return $ignorePoli;
+
+	
+
+		$ignorePoli = ['ALG','UGD','ANU'];
+
+		### Libur nasional start
+		$payload->metode_ambil = 'kiosk';
+		$payload->tanggal_berobat = $dateNow;
+		$request->merge([
+			'url' => 'libur-nasional/ignore-poli',
+			'payload' => $payload,
+		]);
+		// $exec = RequestorWaBot::managementPoli($request);
+		// if ($exec && $exec->metadata->code===200) {
+		// 	// $ignorePoli = array_merge($ignorePoli, $exec->response);
+		// 	$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
+		// 	// return "'".implode("','", $ignorePoli)."'";
+		// }
+		### Libur nasional end
+
+		### Libur poli start
+		$request->merge(['url' => 'libur-poli/ignore-poli']);
+		$exec = RequestorWaBot::managementPoli($request);
+		// return $request->all();
+      return response()->json($exec);
+		if ($exec && $exec->metadata->code===200) {
+			$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
+			// return "'".implode("','", $ignorePoli)."'";
+		}
+		// $ignorePoli = array_values(array_unique($ignorePoli));
+		### Libur poli end
+
+		### Kuota poli start
+		$request->merge([
+			'url' => 'kuota-poli/ignore-poli',
+			'payload' => $payload,
+		]);
+		$exec = RequestorWaBot::managementPoli($request);
+		if ($exec && $exec->metadata->code===200) {
+			$ignorePoli = array_values(array_unique(array_merge($ignorePoli,$exec->response)));
+		}
+		### Kuota poli end
+		// return "'".implode("','", $ignorePoli)."'";
+
+		return $ignorePoli;
 
 		// $dayInNum = date('N');
 		$id_kiosk = $request->id_kiosk;

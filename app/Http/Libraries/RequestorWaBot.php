@@ -174,9 +174,9 @@ class RequestorWaBot{
 	public static function managementPoli($request)
 	{
 		if (Env::status() === 'production') {
-			$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
+			$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url";
 		} else {
-			$url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url?$request->payload";
+			$url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url";
 		}
 
 		$ch = curl_init();
@@ -187,12 +187,14 @@ class RequestorWaBot{
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_TIMEOUT        => 120,
 			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-			CURLOPT_CUSTOMREQUEST  => "GET",
+			CURLOPT_CUSTOMREQUEST  => "POST",
 			CURLOPT_USERAGENT      => 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)',
+			CURLOPT_POSTFIELDS     => $request->payload,
 		));
 		// curl_setopt($ch, CURLOPT_URL,$url);
 
 		$response = curl_exec($ch);
+		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 		$errMsg = "Gagal terhubung ke server!";
 		if ($err = curl_errno($ch)) {
@@ -205,11 +207,17 @@ class RequestorWaBot{
 			return json_decode($response);
 		}
 
-		return response()->json([
+		return json_decode(json_encode([
 			'metadata' => [
 				'code' => 500,
 				'message' => $errMsg,
 			]
-		],500);
+		]));
+		// return response()->json([
+		// 	'metadata' => [
+		// 		'code' => 500,
+		// 		'message' => $errMsg,
+		// 	]
+		// ],500);
 	}
 }

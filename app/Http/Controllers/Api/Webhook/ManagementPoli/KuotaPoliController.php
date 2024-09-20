@@ -76,6 +76,10 @@ class KuotaPoliController extends Controller
 				],
 			],204);
 		} catch (\Throwable $e) {
+			\Log::error(json_encode([
+				'title' => 'KUOTA POLI GET DATA',
+				'message' => $e->getMessage()
+			]));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -227,7 +231,7 @@ class KuotaPoliController extends Controller
 			return $exec;
 		} catch (\Throwable $e) {
 			\Log::error(json_encode([
-				'title' => 'KUOTA POLI CONTROLLER',
+				'title' => 'KUOTA POLI MESSAGE',
 				'message' => $e->getMessage()
 			]));
 			return response()->json([
@@ -291,6 +295,10 @@ class KuotaPoliController extends Controller
 				'response' => $ignorePoli
 			],200);
 		} catch (\Throwable $e) {
+			\Log::error(json_encode([
+				'title' => 'KUOTA POLI IGNORE',
+				'message' => $e->getMessage()
+			]));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
