@@ -440,6 +440,16 @@
 									}
 								}
 							}
+							if ($request->phone=='6281335537942') {
+								$getIgnorePoli = ManagementPoli::ignorePoli($request);
+	
+								// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
+								$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($getIgnorePoli) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
+								$resPoli = mysqli_query($dbrsud,$poli);
+								$msg = getPoli($resPoli);
+								echo $msg;
+								die();
+							}
 							updateStatusChat('statusChat',$idBots,$wablas,$dataIn);
 
 							$request->merge(['tanggal_berobat' => $tglBerobat]);
