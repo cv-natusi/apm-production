@@ -453,7 +453,7 @@ class RegistrationController extends Controller{
 			->orderBy('tm_poli.NamaPoli','ASC')
 			->get();
 
-		$waktu = '06:30'; # Init default jam buka, jika di table holiday tidak ada data
+		$waktu = '06:30'; # Init default jam buka kiosk, jika di table holiday tidak ada data
 		// if($holiday = Holidays::orderBy('id_holiday','ASC')->first()){
 		// 	$jam = explode(':',$holiday->jam);
 		// 	$waktu = "$jam[0]:$jam[1]";
