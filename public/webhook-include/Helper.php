@@ -87,8 +87,6 @@ class Helper{
 
 		$response = curl_exec($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		// return $response;
-		// return "$httpcode";
 
 		$errMsg = "Gagal terhubung ke server!";
 		if ($err = curl_errno($ch)) {
@@ -102,6 +100,7 @@ class Helper{
 			// return $response;
 			return json_decode($response);
 		}
+
 		return json_decode(json_encode([
 			'metadata' => [
 				'code' => 500,
