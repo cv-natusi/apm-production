@@ -87,8 +87,6 @@ class Helper{
 
 		$response = curl_exec($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		// return $response;
-		// return "$httpcode";
 
 		$errMsg = "Gagal terhubung ke server!";
 		if ($err = curl_errno($ch)) {
