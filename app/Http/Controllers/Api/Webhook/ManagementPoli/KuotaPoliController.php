@@ -79,7 +79,7 @@ class KuotaPoliController extends Controller
 			\Log::error(json_encode([
 				'title' => 'KUOTA POLI GET DATA',
 				'message' => $e->getMessage()
-			]));
+			], JSON_PRETTY_PRINT));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -233,7 +233,7 @@ class KuotaPoliController extends Controller
 			\Log::error(json_encode([
 				'title' => 'KUOTA POLI MESSAGE',
 				'message' => $e->getMessage()
-			]));
+			], JSON_PRETTY_PRINT));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -298,7 +298,7 @@ class KuotaPoliController extends Controller
 			\Log::error(json_encode([
 				'title' => 'KUOTA POLI IGNORE',
 				'message' => $e->getMessage()
-			]));
+			], JSON_PRETTY_PRINT));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -308,24 +308,24 @@ class KuotaPoliController extends Controller
 		}
 	}
 
-	public static function testing(Request $request)
-	{
-		$request->merge([
-			'url' => 'kuota-poli/ignore-poli',
-			'payload' => "metode_ambil=$request->metode_ambil",
-		]);
-		if($exec = RequestorWaBot::managementPoli($request)){
-			// return $exec;
-			// $code = $exec->metadata->code;
-			// $exec = $exec->response;
-			return response()->json($exec);
-		}
+	// public static function testing(Request $request)
+	// {
+	// 	$request->merge([
+	// 		'url' => 'kuota-poli/ignore-poli',
+	// 		'payload' => "metode_ambil=$request->metode_ambil",
+	// 	]);
+	// 	if($exec = RequestorWaBot::managementPoli($request)){
+	// 		// return $exec;
+	// 		// $code = $exec->metadata->code;
+	// 		// $exec = $exec->response;
+	// 		return response()->json($exec);
+	// 	}
 
-		return response()->json([
-			'metadata' => [
-				'code' => 500,
-				'message' => "Gagal terhubung ke server.",
-			]
-		],500);
-	}
+	// 	return response()->json([
+	// 		'metadata' => [
+	// 			'code' => 500,
+	// 			'message' => "Gagal terhubung ke server.",
+	// 		]
+	// 	],500);
+	// }
 }

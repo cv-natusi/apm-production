@@ -59,13 +59,12 @@ class Helper{
 	public static function curl($request)
 	{
 		header('Content-Type: application/json; charset=utf-8');
+		// $url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
 
-		// if (Env::status() === 'production') {
-			// $url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
-			$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url";
-		// } else {
-			// $url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url";
-		// }
+		# Production
+		$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url";
+		# Develop
+		// $url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url";
 
 		$ch = curl_init();
 		curl_setopt_array($ch, array(

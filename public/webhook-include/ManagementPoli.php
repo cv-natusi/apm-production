@@ -81,23 +81,27 @@ class ManagementPoli
 
 	public static function ignorePoli($request)
 	{
-		$payload = "
-			tanggal_berobat=$request->tanggal_berobat
-			&metode_ambil=wa
-		";
-		$replacements = [
-			"/\r\n/" => "",  # Ganti "\r\n" dengan string kosong
-			"/\t/" => "",    # Ganti "\t" dengan string kosong
-		];
-		foreach ($replacements as $pattern => $replacement) {
-			$payload = preg_replace(
-				$pattern,
-				$replacement,
-				$payload
-			);
-		}
+		// $payload = "
+		// 	tanggal_berobat=$request->tanggal_berobat
+		// 	&metode_ambil=wa
+		// ";
+		// $replacements = [
+		// 	"/\r\n/" => "",  # Ganti "\r\n" dengan string kosong
+		// 	"/\t/" => "",    # Ganti "\t" dengan string kosong
+		// ];
+		// foreach ($replacements as $pattern => $replacement) {
+		// 	$payload = preg_replace(
+		// 		$pattern,
+		// 		$replacement,
+		// 		$payload
+		// 	);
+		// }
 
 		$ignorePoli = ['ALG','UGD','ANU','GIG'];
+		$payload = (object) [
+			'tanggal_berobat' => $request->tanggal_berobat,
+			'metode_ambil' => 'wa'
+		];
 
 		### Libur nasional start
 		$request->merge([
@@ -106,7 +110,6 @@ class ManagementPoli
 		]);
 		$exec = Helper::curl($request);
 		if ($exec && $exec->metadata->code===200) {
-			// $ignorePoli = array_merge($ignorePoli, $exec->response);
 			$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
 			return "'".implode("','", $ignorePoli)."'";
 		}
@@ -119,7 +122,6 @@ class ManagementPoli
 			$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
 			return "'".implode("','", $ignorePoli)."'";
 		}
-		// $ignorePoli = array_values(array_unique($ignorePoli));
 		### Libur poli end
 
 		### Kuota poli start

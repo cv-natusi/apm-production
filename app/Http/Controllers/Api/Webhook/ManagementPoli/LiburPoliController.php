@@ -56,7 +56,7 @@ class LiburPoliController extends Controller
 			\Log::error(json_encode([
 				'title' => 'LIBUR POLI GET DATA',
 				'message' => $e->getMessage()
-			]));
+			], JSON_PRETTY_PRINT));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -113,9 +113,6 @@ class LiburPoliController extends Controller
 					$groupedData[$poliBpjsId][] = $item->tanggal;
 				}
 
-				// \Log::debug(json_encode($groupedData,JSON_PRETTY_PRINT));
-				// \Log::debug(json_encode($groupedData['ant'],JSON_PRETTY_PRINT));
-
 				return response()->json([
 					'metadata' => [
 						'code' => $code,
@@ -130,7 +127,7 @@ class LiburPoliController extends Controller
 			\Log::error(json_encode([
 				'title' => 'LIBUR POLI MESSAGE',
 				'message' => $e->getMessage()
-			]));
+			], JSON_PRETTY_PRINT));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -153,7 +150,16 @@ class LiburPoliController extends Controller
 
 			if ($data->metadata->code==200) {
 				### Mapping array => cek duplikat => reindex array
-				$ignorePoli = array_merge($ignorePoli, array_values(array_unique(array_map(fn($item)=>$item->poli_bpjs_id, $data->response))));
+				$poliBpjs = array_values(array_unique(array_map(fn($item)=>$item->poli_bpjs_id, $data->response)));
+				$gigi = ['BDM', 'GIG', 'GND', 'KON'];
+				foreach($gigi as $key => $val){
+					if (in_array($val, $poliBpjs)) {
+						$poliBpjs = array_values(array_unique(array_merge($gigi, $poliBpjs)));
+						break;
+					}
+				}
+
+				$ignorePoli = array_merge($ignorePoli, array_values($poliBpjs));
 
 				return response()->json([
 					'metadata' => [
@@ -168,7 +174,7 @@ class LiburPoliController extends Controller
 			\Log::error(json_encode([
 				'title' => 'LIBUR POLI IGNORE',
 				'message' => $e->getMessage()
-			]));
+			], JSON_PRETTY_PRINT));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,

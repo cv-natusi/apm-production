@@ -53,6 +53,10 @@ class LiburNasionalController extends Controller
 				],
 			],204);
 		} catch (\Throwable $e) {
+			\Log::error(json_encode([
+				'title' => 'LIBUR NASIONAL GET DATA',
+				'message' => $e->getMessage()
+			], JSON_PRETTY_PRINT));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -99,6 +103,10 @@ class LiburNasionalController extends Controller
 			}
 			return $exec;
 		} catch (\Throwable $e) {
+			\Log::error(json_encode([
+				'title' => 'LIBUR NASIONAL MESSAGE',
+				'message' => $e->getMessage()
+			], JSON_PRETTY_PRINT));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -122,13 +130,15 @@ class LiburNasionalController extends Controller
 
 			if ($data->metadata->code==200) {
 				### Mapping array => cek duplikat => reindex array
-				$ignorePoli = array_merge($ignorePoli, array_values(array_unique(array_map(fn($item)=>$item->poli_bpjs_id, $data->response))));
+				// $ignorePoli = array_merge($ignorePoli, array_values(array_unique(array_map(fn($item)=>$item->poli_bpjs_id, $data->response))));
 
 				$data = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
+					->whereNotNull('kdpoli')
 					->whereNotIn('kdpoli',['HDL'])
 					->groupBy('mapping_poli_bridging.kdpoli_rs')
 					->orderBy('tm_poli.NamaPoli','ASC')
 					->get()->toArray();
+
 				### Mapping array => cek duplikat => reindex array
 				// $kodePoli = array_values(array_unique(array_map(fn($item)=>$item['kdpoli'], $data)));
 				$ignorePoli = array_merge($ignorePoli, array_values(array_unique(array_map(fn($item)=>$item['kdpoli'], $data))));
@@ -143,6 +153,10 @@ class LiburNasionalController extends Controller
 			}
 			return $exec;
 		} catch (\Throwable $e) {
+			\Log::error(json_encode([
+				'title' => 'LIBUR NASIONAL IGNORE',
+				'message' => $e->getMessage()
+			], JSON_PRETTY_PRINT));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,

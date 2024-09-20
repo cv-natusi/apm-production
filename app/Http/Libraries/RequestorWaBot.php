@@ -212,11 +212,5 @@ class RequestorWaBot{
 				'message' => $errMsg,
 			]
 		]));
-		// return response()->json([
-		// 	'metadata' => [
-		// 		'code' => 500,
-		// 		'message' => $errMsg,
-		// 	]
-		// ],500);
 	}
 }

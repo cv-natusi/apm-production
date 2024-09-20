@@ -346,20 +346,19 @@ class RegistrationController extends Controller{
 
 	public function indexAntrian(Request $request){
 		$dateNow = date('Y-m-d');
-		$ignorePoli = [];
-		$payload = (object)[];
-		$request->merge([
-			'url' => 'kuota-poli/ignore-poli',
-			'payload' => "metode_ambil=kiosk&tanggal_berobat=$dateNow",
-		]);
-		$exec = RequestorWaBot::managementPoli($request);
-		if ($exec && $exec->metadata->code==200) {
-			$ignorePoli = $exec->response;
-		}
+		// $request->merge([
+		// 	'url' => 'kuota-poli/ignore-poli',
+		// 	'payload' => "metode_ambil=kiosk&tanggal_berobat=$dateNow",
+		// ]);
+		// $exec = RequestorWaBot::managementPoli($request);
+		// if ($exec && $exec->metadata->code==200) {
+		// 	$ignorePoli = $exec->response;
+		// }
 
 	
 
 		$ignorePoli = ['ALG','UGD','ANU'];
+		$payload = (object)[];
 
 		### Libur nasional start
 		$payload->metode_ambil = 'kiosk';
@@ -368,39 +367,29 @@ class RegistrationController extends Controller{
 			'url' => 'libur-nasional/ignore-poli',
 			'payload' => $payload,
 		]);
-		// $exec = RequestorWaBot::managementPoli($request);
-		// if ($exec && $exec->metadata->code===200) {
-		// 	// $ignorePoli = array_merge($ignorePoli, $exec->response);
-		// 	$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
-		// 	// return "'".implode("','", $ignorePoli)."'";
-		// }
+		$exec = RequestorWaBot::managementPoli($request);
+		if ($exec && $exec->metadata->code===200) {
+			$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
+		}
 		### Libur nasional end
 
 		### Libur poli start
 		$request->merge(['url' => 'libur-poli/ignore-poli']);
 		$exec = RequestorWaBot::managementPoli($request);
-		// return $request->all();
-      return response()->json($exec);
 		if ($exec && $exec->metadata->code===200) {
 			$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
-			// return "'".implode("','", $ignorePoli)."'";
 		}
-		// $ignorePoli = array_values(array_unique($ignorePoli));
 		### Libur poli end
 
 		### Kuota poli start
 		$request->merge([
 			'url' => 'kuota-poli/ignore-poli',
-			'payload' => $payload,
 		]);
 		$exec = RequestorWaBot::managementPoli($request);
 		if ($exec && $exec->metadata->code===200) {
 			$ignorePoli = array_values(array_unique(array_merge($ignorePoli,$exec->response)));
 		}
 		### Kuota poli end
-		// return "'".implode("','", $ignorePoli)."'";
-
-		return $ignorePoli;
 
 		// $dayInNum = date('N');
 		$id_kiosk = $request->id_kiosk;
@@ -703,15 +692,39 @@ class RegistrationController extends Controller{
 			}
 
 			### Management poli start
-			$ignorePoli = [];
+			$ignorePoli = ['ALG','UGD','ANU'];
+			$payload = (object)[];
+
+			### Libur nasional start
+			$payload->metode_ambil = 'kiosk';
+			$payload->tanggal_berobat = $dateNow;
 			$request->merge([
-				'url' => 'kuota-poli/ignore-poli',
-				'payload' => "metode_ambil=kiosk&tanggal_berobat=$dateNow",
+				'url' => 'libur-nasional/ignore-poli',
+				'payload' => $payload,
 			]);
 			$exec = RequestorWaBot::managementPoli($request);
-			if ($exec && $exec->metadata->code==200) {
-				$ignorePoli = $exec->response;
+			if ($exec && $exec->metadata->code===200) {
+				$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
 			}
+			### Libur nasional end
+
+			### Libur poli start
+			$request->merge(['url' => 'libur-poli/ignore-poli']);
+			$exec = RequestorWaBot::managementPoli($request);
+			if ($exec && $exec->metadata->code===200) {
+				$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
+			}
+			### Libur poli end
+
+			### Kuota poli start
+			$request->merge([
+				'url' => 'kuota-poli/ignore-poli',
+			]);
+			$exec = RequestorWaBot::managementPoli($request);
+			if ($exec && $exec->metadata->code===200) {
+				$ignorePoli = array_values(array_unique(array_merge($ignorePoli,$exec->response)));
+			}
+			### Kuota poli end
 			if (in_array($request->kodepoli,$ignorePoli)) {
 				$kodePoliRs = Rsu_Bridgingpoli::where('kdpoli',$request->kodepoli)->first()->kdpoli_rs;
 				$namaPoli = rsu_poli::where('KodePoli',$kodePoliRs)->first(['NamaPoli'])->NamaPoli;
@@ -719,8 +732,8 @@ class RegistrationController extends Controller{
 				return [
 					'status'=>'error',
 					'code'=>400,
-					'head_message'=>'Whoops!',
-					'message'=>"Mohon maaf, Kuota $namaPoli sudah penuh",
+					'head_message'=>'Mohon maaf',
+					'message'=>"Kuota $namaPoli\nsudah penuh / sedang tidak melayani",
 					'data'=> '',
 					'poli'=> ''
 				];

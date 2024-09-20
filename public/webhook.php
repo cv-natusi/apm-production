@@ -17,9 +17,9 @@
 	require_once "webhook-include/management-poli/KuotaPoli.php";
 
 	use Webhook\ManagementPoli; # Class utama
-	use Webhook\ManagementPoli\LiburNasional;
-	use Webhook\ManagementPoli\LiburPoli;
-	use Webhook\ManagementPoli\KuotaPoli;
+	// use Webhook\ManagementPoli\LiburNasional;
+	// use Webhook\ManagementPoli\LiburPoli;
+	// use Webhook\ManagementPoli\KuotaPoli;
 	### Management poli end
 
 	// echo Env::status();
@@ -74,7 +74,7 @@
 	$phone = $data['phone'];
 
 	### Info maintenance server
-	// if($phone!='6281335537942'){ # Nomor untuk maintenance
+	// if($phone!=''){ # Nomor untuk maintenance
 	// 	if($phone!=""){
 	// 		$msg = "*Sehubungan dengan perbaikan server data untuk optimalisasi sistem informasi, maka akan terjadi down sistem pada:*\n";
 	// 		$msg .= "*Jum'at, 29 September 2023 pukul 17:00 s/d 19:00 WIB.*";
@@ -140,7 +140,7 @@
 	$rows = $result->fetch_assoc();
 	$rowsDapas=$idPsn=$idBots=$statusChat="";
 	$dataIn = [];
-	$listPhone = ['6281335537942','6281330003568'];
+	$listPhone = ['','6281330003568'];
 	if($result->num_rows>0){
 		$idBots = $rows['id'];
 		$statusChat = $rows['statusChat'];
@@ -349,7 +349,7 @@
 				}
 
 				if($cekRespon==200){ // jika cek noka berhasil, langsung cek rujukan
-					// if($phone=='6281335537942'){
+					// if($phone==''){
 						$resRujuk = rujukanMultiRecord($noBpjs,'bpjs');
 					// 	// die(json_encode($resRujuk,JSON_PRETTY_PRINT));
 					// }else{
@@ -440,7 +440,7 @@
 									}
 								}
 							}
-							// if ($request->phone=='6281335537942') {
+							// if ($request->phone=='') {
 							// 	$request->merge(['tanggal_berobat' => $tglBerobat]);
 							// 	$getIgnorePoli = ManagementPoli::ignorePoli($request);
 							// 	// echo json_encode($getIgnorePoli, JSON_PRETTY_PRINT);
@@ -718,7 +718,7 @@
 		$prefix = substr($nomor,12,1);
 		$statusRujuk = "";
 		if($prefix!='N'){ # Prefix "N"=>rujukan internal
-			// if($phone=='6281335537942'){
+			// if($phone==''){
 				$resRujukan1 = rujukanMultiRecord($nomor,'rujukan');
 			// 	// die(json_encode($resRujukan1,JSON_PRETTY_PRINT));
 			// }else{
@@ -767,7 +767,7 @@
 				// }
 			}else{
 				$nomor = $resGetNoBpjs['nomor_kartu'];
-				// if($phone=='6281335537942'){
+				// if($phone==''){
 					$resRujukan2 = rujukanMultiRecord($nomor,'bpjs');
 				// 	// die(json_encode($resRujuk,JSON_PRETTY_PRINT));
 				// }else{
@@ -868,10 +868,6 @@
 			$idBot = $rows['id'];
 			$strRandom = randomString(7);
 			if(array_key_exists($index, $arrPoli)){
-				// if ($request->phone=='6281335537942') {
-				// 	echo $arrPoli[$index]['NamaPoli'];
-				// 	die();
-				// }
 				$namaPoli = $arrPoli[$index]['NamaPoli'];
 				$kodePoli = $arrPoli[$index]['kdpoli'];
 				$ifKode = "";
@@ -1099,7 +1095,7 @@
 				// 				$queryDokter = "SELECT * FROM dokter_bridg WHERE polibpjs='$ifKode'";
 				// 				$execDokter = mysqli_query($dbrsud,$queryDokter) or die(mysqli_error($dbrsud));
 				// 			}
-				// 			// if($phone!='6281335537942'){
+				// 			// if($phone!=''){
 				// 				updateStatusChat('kodeBooking',$idBots,$wablas,$dataIn);
 
 				// 				$addPoliNew = "UPDATE bot_data_pasien SET kodePoli='$upKode' WHERE cust_id='$idPsn'";
