@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Helpers\apm as Help;
 
 use App\Http\Models\Holidays;
+use App\Http\Models\Rsu_Bridgingpoli;
 
 class LiburNasionalController extends Controller
 {
@@ -28,7 +29,6 @@ class LiburNasionalController extends Controller
 			]);
 			if ($request->metode_ambil === 'wa' && $request->jenis === 'message') {
 				Help::dateWhatsApp($request); # Add variable tanggal to request object
-				// return $request->all();
 				$query->whereDateWhatsapp($request);
 			} else {
 				$query->whereDateKiosk($request);
@@ -65,7 +65,6 @@ class LiburNasionalController extends Controller
 
 	public static function message(Request $request)
 	{
-		# return 'tesllll';
 		try {
 			$request->merge([
 				'metode_ambil' => 'wa',
@@ -94,7 +93,8 @@ class LiburNasionalController extends Controller
 						'code' => 200,
 						'message' => 'Ok',
 					],
-					'response' => $text
+					'response' => $text,
+					'tanggal' => $data->pluck('tanggal')->toArray(),
 				],200);
 			}
 			return $exec;
@@ -112,18 +112,33 @@ class LiburNasionalController extends Controller
 	public static function ignorePoli(Request $request)
 	{
 		try {
+			$ignorePoli = ['ALG','UGD','ANU','GIG']; # Default ignore
+			// if ($request->metode_ambil !== 'kiosk') {
+			// 	array_push($ignorePoli, 'GIG');
+			// }
+
 			$exec = self::getData($request);
 			$data = $exec->getData();
+
 			if ($data->metadata->code==200) {
 				### Mapping array => cek duplikat => reindex array
-				$kodePoli = array_values(array_unique(array_map(fn($item)=>$item->poli_bpjs_id, $data->response)));
+				$ignorePoli = array_merge($ignorePoli, array_values(array_unique(array_map(fn($item)=>$item->poli_bpjs_id, $data->response))));
+
+				$data = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
+					->whereNotIn('kdpoli',['HDL'])
+					->groupBy('mapping_poli_bridging.kdpoli_rs')
+					->orderBy('tm_poli.NamaPoli','ASC')
+					->get()->toArray();
+				### Mapping array => cek duplikat => reindex array
+				// $kodePoli = array_values(array_unique(array_map(fn($item)=>$item['kdpoli'], $data)));
+				$ignorePoli = array_merge($ignorePoli, array_values(array_unique(array_map(fn($item)=>$item['kdpoli'], $data))));
 
 				return response()->json([
 					'metadata' => [
 						'code' => 200,
 						'message' => 'Ok',
 					],
-					'response' => $kodePoli
+					'response' => $ignorePoli
 				],200);
 			}
 			return $exec;

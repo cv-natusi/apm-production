@@ -97,8 +97,51 @@ class KuotaPoliController extends Controller
 
 			if ($data->metadata->code == 200) {
 				$groupedData = [];
+				
+				$dataLiburNasional = json_decode($request->libur_nasional_tanggal);
+				$dataLiburPoli = json_decode($request->data_libur_poli);
+				$response = $data->response;
 
-				foreach ($data->response as $item) {
+				### Filter kuota poli yg data nya tidak tercantum dalam $dataLiburNasional & $dataLiburPoli
+				$response = collect($data->response)->filter(
+					function($item) use ($dataLiburNasional, $dataLiburPoli) {
+						$poliBpjsId = strtolower($item->poli_bpjs_id);
+						if (
+							(
+								$dataLiburNasional
+								&& in_array($item->tanggal_temp, $dataLiburNasional)
+							)
+							|| (
+								$dataLiburPoli
+								&& isset($dataLiburPoli->$poliBpjsId)
+								&& in_array($item->tanggal_temp, $dataLiburPoli->$poliBpjsId)
+							)
+						) {
+							return false;
+						}
+						return true;
+					}
+				)->values();
+
+				if (count($response) == 0) {
+					return response()->json([
+						'metadata' => [
+							'code' => 204,
+							'message' => 'No content',
+						],
+					], 204);
+				}
+
+				// \Log::info(json_encode("1========================================1", JSON_PRETTY_PRINT));
+				// \Log::info(json_encode($dataLiburNasional,JSON_PRETTY_PRINT));
+				// \Log::info("\n\n");
+				// \Log::info(json_encode("2========================================2", JSON_PRETTY_PRINT));
+				// \Log::info(json_encode($dataLiburPoli,JSON_PRETTY_PRINT));
+				// \Log::info("\n\n");
+				// \Log::info(json_encode("3========================================3", JSON_PRETTY_PRINT));
+				// \Log::info(json_encode($response,JSON_PRETTY_PRINT));
+
+				foreach ($response as $item) {
 					$poliId = $item->poli_id;
 
 					if (!isset($groupedData[$poliId])) {
@@ -110,7 +153,7 @@ class KuotaPoliController extends Controller
 					}
 
 					$groupedData[$poliId]['data'][] = $item;
-					$groupedData[$poliId]['keterangan'][] = str_replace('"', "'", $item->keterangan);
+					// $groupedData[$poliId]['keterangan'][] = str_replace('"', "'", $item->keterangan);
 				}
 
 				$data = array_values($groupedData);
@@ -119,18 +162,17 @@ class KuotaPoliController extends Controller
 				});
 
 				### Print text start
-				// $text = "*Untuk sementara waktu.*\n";
-				// $text .= "*==============================*\n";
 				$text = "";
-
 				foreach ($data as $key => $item) {
 					$num = 1;
 					$item = (object) $item;
 					$namaPoli = $item->nama_poli;
 					$text .= "Pendaftaran terbatas *$namaPoli* dengan kuota sebagai berikut:\n";
 
-					# Urutkan data berdasarkan key hari_temp (ASC)
-					array_multisort(array_column($item->data, 'hari_temp'), SORT_ASC, $item->data);
+					# Urutkan data berdasarkan key timestamps (ASC)
+					// array_multisort(array_column($item->data, 'hari_temp'), SORT_ASC, $item->data);
+					array_multisort(array_column($item->data, 'timestamps'), SORT_ASC, $item->data);
+					$item->keterangan = array_column($item->data, 'keterangan');
 
 					foreach ($item->data as $keys => $items) {
 						$increment = $keys + 1;
@@ -149,6 +191,7 @@ class KuotaPoliController extends Controller
 						$total = "$kuota/$items->kuota_wa";
 						$text .= "$num. $namaHari $tanggal, kuota terpakai $total";
 
+						### Print keterangan start
 						foreach ($item->keterangan as $vals) {
 							if (
 								($keterangan = $vals)
@@ -159,6 +202,7 @@ class KuotaPoliController extends Controller
 								$text .= "\n$keterangan";
 							}
 						}
+						### Print keterangan end
 
 						if ($increment < count($item->data) || $key + 1 == count($data)) {
 							$text .= "\n";
@@ -169,8 +213,6 @@ class KuotaPoliController extends Controller
 						$num++;
 					}
 				}
-
-				// $text .= "*==============================*\n\n";
 				### Print text end
 
 				return response()->json([
@@ -184,6 +226,10 @@ class KuotaPoliController extends Controller
 
 			return $exec;
 		} catch (\Throwable $e) {
+			\Log::error(json_encode([
+				'title' => 'KUOTA POLI CONTROLLER',
+				'message' => $e->getMessage()
+			]));
 			return response()->json([
 				'metadata' => [
 					'code' => 500,
@@ -192,7 +238,6 @@ class KuotaPoliController extends Controller
 			],500);
 		}
 	}
-
 
 
 	public static function ignorePoli(Request $request)

@@ -658,19 +658,19 @@ Route::group(['prefix'=>'api'], function(){
 		Route::get('testing', 'Api\Webhook\ManagementPoli\KuotaPoliController@testing');
 		Route::group(['prefix'=>'management-poli'], function () {
 			Route::group(['prefix'=>'libur-nasional'], function () {
-				Route::get('get-data','Api\Webhook\ManagementPoli\LiburNasionalController@getData');
-				Route::get('message','Api\Webhook\ManagementPoli\LiburNasionalController@message');
-				Route::get('ignore-poli','Api\Webhook\ManagementPoli\LiburNasionalController@ignorePoli');
+				Route::post('get-data','Api\Webhook\ManagementPoli\LiburNasionalController@getData');
+				Route::post('message','Api\Webhook\ManagementPoli\LiburNasionalController@message');
+				Route::post('ignore-poli','Api\Webhook\ManagementPoli\LiburNasionalController@ignorePoli');
 			});
 			Route::group(['prefix'=>'libur-poli'], function () {
-				Route::get('get-data','Api\Webhook\ManagementPoli\LiburPoliController@getData');
-				Route::get('message','Api\Webhook\ManagementPoli\LiburPoliController@message');
-				Route::get('ignore-poli','Api\Webhook\ManagementPoli\LiburPoliController@ignorePoli');
+				Route::post('get-data','Api\Webhook\ManagementPoli\LiburPoliController@getData');
+				Route::post('message','Api\Webhook\ManagementPoli\LiburPoliController@message');
+				Route::post('ignore-poli','Api\Webhook\ManagementPoli\LiburPoliController@ignorePoli');
 			});
 			Route::group(['prefix'=>'kuota-poli'], function () {
-				Route::get('get-data','Api\Webhook\ManagementPoli\KuotaPoliController@getData');
-				Route::get('message','Api\Webhook\ManagementPoli\KuotaPoliController@message');
-				Route::get('ignore-poli','Api\Webhook\ManagementPoli\KuotaPoliController@ignorePoli');
+				Route::post('get-data','Api\Webhook\ManagementPoli\KuotaPoliController@getData');
+				Route::post('message','Api\Webhook\ManagementPoli\KuotaPoliController@message');
+				Route::post('ignore-poli','Api\Webhook\ManagementPoli\KuotaPoliController@ignorePoli');
 			});
 		});
 	});

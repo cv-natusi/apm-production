@@ -10,14 +10,43 @@ class ManagementPoli
 
 	public function __construct($request)
 	{
-      Helper::dateDetail($request); # Add variable to request object
+		Helper::dateDetail($request); # Add variable to request object
 	}
 
 	public static function messagePoli($request)
 	{
 		$isActive = false;
-		$text = "*Untuk sementara waktu.*\n";
+		$payload = (object)[];
+		$text = "*UNTUK SEMENTARA WAKTU.*\n";
 		$text .= "*==============================*\n\n";
+
+		### Pesan libur nasional start
+		$request->merge([
+			'url' => 'libur-nasional/message',
+		]);
+		$exec = Helper::curl($request);
+		if ($exec && $exec->metadata->code===200) {
+			$text .= $exec->response;
+			$text .= "\n\nLayanan Poli Hemodialisa akan tetap beroperasi seperti biasa sesuai jadwal yang telah ditentukan.\n";
+			$text .= "\n*==============================*\n\n";
+			$isActive = true;
+
+			$payload->libur_nasional_tanggal = json_encode($exec->tanggal);
+			$request->merge([
+				'url' => 'libur-nasional/ignore-poli',
+				'payload' => $payload,
+			]);
+			$exec = Helper::curl($request);
+			if ($exec && $exec->metadata->code===200) {
+				$payload->libur_nasional_kode_poli = json_encode($exec->response);
+				$request->merge([
+					'payload' => $payload
+				]);
+			}
+		}
+		### Pesan libur nasional end
+
+		### Pesan Libur poli start
 		$request->merge([
 			'url' => 'libur-poli/message',
 		]);
@@ -26,8 +55,16 @@ class ManagementPoli
 			$text .= $exec->response;
 			$text .= "\n\n*==============================*\n\n";
 			$isActive = true;
+  
+			$payload->data_libur_poli = json_encode($exec->data_libur_poli);
+			$request->merge([
+				'url' => 'libur-poli/ignore-poli',
+				'payload' => $payload,
+			]);
 		}
+		### Pesan Libur poli end
 
+		### Pesan kuota poli start
 		$request->merge([
 			'url' => 'kuota-poli/message',
 		]);
@@ -37,17 +74,8 @@ class ManagementPoli
 			$text .= "\n*==============================*\n\n";
 			$isActive = true;
 		}
+		### Pesan kuota poli end
 
-		$request->merge([
-			'url' => 'libur-nasional/message',
-		]);
-		$exec = Helper::curl($request);
-		if ($exec && $exec->metadata->code===200) {
-			$text .= $exec->response;
-			$text .= "Layanan Poli Hemodialisa akan tetap beroperasi seperti biasa sesuai jadwal yang telah ditentukan.";
-			$text .= "\n*==============================*\n\n";
-			$isActive = true;
-		}
 		return $isActive ? $text : '';
 	}
 
@@ -71,21 +99,39 @@ class ManagementPoli
 
 		$ignorePoli = ['ALG','UGD','ANU','GIG'];
 
+		### Libur nasional start
+		$request->merge([
+			'url' => 'libur-nasional/ignore-poli',
+			'payload' => $payload,
+		]);
+		$exec = Helper::curl($request);
+		if ($exec && $exec->metadata->code===200) {
+			// $ignorePoli = array_merge($ignorePoli, $exec->response);
+			$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
+			return "'".implode("','", $ignorePoli)."'";
+		}
+		### Libur nasional end
+
+		### Libur poli start
+		$request->merge(['url' => 'libur-poli/ignore-poli']);
+		$exec = Helper::curl($request);
+		if ($exec && $exec->metadata->code===200) {
+			$ignorePoli = array_values(array_unique(array_merge($ignorePoli, $exec->response)));
+			return "'".implode("','", $ignorePoli)."'";
+		}
+		// $ignorePoli = array_values(array_unique($ignorePoli));
+		### Libur poli end
+
+		### Kuota poli start
 		$request->merge([
 			'url' => 'kuota-poli/ignore-poli',
 			'payload' => $payload,
 		]);
 		$exec = Helper::curl($request);
 		if ($exec && $exec->metadata->code===200) {
-			$ignorePoli = array_merge($ignorePoli,$exec->response);
+			$ignorePoli = array_values(array_unique(array_merge($ignorePoli,$exec->response)));
 		}
-
-		$request->merge(['url' => 'libur-poli/ignore-poli']);
-		$exec = Helper::curl($request);
-		if ($exec && $exec->metadata->code===200) {
-			$ignorePoli = array_merge($ignorePoli,$exec->response);
-		}
-		$ignorePoli = array_values(array_unique($ignorePoli));
+		### Kuota poli end
 		return "'".implode("','", $ignorePoli)."'";
 	}
 }

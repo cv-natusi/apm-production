@@ -22,6 +22,35 @@
 	use Webhook\ManagementPoli\KuotaPoli;
 	### Management poli end
 
+	// echo Env::status();
+
+	// $request = new Request([
+	// 	// 'rsu_conn' => $dbrsud,
+	// 	// 'apm_conn' => $wablas,
+	// 	// 'natusi_apm' => $wablas,
+	// 	'phone' => '$phone',
+	// 	'tanggal_berobat' => '2024-09-23'
+	// ]);
+	// // echo json_encode(KuotaPoli::testing($request),JSON_PRETTY_PRINT);
+	// // echo json_encode(KuotaPoli::ignore($request),JSON_PRETTY_PRINT);
+
+	// // echo LiburPoli::message($request);
+	// // echo json_encode(LiburPoli::message($request),JSON_PRETTY_PRINT);
+
+	// // echo json_encode(ManagementPoli::ignorePoli($request),JSON_PRETTY_PRINT);
+	// if ($_GET['ignore']=='true') {
+	// 	$data = ManagementPoli::ignorePoli($request);
+	// } else {
+	// 	$data = ManagementPoli::messagePoli($request);
+	// }
+	// if (gettype($data)=='string') {
+	// 	echo $data;
+	// } else {
+	// 	// echo "<pre>";
+	// 	print_r($data);
+	// 	// echo "</pre>";
+	// }
+	// die();
 
 	header("Content-Type: text/plain");
 	date_default_timezone_set("Asia/Jakarta");
@@ -43,31 +72,6 @@
 	}
 	$message = $data['message'];
 	$phone = $data['phone'];
-
-	if ($phone=='6281335537942') {
-		// echo Env::status();
-		$request = new Request([
-			// 'rsu_conn' => $dbrsud,
-			// 'apm_conn' => $wablas,
-			// 'natusi_apm' => $wablas,
-			'phone' => '$phone',
-			'tanggal_berobat' => '2024-09-20'
-		]);
-		// echo json_encode(KuotaPoli::testing($request),JSON_PRETTY_PRINT);
-		// echo json_encode(KuotaPoli::ignore($request),JSON_PRETTY_PRINT);
-
-		// echo LiburPoli::message($request);
-		// echo json_encode(LiburPoli::message($request),JSON_PRETTY_PRINT);
-
-		// echo json_encode(ManagementPoli::ignorePoli($request),JSON_PRETTY_PRINT);
-		echo ManagementPoli::messagePoli($request);
-
-		// echo KuotaPoli::testing($request);
-		// echo "<pre>";
-		// print_r(KuotaPoli::testing($request));
-		// echo "</pre>";
-		die();
-	}
 
 	### Info maintenance server
 	// if($phone!='6281335537942'){ # Nomor untuk maintenance
@@ -152,17 +156,6 @@
 
 	### Init class utama untuk passing variable kedalam construct
 	$initManagementPoli = new ManagementPoli($request);
-	if($request->phone=='6281335537942'){
-		// $liburNasional = LiburNasional::liburNasional($request);
-		// $liburPoli = LiburPoli::liburPoli($request);
-		// $kuotaPoli = KuotaPoli::message($request);
-		// $kuotaPoli = KuotaPoli::ignore($request);
-		// echo $liburNasional;
-		// echo is_array($liburNasional) ? json_encode($liburNasional,JSON_PRETTY_PRINT) : $liburNasional;
-		// echo "\n\n";
-		// echo is_array($liburPoli) ? json_encode($liburPoli,JSON_PRETTY_PRINT) : $liburPoli;
-		// die();
-	}
 
 	### Info pendaftaran
 	if($result->num_rows<1){
@@ -451,7 +444,8 @@
 
 							$request->merge(['tanggal_berobat' => $tglBerobat]);
 							// $getIgnorePoli = kuotaPoliIgnore($request);
-							$getIgnorePoli = KuotaPoli::ignore($request);
+							// $getIgnorePoli = KuotaPoli::ignore($request);
+							$getIgnorePoli = ManagementPoli::ignorePoli($request);
 
 							// $poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ('ALG','UGD','ANU') GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC";
 							$poli = "SELECT tp.NamaPoli,mp.kdpoli_rs,mp.kdpoli FROM mapping_poli_bridging AS mp JOIN tm_poli AS tp ON mp.kdpoli_rs=tp.KodePoli WHERE mp.kdpoli NOT IN ($getIgnorePoli) GROUP BY mp.kdpoli_rs ORDER BY tp.KodePoli ASC"; # GIG=="poli gigi dokter umum"
@@ -834,7 +828,8 @@
 
 		$request->merge(['tanggal_berobat' => $rows['tgl_periksa']]);
 		// $getIgnorePoli = kuotaPoliIgnore($request);
-		$getIgnorePoli = KuotaPoli::ignore($request);
+		// $getIgnorePoli = KuotaPoli::ignore($request);
+		$getIgnorePoli = ManagementPoli::ignorePoli($request);
 
 		$notIn = "mp.kdpoli NOT IN ($getIgnorePoli)";
 		$poli = "
@@ -1732,7 +1727,8 @@
 		// $msg .= "*Silahkan mendaftar kembali di tanggal 01 Juli 2023*\n";
 		// $msg .= "*Terima Kasih*\n\n";
 
-		$msg .= KuotaPoli::message($request);
+		// $msg .= KuotaPoli::message($request);
+		$msg .= ManagementPoli::messagePoli($request);
 		// 	$kuotaPoliMessage = kuotaPoliMessage($request);
 		// 	$msg .= $kuotaPoliMessage!==false ? $kuotaPoliMessage : '';
 

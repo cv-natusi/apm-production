@@ -87,21 +87,33 @@ class Holidays extends Model
 	public function getTanggalTempAttribute($value)
 	{
 		if ($this->attributes['is_hari'] === 1) {
-			return date(
-				'Y-m-d',
-				Help::numberToTimestamps(
-					new Request(['date_number' => $this->attributes['hari']])
-				)
+			$timestamps = Help::numberToTimestamps(
+				new Request(['date_number' => $this->attributes['hari']])
 			);
+			if ($timestamps < strtotime('now')) {
+				$timestamps = strtotime(date("Y-m-d",$timestamps)." +1 week");
+			}
+			return date('Y-m-d', $timestamps);
+			// return date(
+			// 	'Y-m-d',
+			// 	Help::numberToTimestamps(
+			// 		new Request(['date_number' => $this->attributes['hari']])
+			// 	)
+			// );
 		}
 		return $this->attributes['tanggal'];
 	}
 	public function getTimestampsAttribute($value)
 	{
 		if ($this->attributes['is_hari'] === 1) {
-			return Help::numberToTimestamps(
-				new Request(['date_number' => $this->attributes['hari']])
+			$hari = $this->attributes['hari'];
+			$timestamps = Help::numberToTimestamps(
+				new Request(['date_number' => $hari])
 			);
+			if ($timestamps < strtotime('now')) {
+				$timestamps = strtotime(date("Y-m-d",$timestamps)." +1 week");
+			}
+			return $timestamps;
 		}
 		return strtotime($this->attributes['tanggal']);
 	}

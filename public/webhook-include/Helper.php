@@ -61,9 +61,10 @@ class Helper{
 		header('Content-Type: application/json; charset=utf-8');
 
 		// if (Env::status() === 'production') {
-			$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
+			// $url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
+			$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url";
 		// } else {
-		// 	$url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url?$request->payload";
+			// $url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url";
 		// }
 
 		$ch = curl_init();
@@ -74,9 +75,13 @@ class Helper{
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_TIMEOUT        => 120,
 			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-			CURLOPT_CUSTOMREQUEST  => "GET",
+			CURLOPT_CUSTOMREQUEST  => "POST",
 			CURLOPT_USERAGENT      => 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)',
+			CURLOPT_POSTFIELDS     => $request->payload,
 		));
+		// curl_setopt($ch, CURLOPT_POST, 1);
+		// curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request->payload));
+		// curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request->payload));
 		// curl_setopt($ch, CURLOPT_HEADER, true);
 		// curl_setopt($ch, CURLOPT_URL,$url);
 

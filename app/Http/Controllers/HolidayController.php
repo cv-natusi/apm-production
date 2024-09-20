@@ -179,12 +179,17 @@ class HolidayController extends Controller
 
 	public function dataTable(Request $request)
 	{
-		$data = Holidays::where('kategori',$request->kategori)
-			->with('poli')
-			->orderBy('is_active','DESC')
-			->orderBy('tanggal','ASC')
-			->orderBy('hari','ASC')
-			->get();
+		$query = Holidays::where('kategori',$request->kategori)
+			->with('poli');
+			$query->orderBy('is_active','DESC');
+			if ($request->kategori == 'kuota-poli') {
+				$query->orderBy('tanggal','ASC');
+				$query->orderBy('hari','ASC');
+			}
+			if ($request->kategori == 'libur-nasional') {
+				$query->orderBy('tanggal','DESC');
+			}
+			$data = $query->get();
 		return Datatables::of($data)
 			->addIndexColumn()
 			->addColumn('nama_poli',fn($row)=>$row->poli?$row->poli->NamaPoli:'-')

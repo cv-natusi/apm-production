@@ -29,11 +29,6 @@ class LiburPoliController extends Controller
 				'is_active'=>1,
 			]);
 
-			// if ($request->metode_ambil==='wa') {
-			// 	$query->whereBetween('tanggal',[$request->date_start, $request->date_end]);
-			// } else {
-			// 	$query->whereDate('tanggal','=',date('Y-m-d'));
-			// }
 			if ($request->metode_ambil === 'wa' && $request->jenis === 'message') {
 				Help::dateWhatsApp($request); # Add variable tanggal to request object
 				$query->whereDateWhatsapp($request);
@@ -76,13 +71,19 @@ class LiburPoliController extends Controller
 			]);
 			$exec = self::getData($request);
 			$data = $exec->getData();
+
 			if ($data->metadata->code==200) {
 				### Print text start
 				$text = "List poli sedang libur sementara waktu:\n";
 				$num = 1;
+				$break = false;
 				$data = collect($data->response)->sortBy('tanggal')->values();
 				foreach($data as $key => $val){
 					if ($poli = rsu_poli::where('KodePoli',$val->poli_id)->first()) {
+						if (isset($request->libur_nasional_tanggal) && in_array($val->tanggal, json_decode($request->libur_nasional_tanggal))) {
+							$break = true;
+							continue;
+						}
 						$request->merge([
 							'nama_hari_en' => (int)date('N',strtotime($val->tanggal))
 						]);
@@ -94,14 +95,31 @@ class LiburPoliController extends Controller
 						$num++;
 					}
 				}
+				$code = $break && $num===1 ? 204 : 200;
 				### Print text end
+
+				$groupedData = [];
+				foreach($data as $key => $item){
+					$poliBpjsId = strtolower($item->poli_bpjs_id);
+
+					if (!isset($groupedData[$poliBpjsId])) {
+					// if (!isset($groupedData->$poliBpjsId)) {
+						$groupedData[$poliBpjsId] = [];
+					}
+					$groupedData[$poliBpjsId][] = $item->tanggal;
+				}
+
+				// \Log::debug(json_encode($groupedData,JSON_PRETTY_PRINT));
+				// \Log::debug(json_encode($groupedData['ant'],JSON_PRETTY_PRINT));
+
 				return response()->json([
 					'metadata' => [
-						'code' => 200,
+						'code' => $code,
 						'message' => 'Ok',
 					],
-					'response' => $text
-				],200);
+					'response' => $text,
+					'data_libur_poli' => (object)$groupedData,
+				],$code);
 			}
 			return $exec;
 		} catch (\Throwable $e) {
