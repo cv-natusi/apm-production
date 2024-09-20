@@ -112,7 +112,7 @@ class LiburNasionalController extends Controller
 	public static function ignorePoli(Request $request)
 	{
 		try {
-			$ignorePoli = ['ALG','UGD','ANU','GIG']; # Default ignore
+			$ignorePoli = ['ALG', 'UGD', 'ANU', 'BDM', 'GIG', 'GND', 'KON']; # Default ignore
 			// if ($request->metode_ambil !== 'kiosk') {
 			// 	array_push($ignorePoli, 'GIG');
 			// }
