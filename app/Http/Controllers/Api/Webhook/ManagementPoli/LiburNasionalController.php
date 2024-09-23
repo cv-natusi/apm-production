@@ -87,7 +87,13 @@ class LiburNasionalController extends Controller
 					]);
 					$tanggal = date('d-m-Y',strtotime($val->tanggal));
 					$namaHari = Help::namaHariID($request);
-					$text .= "$num. $namaHari, $tanggal";
+					$text .= "$num. $namaHari, $tanggal.";
+
+					if ($keterangan = $val->keterangan) {
+						$keterangan = Help::replaceHtmlTagsWithSeparator($keterangan);
+						$text .= " $keterangan";
+					}
+
 					$text .= $key+1 < count($data) ? "\n" : "";
 					$num++;
 				}

@@ -137,15 +137,6 @@ class KuotaPoliController extends Controller
 					], 204);
 				}
 
-				// \Log::info(json_encode("1========================================1", JSON_PRETTY_PRINT));
-				// \Log::info(json_encode($dataLiburNasional,JSON_PRETTY_PRINT));
-				// \Log::info("\n\n");
-				// \Log::info(json_encode("2========================================2", JSON_PRETTY_PRINT));
-				// \Log::info(json_encode($dataLiburPoli,JSON_PRETTY_PRINT));
-				// \Log::info("\n\n");
-				// \Log::info(json_encode("3========================================3", JSON_PRETTY_PRINT));
-				// \Log::info(json_encode($response,JSON_PRETTY_PRINT));
-
 				foreach ($response as $item) {
 					$poliId = $item->poli_id;
 
@@ -194,25 +185,31 @@ class KuotaPoliController extends Controller
 						$kuota = $countPendaftaran <= $items->kuota_wa ? $countPendaftaran : $items->kuota_wa;
 						$total = "$kuota/$items->kuota_wa";
 						$text .= "$num. $namaHari $tanggal, kuota terpakai $total";
-
-						### Print keterangan start
-						foreach ($item->keterangan as $vals) {
-							if (
-								($keterangan = $vals)
-								&& $item->poli_id == $items->poli_id
-								&& $increment == count($item->data)
-							) {
-								$keterangan = Help::replaceHtmlTagsWithSeparator($keterangan);
-								$text .= "\n$keterangan";
-							}
+						if ($keterangan = $items->keterangan) {
+							$keterangan = Help::replaceHtmlTagsWithSeparator($keterangan);
+							$text .= "\n$keterangan";
 						}
-						### Print keterangan end
 
-						if ($increment < count($item->data) || $key + 1 == count($data)) {
-							$text .= "\n";
+						// ### Print keterangan start
+						// foreach ($item->keterangan as $vals) {
+						// 	if (
+						// 		($keterangan = $vals)
+						// 		&& $item->poli_id == $items->poli_id
+						// 		&& $increment == count($item->data)
+						// 	) {
+						// 		$keterangan = Help::replaceHtmlTagsWithSeparator($keterangan);
+						// 		$text .= "\n$keterangan";
+						// 	}
+						// }
+						// ### Print keterangan end
+
+						if ($increment < count($item->data)) {
+							$text .= "\n\n";
 						} elseif ($key + 1 < count($data)) {
 							$text .= "\n\n";
-						}
+						} elseif ($key + 1 == count($data)){
+							$text .= "\n";
+                  }
 
 						$num++;
 					}

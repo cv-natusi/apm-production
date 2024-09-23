@@ -27,7 +27,8 @@ class ManagementPoli
 		$exec = Helper::curl($request);
 		if ($exec && $exec->metadata->code===200) {
 			$text .= $exec->response;
-			$text .= "\n\nLayanan Poli Hemodialisa akan tetap beroperasi seperti biasa sesuai jadwal yang telah ditentukan.\n";
+			$text .= "\nkami informasikan bahwa seluruh layanan poliklinik di RSUD dr. Wahidin Sudiro Husodo akan ditutup.";
+			$text .= "\nLayanan *Poli Hemodialisa akan tetap beroperasi* seperti biasa sesuai jadwal yang telah ditentukan.\n";
 			$text .= "\n*==============================*\n\n";
 			$isActive = true;
 

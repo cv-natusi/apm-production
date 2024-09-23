@@ -95,7 +95,11 @@ class LiburPoliController extends Controller
 						$namaPoli = strtoupper($poli->NamaPoli);
 						$namaHari = Help::namaHariID($request);
 						$text .= "$num. $namaHari $tanggal, $namaPoli";
-						$text .= $key+1 < count($data) ? "\n" : "";
+						if ($keterangan = $val->keterangan) {
+							$keterangan = Help::replaceHtmlTagsWithSeparator($keterangan);
+							$text .= "\n$keterangan";
+						}
+						$text .= $key+1 < count($data) ? "\n\n" : "";
 						$num++;
 					}
 				}

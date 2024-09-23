@@ -158,7 +158,7 @@ class apm{
 				$hari = 'Kamis';
 				break;
 			case ($str==='Fri' || $str===5):
-				$hari = "Jum'at";
+				$hari = "Jumat";
 				break;
 			case ($str==='Sat' || $str===6):
 				$hari = 'Sabtu';
@@ -197,12 +197,9 @@ class apm{
 		$date = (int)$request->date_number;
 		$numCurrent = (int)date('N',strtotime('now'));
 		$numPayload = $date;
-		// return "$numCurrent || $numPayload";
 		$count =  ($numCurrent <= $numPayload ? '+' : '').($numPayload - $numCurrent).' day';
-		// return "$numCurrent || $numPayload || $count";
 		$timestamps = strtotime("now $count");
 		return $timestamps;
-		// return date('d-m-Y',$timestamps);
 	}
 	public static function dateWhatsApp($request)
 	{
@@ -242,18 +239,20 @@ class apm{
 	{
 		# Daftar penggantian tag HTML
 		$replacements = [
-			"/<strong>/" => "*",    # Ganti tag <strong> dengan string kosong
-			"/<\/strong>/" => "*",  # Ganti tag </strong> dengan string kosong
-			"/<p[^>]*>/" => "",     # Ganti tag <p> dengan string kosong
-			"/<\/p>/" => "",        # Ganti tag </p> dengan string kosong
-			"/<s[^>]*>/" => "",     # Ganti tag <s> dengan string kosong
-			"/<\/s[^>]*>/" => "",   # Ganti tag </s> dengan string kosong
-			"/<u>/" => "",          # Ganti tag <u> dengan string kosong
-			"/<\/u>/" => "",        # Ganti tag </u> dengan string kosong
-			"/<em>/" => "_",        # Ganti tag <em> dengan karakter _
-			"/<\/em>/" => "_",      # Ganti tag </em> dengan karakter _
-			"/<br\s*\/?>/" => "\n", # Ganti tag <br> dengan newline
-			'/\r\n\r\n/' => "\n",   # Ganti "\r\n\r\n" dengan newline
+         "/&nbsp;/" => "",         # Ganti &nbsp; dengan string kosong
+			"/<strong>/" => "*",      # Ganti tag <strong> dengan string kosong
+			"/<\/strong>/" => "*",    # Ganti tag </strong> dengan string kosong
+			"/<p[^>]*>/" => "",       # Ganti tag <p> dengan string kosong
+			"/<\/p>/" => "",          # Ganti tag </p> dengan string kosong
+			"/<s[^>]*>/" => "",       # Ganti tag <s> dengan string kosong
+			"/<\/s[^>]*>/" => "",     # Ganti tag </s> dengan string kosong
+			"/<u>/" => "",            # Ganti tag <u> dengan string kosong
+			"/<\/u>/" => "",          # Ganti tag </u> dengan string kosong
+			"/<em>/" => "_",          # Ganti tag <em> dengan karakter _
+			"/<\/em>/" => "_",        # Ganti tag </em> dengan karakter _
+			"/<br\s*\/?>/" => "\n",   # Ganti tag <br> dengan newline
+			// '/\r\n\r\n\r\n/' => "",   # Ganti "\r\n\r\n\r\n" dengan newline
+			'/\r\n\r\n/' => "\n\n",     # Ganti "\r\n\r\n" dengan newline*2
 			'/\r\n/' => "",         # Ganti "\r\n" dengan string kosong
 		];
 	

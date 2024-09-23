@@ -265,9 +265,6 @@ class HolidayController extends Controller
 						$query->where('bdp.kodePoli', $row->poli_bpjs_id);
 					}
 					$count = $query->count();
-					if ($count>0) {						
-						\Log::debug(json_encode($row, JSON_PRETTY_PRINT));
-					}
 					return $count . '/' . $row->kuota_wa;
 				}
 				return $row->kuota_wa;
@@ -291,8 +288,8 @@ class HolidayController extends Controller
 				return $row->kuota_kiosk;
 			})
 			->addColumn('aksi',function($row){
-				$tanggal = $row->tanggal;
-				$jam = $row->jam;
+				// $tanggal = $row->tanggal;
+				// $jam = $row->jam;
 				$keterangan = $row->keterangan;
 				$poli = $row->poli;
 				// unset($row->tanggal);
@@ -309,9 +306,9 @@ class HolidayController extends Controller
 				// $btn .= "</div>";
 
 				// $row->tanggal = $tanggal;
-				$row->jam = $jam;
-				$row->keterangan = $keterangan;
-				$row->poli = $poli;
+				// $row->jam = $jam;
+				// $row->keterangan = $keterangan;
+				// $row->poli = $poli;
 				return $btn;
 			})
 			->make(true);
