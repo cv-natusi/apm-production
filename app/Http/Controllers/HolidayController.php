@@ -6,22 +6,22 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+
+### Library / package
+use File, Auth, Redirect, Validator, DB;
+use Datatables;
+
+### Models
+use App\Http\Models\Antrian;
 use App\Http\Models\Holidays;
 use App\Http\Models\Rsu_Bridgingpoli;
 use App\Helpers\apm as Help;
-use File, Auth, Redirect, Validator,DB;
-use Datatables;# Helpers
-use ValidateRequest;
-
-# Request custom
-use App\Http\Requests\Holiday\StoreHolidayRequest;
 
 class HolidayController extends Controller
 {
 	public function main(Request $request)
 	{
 		$this->data['classtutup'] = '';
-		// return view('Admin.Holidays.main')->with('data', $this->data);
 		return view('Admin.Holidays.index')->with('data', $this->data);
 	}
 
@@ -228,16 +228,16 @@ class HolidayController extends Controller
 	public function dataTable(Request $request)
 	{
 		$query = Holidays::where('kategori',$request->kategori)
-			->with('poli');
-			$query->orderBy('is_active','DESC');
-			if ($request->kategori == 'kuota-poli') {
-				$query->orderBy('tanggal','ASC');
-				$query->orderBy('hari','ASC');
-			}
-			if ($request->kategori == 'libur-nasional') {
-				$query->orderBy('tanggal','DESC');
-			}
-			$data = $query->get();
+			->with('poli')->orderBy('is_active','DESC');
+		if ($request->kategori == 'kuota-poli') {
+			$query->orderBy('tanggal','ASC');
+			$query->orderBy('hari','ASC');
+		}
+		if ($request->kategori == 'libur-nasional') {
+			$query->orderBy('tanggal','DESC');
+		}
+		$data = $query->get();
+
 		return Datatables::of($data)
 			->addIndexColumn()
 			->addColumn('nama_poli',fn($row)=>$row->poli?$row->poli->NamaPoli:'-')
@@ -250,12 +250,52 @@ class HolidayController extends Controller
 				$class = $row->is_active==1 ? 'success' : 'secondary';
 				return "<span class='badge badge-$class'>$status</span>";
 			})
+			->addColumn('display_kuota_wa', function($row){
+				if ($row->kategori == 'kuota-poli') {
+					$query = DB::table('bot_pasien as bp')
+						->select('bp.id')
+						->join('bot_data_pasien as bdp', 'bp.id', '=', 'bdp.idBots')
+						->whereDate('bp.tgl_periksa', '=', date('Y-m-d', $row->date_to_timestamps))
+						->where('bp.statusChat', 99);
+
+					$gigi = ['BDM', 'GIG', 'GND', 'KON'];
+					if (in_array($row->poli_bpjs_id, $gigi)) {
+						$query->whereIn('bdp.kodePoli', $gigi);
+					}else{
+						$query->where('bdp.kodePoli', $row->poli_bpjs_id);
+					}
+					$count = $query->count();
+					if ($count>0) {						
+						\Log::debug(json_encode($row, JSON_PRETTY_PRINT));
+					}
+					return $count . '/' . $row->kuota_wa;
+				}
+				return $row->kuota_wa;
+			})
+			->addColumn('display_kuota_kiosk', function($row){
+				if ($row->kategori == 'kuota-poli') {
+					$query = Antrian::select('id','kode_poli')
+						->where([
+							'tgl_periksa' => date('Y-m-d', $row->date_to_timestamps),
+							'metode_ambil' => 'KIOSK',
+						]);
+					$gigi = ['BDM', 'GIG', 'GND', 'KON'];
+					if (in_array($row->poli_bpjs_id, $gigi)) { # Poli gigi
+						$query->whereIn('kode_poli', $gigi);
+					} else {
+						$query->where('kode_poli', $row->poli_bpjs_id);
+					}
+					$count = $query->count();
+					return $count . '/' . $row->kuota_kiosk;
+				}
+				return $row->kuota_kiosk;
+			})
 			->addColumn('aksi',function($row){
 				$tanggal = $row->tanggal;
 				$jam = $row->jam;
 				$keterangan = $row->keterangan;
 				$poli = $row->poli;
-				unset($row->tanggal);
+				// unset($row->tanggal);
 				unset($row->keterangan);
 				unset($row->poli);
 				$data = json_encode($row);
@@ -268,7 +308,7 @@ class HolidayController extends Controller
 				$btn .= "<button class='btn btn-sm btn-danger' title='Hapus' onclick='destroy(`$data`)'><i class='fa fa-trash' aria-hidden='true'></i></button> &nbsp;";
 				// $btn .= "</div>";
 
-				$row->tanggal = $tanggal;
+				// $row->tanggal = $tanggal;
 				$row->jam = $jam;
 				$row->keterangan = $keterangan;
 				$row->poli = $poli;
@@ -322,240 +362,4 @@ class HolidayController extends Controller
 			],
 		],204);
 	}
-
-	// public function testing(Request $request)
-	// {
-	// 	\Log::info('testing');
-	// }
-
-
-	// public function datagrid(Request $request)
-	// {
-	// 	$data = Holidays::getJson($request);
-	// 	return response()->json($data);
-	// }
-	
-	// public function datagridKuotaPoli(Request $request)
-	// {
-	// 	try {
-	// 		$data = Holidays::getJsonKuotaPoli($request);
-	// 		return response()->json($data);
-	// 	} catch (\Throwable $e) {
-	// 		$log = ['ERROR DATAGRID ('.$e->getFile().')',false,$e->getMessage(),$e->getLine()];
-	// 		Help::logging($log);
-	// 		return false;
-	// 	}
-	// }
-	
-	// public function datagridLiburPoli(Request $request)
-	// {
-	// 	$data = Holidays::getJsonLiburPoli($request);
-	// 	return response()->json($data);
-	// }
-	
-	// public function formAdd(Request $request)
-	// {
-	// 	$content = view('Admin.Holidays.formAdd')->render();
-	// 	return ['status' => 'success', 'content' => $content];
-	// }
-	
-	// public function formAddKuotaPoli(Request $request)
-	// {
-	// 	$data['poli'] = DB::connection('dbrsud')->table('tm_poli as p')->join('mapping_poli_bridging as bp','bp.kdpoli_rs','=','p.KodePoli')->get();
-	// 	$content = view('Admin.Holidays.formAddKuotaPoli', $data)->render();
-	// 	return ['status' => 'success', 'content' => $content];
-	// }
-	
-	// public function formAddLiburPoli(Request $request)
-	// {
-	// 	$data['poli'] = DB::connection('dbrsud')->table('tm_poli as p')->join('mapping_poli_bridging as bp', 'bp.kdpoli_rs', '=', 'p.KodePoli')->get();
-	// 	$content = view('Admin.Holidays.formAddLiburPoli', $data)->render();
-	// 	return ['status' => 'success', 'content' => $content];
-	// }
-	
-	// public function Add(Request $request)
-	// {
-	// 	// $cekHoliday = Holidays::where('tanggal',date('Y-m-d',strtotime($request->tanggal_libur)))->first();
-	// 	// if (!empty($cekHoliday)) {
-	// 	$holiday = new Holidays;
-	// 	$holiday->tanggal = date('Y-m-d',strtotime($request->tanggal_libur));
-	// 	$holiday->keterangan = strip_tags($request->keterangan);
-	// 	$holiday->kategori = "Libur Nasional";
-	// 	$holiday->save();
-		
-	// 	if ($holiday) {
-	// 		return Redirect::route('holiday')->with('title', 'Berhasil !!')->with('message', 'Tanggal Libur Berhasil Ditambahkan')->with('type', 'success');
-	// 	}else{
-	// 		return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Gagal Ditambahkan')->with('type', 'error');
-	// 	}
-	// 	// }else{
-	// 	//     return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Sudah Di Pilih Sebagai Tanggal Libur')->with('type', 'error');
-	// 	// }
-	// }
-	
-	// public function AddKuotaPoli(Request $request)
-	// {
-	// 	// $cekHoliday = Holidays::where('tanggal',date('Y-m-d',strtotime($request->tanggal_libur)))->first();
-	// 	// if (!empty($cekHoliday)) {
-	// 	$holiday = new Holidays;
-	// 	$holiday->tanggal = date('Y-m-d',strtotime($request->tanggal_libur));
-	// 	$holiday->poli_id = $request->pilih_poli;
-	// 	$holiday->kuota_wa = $request->kuota_wa;
-	// 	$holiday->kuota_kiosk = $request->kuota_kiosk;
-	// 	$holiday->keterangan = strip_tags($request->keterangan);
-	// 	$holiday->kategori = "Kuota Poli";
-	// 	$holiday->save();
-		
-	// 	if ($holiday) {
-	// 		return Redirect::route('holiday')->with('title', 'Berhasil !!')->with('message', 'Tanggal Libur Berhasil Ditambahkan')->with('type', 'success')->with('kuota_poli', true);
-	// 	}else{
-	// 		return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Gagal Ditambahkan')->with('type', 'error');
-	// 	}
-	// 	// }else{
-	// 	//     return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Sudah Di Pilih Sebagai Tanggal Libur')->with('type', 'error');
-	// 	// }
-	// }
-	
-	// public function AddLiburPoli(Request $request)
-	// {
-	// 	// $cekHoliday = Holidays::where('tanggal',date('Y-m-d',strtotime($request->tanggal_libur)))->first();
-	// 	// if (!empty($cekHoliday)) {
-	// 	$holiday = new Holidays;
-	// 	$holiday->tanggal = date('Y-m-d',strtotime($request->tanggal_libur));
-	// 	$holiday->poli_id = $request->pilih_poli;
-	// 	$holiday->keterangan = strip_tags($request->keterangan);
-	// 	$holiday->kategori = "Libur Poli";
-	// 	$holiday->save();
-		
-	// 	if ($holiday) {
-	// 		return Redirect::route('holiday')->with('title', 'Berhasil !!')->with('message', 'Tanggal Libur Berhasil Ditambahkan')->with('type', 'success')->with('libur_poli', true);
-	// 	}else{
-	// 		return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Gagal Ditambahkan')->with('type', 'error');
-	// 	}
-	// 	// }else{
-	// 	//     return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Sudah Di Pilih Sebagai Tanggal Libur')->with('type', 'error');
-	// 	// }
-	// }
-	
-	// public function formUpdate(Request $request)
-	// {
-	// 	$data['holiday'] = Holidays::find($request->id);
-	// 	$content = view('Admin.Holidays.formUpdate',$data)->render();
-	// 	return ['status' => 'success', 'content' => $content];
-	// }
-	
-	// public function formUpdateKuotaPoli(Request $request)
-	// {
-	// 	try {
-	// 		$data['poli'] = DB::connection('dbrsud')->table('tm_poli as p')->join('mapping_poli_bridging as bp','bp.kdpoli_rs','=','p.KodePoli')->get();
-	// 		$data['holiday'] = Holidays::find($request->id);
-	// 		$content = view('Admin.Holidays.formUpdateKuotaPoli',$data)->render();
-	// 		return ['status' => 'success', 'content' => $content];
-	// 	} catch (\Throwable $e) {
-	// 		$log = ['ERROR FORM KUOTA POLI ('.$e->getFile().')',false,$e->getMessage(),$e->getLine()];
-	// 		Help::logging($log);
-	// 		return false;
-	// 	}
-		
-	// }
-	
-	// public function formUpdateLiburPoli(Request $request)
-	// {
-	// 	$data['poli'] = DB::connection('dbrsud')->table('tm_poli as p')->join('mapping_poli_bridging as bp','bp.kdpoli_rs','=','p.KodePoli')->get();
-	// 	$data['holiday'] = Holidays::find($request->id);
-	// 	$content = view('Admin.Holidays.formUpdateLiburPoli',$data)->render();
-	// 	return ['status' => 'success', 'content' => $content];
-	// }
-	
-	// public function Updates(Request $request)
-	// {
-	// 	$cekHoliday = Holidays::where('id_holiday','=',$request->id_holiday)->first();
-	// 	if ($cekHoliday) {
-	// 		$holiday = Holidays::find($request->id_holiday);
-	// 		$holiday->tanggal = date('Y-m-d',strtotime($request->tanggal_libur));
-	// 		$holiday->keterangan = strip_tags($request->keterangan);
-	// 		$holiday->save();
-			
-	// 		if ($holiday) {
-	// 			return Redirect::route('holiday')->with('title', 'Berhasil !!')->with('message', 'Tanggal Libur Berhasil Diperbaharui')->with('type', 'success');
-	// 		}
-	// 		return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Gagal Diperbaharui')->with('type', 'error');
-	// 	}
-	// 	return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Sudah Di Pilih Sebagai Tanggal Libur')->with('type', 'error');
-	// }
-	
-	// public function UpdatesKuotaPoli(Request $request)
-	// {
-	// 	$cekHoliday = Holidays::where('id_holiday','=',$request->id_holiday)->first();
-	// 	if (!empty($cekHoliday)) {
-	// 		$holiday = Holidays::find($request->id_holiday);
-	// 		$holiday->tanggal = date('Y-m-d',strtotime($request->tanggal_libur));
-	// 		$holiday->poli_id = $request->pilih_poli;
-	// 		$holiday->kuota_wa = $request->kuota_wa;
-	// 		$holiday->kuota_kiosk = $request->kuota_kiosk;
-	// 		$holiday->keterangan = strip_tags($request->keterangan);
-	// 		$holiday->save();
-			
-	// 		if ($holiday) {
-	// 			return Redirect::route('holiday')->with('title', 'Berhasil !!')->with('message', 'Tanggal Libur Berhasil Diperbaharui')->with('type', 'success')->with('kuota_poli', true);
-	// 		}else{
-	// 			return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Gagal Diperbaharui')->with('type', 'error');
-	// 		}
-	// 	}else{
-	// 		return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Sudah Di Pilih Sebagai Tanggal Libur')->with('type', 'error');
-	// 	}
-	// }
-	
-	// public function UpdatesLiburPoli(Request $request)
-	// {
-	// 	$cekHoliday = Holidays::where('id_holiday', '=', $request->id_holiday)->first();
-	// 	if (!empty($cekHoliday)) {
-	// 		$holiday = Holidays::find($request->id_holiday);
-	// 		$holiday->tanggal = date('Y-m-d',strtotime($request->tanggal_libur));
-	// 		$holiday->poli_id = $request->pilih_poli;
-	// 		$holiday->keterangan = strip_tags($request->keterangan);
-	// 		$holiday->save();
-			
-	// 		if ($holiday) {
-	// 			return Redirect::route('holiday')->with('title', 'Berhasil !!')->with('message', 'Tanggal Libur Berhasil Diperbaharui')->with('type', 'success')->with('libur_poli', true);
-	// 		}else{
-	// 			return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Gagal Diperbaharui')->with('type', 'error');
-	// 		}
-	// 	}else{
-	// 		return redirect()->route('holiday')->with('title', 'Maaf !!')->with('message', 'Tanggal Libur Sudah Di Pilih Sebagai Tanggal Libur')->with('type', 'error');
-	// 	}
-	// }
-	
-	// public function delete(Request $request)
-	// {
-	// 	$holiday = Holidays::find($request->id);
-	// 	if(!empty($holiday)){
-	// 		$holiday->delete();
-	// 		return ['status' => 'success', 'message' => 'Data berhasil dihapus'];
-	// 	}else{
-	// 		return ['status'=>'error', 'message'=>'Invalid user.'];
-	// 	}
-	// }
-	
-	// public function deleteKuotaPoli(Request $request)
-	// {
-	// 	$holiday = Holidays::find($request->id);
-	// 	if(!empty($holiday)){
-	// 		$holiday->delete();
-	// 		return ['status' => 'success', 'message' => 'Data berhasil dihapus'];
-	// 	}else{
-	// 		return ['status'=>'error', 'message'=>'Invalid user.'];
-	// 	}
-	// }
-	
-	// public function deleteLiburPoli(Request $request)
-	// {
-	// 	$holiday = Holidays::find($request->id);
-	// 	if(!empty($holiday)){
-	// 		$holiday->delete();
-	// 		return ['status' => 'success', 'message' => 'Data berhasil dihapus'];
-	// 	}else{
-	// 		return ['status'=>'error', 'message'=>'Invalid user.'];
-	// 	}
-	// }
 }

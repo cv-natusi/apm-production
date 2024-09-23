@@ -61,6 +61,44 @@
 			/* background-color: #6c757d; */
 			background-color: #a4a4a4;
 		}
+
+		/* ALL LOADERS */
+		.loader{
+			width: 100px;
+			height: 100px;
+			border-radius: 100%;
+			position: relative;
+			margin: 0 auto;
+		}
+
+		/* LOADER 4 */
+		#loader-4 span{
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			border-radius: 100%;
+			background-color: #3498db;
+			margin: 35px 5px;
+			opacity: 0;
+		}
+		#loader-4 span:nth-child(1){
+			animation: opacitychange 1s ease-in-out infinite;
+		}
+		#loader-4 span:nth-child(2){
+			animation: opacitychange 1s ease-in-out 0.33s infinite;
+		}
+		#loader-4 span:nth-child(3){
+			animation: opacitychange 1s ease-in-out 0.66s infinite;
+		}
+		@keyframes opacitychange{
+			0%, 100%{
+				opacity: 0;
+			}
+
+			60%{
+				opacity: 1;
+			}
+		}
 	</style>
 @stop
 
@@ -208,6 +246,7 @@
 	<script type="text/javascript">
 		// Add method to jQuery
 		$.fn.initDatatable = function(){
+			var loading = '<div class="loader" id="loader-4"><span></span><span></span><span></span></div>'
 			const tableID = this[0].id
 			const columns = [
 				{data: 'DT_Row_Index', name: 'DT_Row_Index'},
@@ -230,12 +269,12 @@
 						name: 'nama_poli',
 					},
 					{
-						data: 'kuota_wa',
-						name: 'kuota_wa',
+						data: 'display_kuota_wa',
+						name: 'display_kuota_wa',
 					},
 					{
-						data: 'kuota_kiosk',
-						name: 'kuota_kiosk',
+						data: 'display_kuota_kiosk',
+						name: 'display_kuota_kiosk',
 					},
 				)
 			}else if(tableID==='table-libur-poli'){
@@ -254,9 +293,9 @@
 				bFilter: true,
 				processing: true,
 				serverSide: true,
-				// language: {
-				// 	processing: loading,
-				// },
+				language: {
+					processing: loading,
+				},
 				search: {
 					caseInsensitive: true
 				},

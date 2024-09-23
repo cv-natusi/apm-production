@@ -48,6 +48,7 @@ class KuotaPoliController extends Controller
 				'is_hari',
 				DB::raw('null as tanggal_temp'),
 				DB::raw('null as timestamps'),
+				DB::raw('null as date_to_timestamps'),
 				'tanggal',
 				'hari',
 				DB::raw('null as nama_hari'),
@@ -173,19 +174,18 @@ class KuotaPoliController extends Controller
 					$namaPoli = $item->nama_poli;
 					$text .= "Pendaftaran terbatas *$namaPoli* dengan kuota sebagai berikut:\n";
 
-					# Urutkan data berdasarkan key timestamps (ASC)
-					// array_multisort(array_column($item->data, 'hari_temp'), SORT_ASC, $item->data);
-					array_multisort(array_column($item->data, 'timestamps'), SORT_ASC, $item->data);
+					# Urutkan data berdasarkan key date_to_timestamps (ASC)
+					array_multisort(array_column($item->data, 'date_to_timestamps'), SORT_ASC, $item->data);
 					$item->keterangan = array_column($item->data, 'keterangan');
 
 					foreach ($item->data as $keys => $items) {
 						$increment = $keys + 1;
-						$tanggal = date('d-m-Y', $items->timestamps);
+						$tanggal = date('d-m-Y', $items->date_to_timestamps);
 						$namaHari = $items->nama_hari;
 
 						$countPendaftaran = DB::table('bot_pasien as bp')
 							->join('bot_data_pasien as bdp', 'bp.id', '=', 'bdp.idBots')
-							->whereDate('bp.tgl_periksa', '=', date('Y-m-d', $items->timestamps))
+							->whereDate('bp.tgl_periksa', '=', date('Y-m-d', $items->date_to_timestamps))
 							->where([
 								'bp.statusChat' => 99,
 								'bdp.kodePoli' => $items->poli_bpjs_id
@@ -264,7 +264,7 @@ class KuotaPoliController extends Controller
 					$kodePoliBpjs = $items->poli_bpjs_id;
 					if ($request->metode_ambil === 'wa') {
 						$request->merge([
-							'timestamps' => $items->timestamps,
+							'timestamps' => $items->date_to_timestamps,
 							'poli_bpjs_id' => $kodePoliBpjs,
 						]);
 						$antrian = Help::kuotaWa($request);

@@ -253,9 +253,6 @@ class RegistrationController extends Controller{
 			$getdokter = $getdok->refJadDok($request);
 		}
 
-		// Log::debug(json_encode($arrdokgigi));
-		// Log::debug($arrdokgigi);
-
 		if ($getdokter['metaData']->code == 200) {
 			$valdokter = $getdokter['response'];
 			if($ks=="040" || $ks=="017"){
@@ -346,17 +343,6 @@ class RegistrationController extends Controller{
 
 	public function indexAntrian(Request $request){
 		$dateNow = date('Y-m-d');
-		// $request->merge([
-		// 	'url' => 'kuota-poli/ignore-poli',
-		// 	'payload' => "metode_ambil=kiosk&tanggal_berobat=$dateNow",
-		// ]);
-		// $exec = RequestorWaBot::managementPoli($request);
-		// if ($exec && $exec->metadata->code==200) {
-		// 	$ignorePoli = $exec->response;
-		// }
-
-	
-
 		$ignorePoli = ['ALG','UGD','ANU'];
 		$payload = (object)[];
 
@@ -396,56 +382,6 @@ class RegistrationController extends Controller{
 		if(!is_numeric($id_kiosk) || $id_kiosk > 8){
 			return abort(404);
 		}
-		// $ignore = ['ALG','UGD','ANU'];
-
-		// $dataKuotaPoli = Holidays::
-		// select('poli_bpjs_id','kuota_kiosk')->
-		// where('kategori','kuota-poli')
-		// ->where('is_active',1)
-		// ->where(fn($q)=>$q
-		// 	->where(fn($q)=>$q->where('hari',$dayInNum)->whereNull('tanggal'))
-		// 	->orWhere(fn($q)=>$q->where('tanggal',$dateNow)->whereNull('hari'))
-		// )->get();
-		// if(count($dataKuotaPoli)){
-		// 	$kodeBpjs = array_map(function($item){
-		// 		return $item['poli_bpjs_id'];
-		// 	},$dataKuotaPoli->toArray());
-		// 	$kuotaPoli = array_map(function($item){
-		// 		return $item['kuota_kiosk'];
-		// 	},$dataKuotaPoli->toArray());
-
-		// 	$groupedData = [];
-		// 	$antrian = Antrian::select('id','kode_poli')->where('tgl_periksa',$dateNow)->where('metode_ambil','KIOSK')->whereIn('kode_poli',$kodeBpjs)->get();
-		// 	foreach ($antrian as $item) {
-		// 		$kodePoli = $item['kode_poli'];
-		// 		if (!isset($groupedData[$kodePoli])) {
-		// 			$groupedData[$kodePoli] = [
-		// 				'total' => 0
-		// 			];
-		// 		}
-		// 		// $groupedData[$kodePoli]['data'][] = $item;
-		// 		$groupedData[$kodePoli]['total']++;
-		// 	}
-		// 	foreach($kodeBpjs as $key => $val){
-		// 		if(isset($groupedData[$val]) && $groupedData[$val]['total'] >= $kuotaPoli[$key]){
-		// 			array_push($ignore,$val);
-		// 		}
-		// 	}
-		// }
-
-		// $request->merge(['nama_hari_en'=>date('D',strtotime('today'))]);
-		// $namaHariID = Help::namaHariID($request);
-		// if(
-		// 	in_array($namaHariID,['Selasa','Kamis'])
-		// 	&& Antrian::where([
-		// 		'tgl_periksa'=>$dateNow,
-		// 		'kode_poli'=>'017',
-		// 		'metode_ambil'=>'KIOSK',
-		// 	])->count() >= 10
-		// 	&& $dateNow != '2024-09-05'
-		// ){
-		// 	array_push($ignore,'017');
-		// }
 
 		$poli = Rsu_Bridgingpoli::join('tm_poli', 'mapping_poli_bridging.kdpoli_rs', '=', 'tm_poli.KodePoli')
 			->whereNotIn('kdpoli',$ignorePoli)
@@ -609,59 +545,6 @@ class RegistrationController extends Controller{
 	public function ambilAntrianSave(Request $request){
 		date_default_timezone_set("Asia/Jakarta");
 		$dateNow = date('Y-m-d');
-		// $dayInNum = date('N');
-
-		// $dataKuotaPoli = Holidays::
-		// 	select('poli_id','poli_bpjs_id','kuota_kiosk')->
-		// 	where('kategori','kuota-poli')
-		// 	->where('is_active',1)
-		// 	->where('poli_bpjs_id',$request->kodepoli)
-		// 	->where(fn($q)=>$q
-		// 		->where(fn($q)=>$q->where('hari',$dayInNum)->whereNull('tanggal'))
-		// 		->orWhere(fn($q)=>$q->where('tanggal',$dateNow)->whereNull('hari'))
-		// 	)->first();
-		// if(
-		// 	$dataKuotaPoli
-		// 	&& $dataKuotaPoli->kuota_kiosk <= ($cn = Antrian::where([
-		// 		'tgl_periksa'=>$dateNow,
-		// 		'kode_poli'=>$request->kodepoli,
-		// 		'metode_ambil'=>'KIOSK',
-		// 	])->count())
-		// ){
-		// 	$namaPoli = rsu_poli::where('KodePoli',$dataKuotaPoli->poli_id)->first(['NamaPoli'])->NamaPoli;
-		// 	$cn = $cn > $dataKuotaPoli->kuota_kiosk ? $dataKuotaPoli->kuota_kiosk : $cn;
-		// 	return [
-		// 		'status'=>'error',
-		// 		'code'=>400,
-		// 		'head_message'=>'Whoops!',
-		// 		'message'=>"Kuota $namaPoli sudah penuh($cn/$dataKuotaPoli->kuota_kiosk)",
-		// 		'data'=> '',
-		// 		'poli'=> ''
-		// 	];
-		// }
-
-
-		// $request->merge(['nama_hari_en'=>date('D',strtotime('today'))]);
-		// $namaHariID = Help::namaHariID($request);
-		// if(
-		// 	in_array($namaHariID,['Selasa','Kamis'])
-		// 	&& $request->kodepoli=='017'
-		// 	&& ($cn = Antrian::where([
-		// 		'tgl_periksa'=>$dateNow,
-		// 		'kode_poli'=>'017',
-		// 		'metode_ambil'=>'KIOSK',
-		// 	])->count()) >= 10
-		// 	&& $dateNow != '2024-09-05'
-		// ){
-		// 	return [
-		// 		'status'=>'error',
-		// 		'code'=>400,
-		// 		'head_message'=>'Whoops!',
-		// 		'message'=>"Kuota POLI BEDAH ONKOLOGI sudah penuh($cn/10)",
-		// 		'data'=> '',
-		// 		'poli'=> ''
-		// 	];
-		// }
 
 		$no_rm   = $request->no_rm;
 		$no_bpjs = $request->no_bpjs;

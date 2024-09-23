@@ -29,10 +29,11 @@ class Holidays extends Model
 		'kuota_wa',
 		'kategori',
 	];
-	protected $append = [
+	protected $appends = [
 		'hari_temp',
 		'tanggal_temp',
 		'timestamps',
+		'date_to_timestamps',
 		'nama_hari',
 	];
 
@@ -63,22 +64,10 @@ class Holidays extends Model
 		$date = $request->tanggal_berobat ? date('Y-m-d',strtotime($request->tanggal_berobat)) : date('Y-m-d');
 		$request->merge(['date_num' => (int) date('N',strtotime($date))]);
 		$query->where(
-			fn($q)=>$q
-			// ->where(fn($q)=>$q->where('hari',$dayInNum)->whereNull('tanggal'))
-			// ->orWhere(fn($q)=>$q->where('tanggal',$dateNow)->whereNull('hari'))
-			->where(
-				fn($q)=>$q->where('hari',$request->date_num)->whereNull('tanggal')
-			)->orWhere(
-				fn($q)=>$q->where('tanggal',$date)->whereNull('hari')
-			)
+			fn($q) => $q->where(fn($q) => $q->where('hari',$request->date_num)->whereNull('tanggal'))
+				->orWhere(fn($q) => $q->where('tanggal',$date)->whereNull('hari'))
 		);
-		// $query->where(
-		// 	fn($q)=>$q->where(
-		// 		fn($q) => $q->whereBetween('tanggal',[$request->dt_plus_1, $request->dt_plus_3])->whereNull('hari')
-		// 	)->orWhere(
-		// 		fn($q) => $q->whereNull('tanggal')->whereIn('hari',$request->array_hari)
-		// 	)
-		// );
+
 		return $query;
 	}
 	### Scope end
@@ -104,6 +93,20 @@ class Holidays extends Model
 		return $this->attributes['tanggal'];
 	}
 	public function getTimestampsAttribute($value)
+	{
+		if ($this->attributes['is_hari'] === 1) {
+			$hari = $this->attributes['hari'];
+			$timestamps = Help::numberToTimestamps(
+				new Request(['date_number' => $hari])
+			);
+			if ($timestamps < strtotime('now')) {
+				$timestamps = strtotime(date("Y-m-d",$timestamps)." +1 week");
+			}
+			return $timestamps;
+		}
+		return strtotime($this->attributes['tanggal']);
+	}
+	public function getDateToTimestampsAttribute($value)
 	{
 		if ($this->attributes['is_hari'] === 1) {
 			$hari = $this->attributes['hari'];
