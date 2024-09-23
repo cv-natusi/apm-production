@@ -18,6 +18,12 @@
 		0% { transform: rotate(0deg); }
 		100% { transform: rotate(360deg); }
 	}
+
+	.sweet-alert p{
+		display: grid !important;
+		justify-content: center;
+		justify-items: center;
+	}
 </style>
 
 <div class="content col-lg-12 col-md-12 col-sm-12 col-xs-12" style="min-height: 0px;">
@@ -964,20 +970,73 @@
 			var data = new FormData($('.formAdd')[0]);
 			sendToCounterPoli(data).then(async(data)=>{
 				if(data.metadata.code==200){
+					var html = `
+						<span>Silahkan klik tombol di bawah untuk menyalin<br>nomor rekam medis</span>
+						<br>
+						<div style="
+							display: flex;
+							align-items: center;
+							justify-content: space-between;
+							background-color: #d8d8d8;
+							padding: 5px 5px;
+							border-radius: 5px;
+							width: 90%;
+						">
+							<span
+								class="swal-nomor-rm"
+								style="
+									margin-left: 0.5rem;
+									font-weight: 700;
+								"
+							>${data.response.KodeCust}</span>
+							<button
+								id="copy-rm"
+								type="button"
+								class="copy-rm"
+								style="
+									font-size: 12px;
+									margin: 0px 0rem 0px 0px;
+									font-weight: 600;
+									background-color: #00c0ef;
+									border-color: #00acd6;
+							">
+								Salin
+							</button>
+						</div>
+					`
 					await swal({
-						title: 'Berhasil',
+						title: "Berhasil dikirim ke konter poli",
 						type: data.metadata.status,
-						text: data.metadata.message,
+						html: true,
+						text: html,
+						allowOutsideClick: false,
+						allowEscapeKey: false,
 						showConfirmButton: false,
-						timer: 1000
 					})
-					setTimeout(()=>{
-						$('.other-page').fadeOut(function() {
-							$('.other-page').empty()
-							$('.main-layer').fadeIn()
-							$('#dataTable').DataTable().ajax.reload()
-						})
-					},900)
+
+					$('#copy-rm')[0].addEventListener('click', async function() {
+						const el = $('.swal-nomor-rm')
+						await navigator.clipboard.writeText(el.text())
+						// const el = document.querySelector('.clipboard')
+						// console.log(el.textContent)
+
+						setTimeout(()=>{
+							swal({
+								title: 'Berhasil',
+								text: `Nomor rekam medis berhasil disalin : ${el.text()}`,
+								type: 'success',
+								showConfirmButton: false,
+								timer: 1000,
+							})
+							setTimeout(()=>{
+								$('.other-page').fadeOut(function() {
+									$('.other-page').empty()
+									$('.main-layer').fadeIn()
+									$('#dataTable').DataTable().ajax.reload()
+								})
+							},900)
+						},200)
+					})
 					// let idAntrian = $('#id_antrian').val()
 					// let urlD = '{{route("cetakTracerPasien", ["id" => ":id" ] )}}'
 					// const url = urlD.replace(":id", idAntrian)
