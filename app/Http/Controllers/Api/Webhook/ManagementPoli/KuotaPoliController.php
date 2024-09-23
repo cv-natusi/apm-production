@@ -249,6 +249,7 @@ class KuotaPoliController extends Controller
 		try {
 			// Help::dateWhatsApp($request); # Add variable tanggal to request object
 			$ignorePoli = ['ALG','UGD','ANU']; # Default ignore
+			$gigi = ['BDM', 'GIG', 'GND', 'KON'];
 			if ($request->metode_ambil !== 'kiosk') {
 				array_push($ignorePoli, 'GIG');
 			}
@@ -270,13 +271,19 @@ class KuotaPoliController extends Controller
 						$limit = $items->kuota_wa;
 					} else {
 						$date = $request->tanggal_berobat ? date('Y-m-d',strtotime($request->tanggal_berobat)) : date('Y-m-d');
-						$antrian = Antrian::select('id','kode_poli')
+						$query = Antrian::select('id','kode_poli')
 							->where([
 								'tgl_periksa' => $date,
 								'metode_ambil' => 'KIOSK',
-								'kode_poli' => $kodePoliBpjs,
-							])
-							->count();
+								// 'kode_poli' => $kodePoliBpjs,
+							]);
+
+						if (in_array($kodePoliBpjs, $gigi)) { # Poli gigi
+							$query->whereIn('kode_poli', $gigi);
+						} else {
+							$query->where('kode_poli', $kodePoliBpjs);
+						}
+						$antrian = $query->count();
 						$limit = $items->kuota_kiosk;
 					}
 					if ($antrian < $limit) {
@@ -285,7 +292,14 @@ class KuotaPoliController extends Controller
 				}
 
 				$data = array_values($data->response);
-				$ignorePoli = array_merge($ignorePoli, array_values(array_unique(array_map(fn($item)=>$item->poli_bpjs_id, $data))));
+				$kodePoliBpjs = array_map(fn($item)=>$item->poli_bpjs_id, $data);
+				foreach($gigi as $key => $val){ # Pengecekan poli gigi
+					if (in_array($val, $kodePoliBpjs)) {
+						$kodePoliBpjs = array_values(array_unique(array_merge($gigi, $kodePoliBpjs)));
+						break;
+					}
+				}
+				$ignorePoli = array_merge($ignorePoli, array_values(array_unique($kodePoliBpjs)));
 			}
 			return response()->json([
 				'metadata' => [

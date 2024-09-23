@@ -172,13 +172,24 @@ class apm{
 
 	public static function kuotaWa($request)
 	{
-		return DB::table('bot_pasien as bp')
+		$query = DB::table('bot_pasien as bp')
 			->join('bot_data_pasien as bdp', 'bp.id', '=', 'bdp.idBots')
 			->whereDate('bp.tgl_periksa', '=', date('Y-m-d', $request->timestamps))
-			->where([
-				'bp.statusChat' => 99,
-				'bdp.kodePoli' => $request->poli_bpjs_id
-			])->count();
+			->where('bp.statusChat', 99);
+			// ->where([
+			// 	'bp.statusChat' => 99,
+			// 	'bdp.kodePoli' => $request->poli_bpjs_id
+			// ]);
+
+		$gigi = ['BDM', 'GIG', 'GND', 'KON'];
+		if (in_array($request->poli_bpjs_id, $gigi)) {
+			$query->whereIn('bdp.kodePoli', $gigi);
+		}else{
+			$query->where('bdp.kodePoli', $request->poli_bpjs_id);
+		}
+
+		$count = $query->count();
+		return $count;
 	}
 	public static function numberToTimestamps($request)
 	{
@@ -227,7 +238,7 @@ class apm{
 			'dt_plus_3'=>date('Y-m-d',$tsPlus3),
 		]);
 	}
-   public static function replaceHtmlTagsWithSeparator($inputString)
+	public static function replaceHtmlTagsWithSeparator($inputString)
 	{
 		# Daftar penggantian tag HTML
 		$replacements = [

@@ -62,9 +62,9 @@ class Helper{
 		// $url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url?$request->payload";
 
 		# Production
-		$url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url";
+		// $url = "https://192.168.1.8:8191/api/webhook/management-poli/$request->url";
 		# Develop
-		// $url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url";
+		$url = "http://localhost/apm-production/public/api/webhook/management-poli/$request->url";
 
 		$ch = curl_init();
 		curl_setopt_array($ch, array(
