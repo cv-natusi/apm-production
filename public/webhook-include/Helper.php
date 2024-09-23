@@ -80,9 +80,6 @@ class Helper{
 		));
 		// curl_setopt($ch, CURLOPT_POST, 1);
 		// curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request->payload));
-		// curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request->payload));
-		// curl_setopt($ch, CURLOPT_HEADER, true);
-		// curl_setopt($ch, CURLOPT_URL,$url);
 
 		$response = curl_exec($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);

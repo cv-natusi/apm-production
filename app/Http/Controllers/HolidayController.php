@@ -251,7 +251,7 @@ class HolidayController extends Controller
 				return "<span class='badge badge-$class'>$status</span>";
 			})
 			->addColumn('display_kuota_wa', function($row){
-				if ($row->kategori == 'kuota-poli') {
+				if ($row->kategori == 'kuota-poli' && $row->is_active == 1) {
 					$query = DB::table('bot_pasien as bp')
 						->select('bp.id')
 						->join('bot_data_pasien as bdp', 'bp.id', '=', 'bdp.idBots')
@@ -270,7 +270,7 @@ class HolidayController extends Controller
 				return $row->kuota_wa;
 			})
 			->addColumn('display_kuota_kiosk', function($row){
-				if ($row->kategori == 'kuota-poli') {
+				if ($row->kategori == 'kuota-poli' && $row->is_active == 1) {
 					$query = Antrian::select('id','kode_poli')
 						->where([
 							'tgl_periksa' => date('Y-m-d', $row->date_to_timestamps),

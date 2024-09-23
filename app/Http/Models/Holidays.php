@@ -51,14 +51,12 @@ class Holidays extends Model
 	public function scopeWhereDateWhatsapp($query,$request)
 	{
 		return $query->where(
-			fn($q)=>$q->where(
-				fn($q) => $q->whereBetween('tanggal',[$request->dt_plus_1, $request->dt_plus_3])->whereNull('hari')
-			)->orWhere(
-				fn($q) => $q->whereNull('tanggal')->whereIn('hari',$request->array_hari)
-			)
+			fn($q) => $q->where(fn($q) => $q->whereBetween('tanggal',[$request->dt_plus_1, $request->dt_plus_3])->whereNull('hari'))
+				->orWhere(fn($q) => $q->whereNull('tanggal')->whereIn('hari',$request->array_hari))
 		);
 		return $query;
 	}
+
 	public function scopeWhereDateKiosk($query,$request)
 	{
 		$date = $request->tanggal_berobat ? date('Y-m-d',strtotime($request->tanggal_berobat)) : date('Y-m-d');
@@ -82,16 +80,10 @@ class Holidays extends Model
 			if ($timestamps < strtotime('now')) {
 				$timestamps = strtotime(date("Y-m-d",$timestamps)." +1 week");
 			}
-			return date('Y-m-d', $timestamps);
-			// return date(
-			// 	'Y-m-d',
-			// 	Help::numberToTimestamps(
-			// 		new Request(['date_number' => $this->attributes['hari']])
-			// 	)
-			// );
 		}
 		return $this->attributes['tanggal'];
 	}
+
 	public function getTimestampsAttribute($value)
 	{
 		if ($this->attributes['is_hari'] === 1) {
@@ -106,6 +98,7 @@ class Holidays extends Model
 		}
 		return strtotime($this->attributes['tanggal']);
 	}
+
 	public function getDateToTimestampsAttribute($value)
 	{
 		if ($this->attributes['is_hari'] === 1) {
@@ -120,6 +113,7 @@ class Holidays extends Model
 		}
 		return strtotime($this->attributes['tanggal']);
 	}
+
 	public function getNamaHariAttribute($value)
 	{
 		$tanggal = $this->attributes['tanggal'];
@@ -132,6 +126,7 @@ class Holidays extends Model
 
 		return Help::namaHariID(new Request(['nama_hari_en' => $num]));
 	}
+
 	public function getHariTempAttribute($value)
 	{
 		return ($this->attributes['is_hari'] === 0 || $this->attributes['tanggal'])
