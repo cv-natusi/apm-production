@@ -988,7 +988,7 @@
 									margin-left: 0.5rem;
 									font-weight: 700;
 								"
-							>${data.response.KodeCust}</span>
+							>${data.response.no_rm}</span>
 							<button
 								id="copy-rm"
 								type="button"
