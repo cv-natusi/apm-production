@@ -202,12 +202,14 @@
 					<li class='treeview'>
 						<!-- <a href="#"><i class="fa fa-asterisk"></i><span>SEP</span><i class="fa fa-angle-left pull-right"></i></a>
 						<ul class="treeview-menu"> -->
-                     @if($admin||$loket1||$loket2||$loket3||$loket4||$loket5)
+                     		@if($admin||$loket1||$loket2||$loket3||$loket4||$loket5||$pvclaim)
 							<li>
 								<a href="{{ route('bridging') }}">
 									<i class="fa fa-plus"></i> <span>Pembuatan SEP</span></i>
 								</a>
 							</li>
+							@endif
+							@if($admin||$loket1||$loket2||$loket3||$loket4||$loket5)
 							<li>
 								<a href="{{ route('persetujuanSEP') }}">
 									<i class="fa fa-thumbs-o-up"></i> <span>Persetujuan SEP</span></i>
