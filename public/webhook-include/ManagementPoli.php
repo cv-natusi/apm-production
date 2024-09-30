@@ -71,6 +71,7 @@ class ManagementPoli
 		]);
 		$exec = Helper::curl($request);
 		if ($exec && $exec->metadata->code===200) {
+			$text .= "—- Apabila kuota penuh, bisa mendaftar melalui aplikasi JKN Mobile https://play.google.com/store/apps/details?id=app.bpjs.mobile —-\n\n";
 			$text .= $exec->response;
 			$text .= "\n*==============================*\n\n";
 			$isActive = true;

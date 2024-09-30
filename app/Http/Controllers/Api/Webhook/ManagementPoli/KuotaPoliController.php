@@ -204,7 +204,8 @@ class KuotaPoliController extends Controller
 						// ### Print keterangan end
 
 						if ($increment < count($item->data)) {
-							$text .= "\n\n";
+							// $text .= "\n\n";
+							$text .= "\n";
 						} elseif ($key + 1 < count($data)) {
 							$text .= "\n\n";
 						} elseif ($key + 1 == count($data)){
