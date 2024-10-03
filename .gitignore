@@ -5,3 +5,7 @@
 *.env
 storage/*
 *.zip
+
+# Custom ignore
+.devcontainer
+compose-apm.yml
