@@ -818,15 +818,18 @@ class BridgBpjsController extends Controller{
 							// 		$request->taskid = '3';
 							// 	}
 							// }
-							if($pasienbaru=='1'){ # Pasien baru
-								$request->taskid = '1';
-							}else{ # Pasien lama
-								$request->taskid = '3';
-							}
-							$request->kodebooking = $kodeBooking;
-							date_default_timezone_set("Asia/Jakarta");
-							$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
-							$updateWaktu = $this->updateWaktu($request);
+
+                     ### 03-10-2024 end
+							// if($pasienbaru=='1'){ # Pasien baru
+							// 	$request->taskid = '1';
+							// }else{ # Pasien lama
+							// 	$request->taskid = '3';
+							// }
+							// $request->kodebooking = $kodeBooking;
+							// date_default_timezone_set("Asia/Jakarta");
+							// $request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
+							// $updateWaktu = $this->updateWaktu($request);
+                     ### 03-10-2024 end
 							return [
 								'metaData' => $result['metaData'],
 							];

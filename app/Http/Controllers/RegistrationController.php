@@ -42,6 +42,9 @@ use App\Traits\KonfirmasiAntrianTraits;
 use Illuminate\Support\Facades\Log;
 use Redirect, DB;
 
+### Custom Library
+use App\Http\Libraries\GuzzleClient;
+
 class RegistrationController extends Controller{
 	use KonfirmasiAntrianTraits;
 	/* DEV */
@@ -341,7 +344,25 @@ class RegistrationController extends Controller{
 		return Help::randomDokter($request);
 	}
 
-	public function indexAntrian(Request $request){
+	public function indexAntrian(Request $request)
+	{
+		$request->merge([
+			'payload_guzzle' => [
+				'endpoint' => 'api/antrian/task-id/store',
+				'method' => 'POST',
+				'body' => [
+					'antrian_id' => 1,
+					'pasien_baru' => 0,
+					'kode_booking' => '031024B001',
+					'task_id' => 3,
+					'tanggal_berobat' => '03-10-2024',
+				]
+			]
+		]);
+		// $sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+		// return response()->json($sendRequest);
+		// return $sendRequest->code;
+
 		$dateNow = date('Y-m-d');
 		$ignorePoli = ['ALG','UGD','ANU'];
 		$payload = (object)[];
@@ -696,6 +717,7 @@ class RegistrationController extends Controller{
 					'poli'=> ''
 				];
 			}
+			$request->merge(['antrian_id' => $antrian->id]); # For store task id
 			$countAntrian = Antrian::where([
 				'no_antrian'=>$antrian->no_antrian,
 				'tgl_periksa'=>$antrian->tgl_periksa
@@ -841,7 +863,7 @@ class RegistrationController extends Controller{
 						'status'=>'error',
 						'code'=>250,
 						'head_message'=>'Error',
-						'message'=>'NIK Yang Anda Masukkan Tidak Terdaftar BPJS',
+						'message'=>'NIK Anda tidak terdaftar BPJS',
 						'data'=> $request->all(),
 						'poli'=> '',
 					]);
@@ -856,7 +878,48 @@ class RegistrationController extends Controller{
 			}
 
 			# "code" == 200 atau "message" == "duplikasi kode"
-			if($respon['metaData']->code==200 || stripos($respon['metaData']->message,'duplikasi Kode')!==false){
+			if ($respon['metaData']->code == 200 || stripos($respon['metaData']->message, 'duplikasi Kode') !== false) {
+				$antrian = Antrian::where('id', $request->antrian_id)->first();
+				$request->merge([
+					// 'prepare_guzzle' => [
+					// 	'base_uri' => 'http://host.docker.internal:8002',
+					// 	'endpoint' => 'api/antrian/task-id/store',
+					// 	'time_out' => 10,
+					// 	'method' => 'POST',
+					// 	'body' => [
+					// 		'antrian_id' => 1,
+					// 		'pasien_baru' => 0,
+					// 		'kode_booking' => '031024B001',
+					// 		'task_id' => 3,
+					// 		'tanggal_berobat' => '03-10-2024',
+					// 	]
+					// ],
+					'payload_guzzle' => [
+						'body' => [
+							'antrian_id' => $antrian->id,
+							'pasien_baru' => $antrian->is_pasien_baru === 'Y' ? 1 : 0,
+							'kode_booking' => $antrian->kode_booking,
+							'task_id' => $antrian->is_pasien_baru === 'Y' ? 1 : 3,
+							'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+						],
+						'method' => 'POST',
+						'endpoint' => 'api/antrian/task-id/store',
+					],
+				]);
+
+				$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+				if(!in_array($sendRequest->code, [201, 409])){
+					DB::rollback();
+					return response()->json([
+						'status' => 'error',
+						'code' => 400,
+						'head_message' => 'Error',
+						'message' => 'Task Id gagal disimpan, silahkan coba lagi',
+						'data' => $request->all(),
+						'poli' => '',
+					]);
+				}
+
 				DB::commit();
 				return response()->json([
 					'status'=>'success',
