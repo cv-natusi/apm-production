@@ -32,6 +32,17 @@ class Antrian extends Model{
 		return Antrian::has('task_id')->with('task_id')->get();
 	}
 
+	### Mutator start
+	public function setCreatedAtAttribute($value)
+	{
+		return \Carbon\Carbon::parse($value)->timezone('Asia/Jakarta');
+	}
+	public function setUpdatedAtAttribute($value)
+	{
+		return \Carbon\Carbon::parse($value)->timezone('Asia/Jakarta');
+	}
+	### Mutator end
+
 	public static function getJsonPoli($input){
 		$table = 'antrian as an';
 		$select = 'an.kode_poli,an.tgl_periksa,an.no_antrian,an.jenis_pasien,an.kode_booking,an.status,'; // table antrian

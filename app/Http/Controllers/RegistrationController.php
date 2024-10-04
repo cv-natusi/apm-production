@@ -566,6 +566,7 @@ class RegistrationController extends Controller{
 	public function ambilAntrianSave(Request $request){
 		date_default_timezone_set("Asia/Jakarta");
 		$dateNow = date('Y-m-d');
+		$request->merge(['tglperiksa' => $dateNow]);
 
 		$no_rm   = $request->no_rm;
 		$no_bpjs = $request->no_bpjs;
@@ -659,8 +660,8 @@ class RegistrationController extends Controller{
 				$num = (int)substr($antri->no_antrian, -3);
 			}
 			$angkaAntri = sprintf("%03d",$num+1);
-			$nextAntri = "$prefix".$angkaAntri;
-			$kodebooking = date('dmy').$nextAntri; // kode booking
+			$nextAntri = "$prefix$angkaAntri";
+			$kodebooking = date('dmy', strtotime($dateNow)).$nextAntri; // kode booking
 			$request->kodebooking = $kodebooking;
 			$request->no_antrian = $nextAntri;
 			if ($request->pasien=='N') {
@@ -671,7 +672,7 @@ class RegistrationController extends Controller{
 			}
 			$antrian = new Antrian;
 			$antrian->nik = $request->nik;
-			$antrian->nomor_kartu = !empty($request->no_bpjs)?$request->no_bpjs:null;
+			$antrian->nomor_kartu = !empty($request->no_bpjs) ? $request->no_bpjs : null;
 			if ($request->pasien=='Y') {
 				$no_rm = '00000000000';
 				$request->no_rm = '00000000000';
@@ -943,7 +944,14 @@ class RegistrationController extends Controller{
 			DB::rollback();
 			$log = ['ERROR AMBIL KIOSK ANTRIAN ('.$e->getFile().')',false,$e->getMessage(),$e->getLine()];
 			Help::logging($log);
-			return false;
+			return [
+				'status'=>'error',
+				'code'=>400,
+				'head_message'=>'Whoops!',
+				'message'=>'Gagal menyimpan antrian, Silahkan coba lagi.',
+				'data'=> '', 
+				'poli'=> ''
+			];
 		}
 	}
 
