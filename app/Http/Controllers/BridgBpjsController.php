@@ -835,6 +835,7 @@ class BridgBpjsController extends Controller{
 							];
 						}else{
 							$result['MESSAGE'] = 'FAILED TO ADD ANTRIAN';
+							$result['data'] = $dataBPJS;
 							Log::info(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 							return [
 								'metaData' => $result['metaData']
