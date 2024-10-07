@@ -8,13 +8,17 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\BridgBpjsController;
 
-# Helpers
+### Custom Library
+use App\Http\Libraries\GuzzleClient;
+
+### Helpers
 use App\Helpers\apm as Help;
 use TM;
 
 # Library / package
 use Datatables, DateTime, DB;
-# Models
+
+### Models
 use App\Http\Models\Antrian;
 use App\Http\Models\AntPasienBaru;
 use App\Http\Models\Desa;
@@ -25,8 +29,10 @@ use App\Http\Models\Rsu_Bridgingpoli;
 use App\Http\Models\rsu_customer;
 use App\Http\Models\Rsu_setupall;
 
-class LoketController extends Controller{
-	public function main(Request $request){
+class LoketController extends Controller
+{
+	public function main(Request $request)
+	{
 		if ($request->ajax()) {
 			$botDaPas = DB::connection('mysql')->table('bot_data_pasien')
 				->whereBetween('tglBerobat',[$request->tglAwal,$request->tglAkhir])
@@ -74,7 +80,8 @@ class LoketController extends Controller{
 		return view('Admin.antreanBPJS.listAntrian.mainLoket');
 	}
 
-	public function kerjakanAntrian(Request $request){
+	public function kerjakanAntrian(Request $request)
+	{
 		$id = $request->id;
 		$view = $request->view ?: 0;
 
@@ -143,7 +150,8 @@ class LoketController extends Controller{
 	 * @var object $getPasien
 	 * @var object $pasien
 	 */
-	public function sendToCounterPoli(Request $request){
+	public function sendToCounterPoli(Request $request)
+	{
 		date_default_timezone_set("Asia/Jakarta");
 		DB::beginTransaction();
 		try{
@@ -265,14 +273,40 @@ class LoketController extends Controller{
 				], 500);
 			}
 
-			$request->merge([
-				'kodebooking' => $antrian->kode_booking,
-				'waktu' => strtotime(date('Y-m-d H:i:s'))*1000,
-				'taskid' => '2',
-			]);
-			$bridgBpjs = new BridgBpjsController;
-			$updateWaktu = $bridgBpjs->updateWaktu($request);
+			// $request->merge([
+			// 	'kodebooking' => $antrian->kode_booking,
+			// 	'waktu' => strtotime(date('Y-m-d H:i:s'))*1000,
+			// 	'taskid' => '2',
+			// ]);
+			// $bridgBpjs = new BridgBpjsController;
+			// $updateWaktu = $bridgBpjs->updateWaktu($request);
 			// \Log::info(json_encode($updateWaktu,JSON_PRETTY_PRINT));
+
+			$request->merge([
+				'payload_guzzle' => [
+					'body' => [
+						'antrian_id' => $antrian->id,
+						'pasien_baru' => 1,
+						'kode_booking' => $antrian->kode_booking,
+						'task_id' => 2,
+						'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+					],
+					'method' => 'POST',
+					'endpoint' => 'api/antrian/task-id/store',
+				],
+			]);
+
+			$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+			if(!in_array($sendRequest->code, [201, 409])){
+				DB::rollback();
+				return response()->json([
+					'metadata' => [
+						'code' => 500,
+						'status' => 'error',
+						'message' => 'Task Id gagal disimpan, silahkan coba lagi',
+					],
+				], 500);
+			}
 
 			//insert antrian_id di table filling
 			$insertFilling = DB::connection('mysql')->table('filling')

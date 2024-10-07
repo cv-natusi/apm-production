@@ -6,8 +6,9 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 // use GuzzleHttp\Exception\BadResponseException;
 
-use TM;
+use Env;
 use Illuminate\Support\Facades\Log;
+use TM;
 
 class GuzzleClient
 {
@@ -40,9 +41,14 @@ class GuzzleClient
 		];
 
 		try{
+			if (Env::status() === 'production') {
+				$baseUri = 'http://192.168.1.6';
+			} else {
+				$baseUri = 'http://host.docker.internal:8002';
+			}
 			$request->merge([
 				'prepare_guzzle' => [
-					'base_uri' => 'http://host.docker.internal:8002',
+					'base_uri' => $baseUri,
 					'time_out' => 10,
 				]
 			]);

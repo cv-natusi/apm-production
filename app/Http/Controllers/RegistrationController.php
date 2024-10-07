@@ -346,19 +346,19 @@ class RegistrationController extends Controller{
 
 	public function indexAntrian(Request $request)
 	{
-		$request->merge([
-			'payload_guzzle' => [
-				'endpoint' => 'api/antrian/task-id/store',
-				'method' => 'POST',
-				'body' => [
-					'antrian_id' => 1,
-					'pasien_baru' => 0,
-					'kode_booking' => '031024B001',
-					'task_id' => 3,
-					'tanggal_berobat' => '03-10-2024',
-				]
-			]
-		]);
+		// $request->merge([
+		// 	'payload_guzzle' => [
+		// 		'endpoint' => 'api/antrian/task-id/store',
+		// 		'method' => 'POST',
+		// 		'body' => [
+		// 			'antrian_id' => 1,
+		// 			'pasien_baru' => 0,
+		// 			'kode_booking' => '031024B001',
+		// 			'task_id' => 3,
+		// 			'tanggal_berobat' => '03-10-2024',
+		// 		]
+		// 	]
+		// ]);
 		// $sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
 		// return response()->json($sendRequest);
 		// return $sendRequest->code;

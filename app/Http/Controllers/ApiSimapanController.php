@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+### Custom Library
+use App\Http\Libraries\GuzzleClient;
+
 # Helpers
 use App\Helpers\apm as Helpers;
+
 # Library / package
 use App\Http\Controllers\Controller;
 use App\Http\Libraries\Requestor;
@@ -11,9 +15,12 @@ use App\Http\Requests;
 use DB,Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+
 # Models
+use App\Http\Models\Antrian;
 use App\Http\Models\JadwalDokterInternal;
 use App\Http\Models\rsu_dokter_bridging;
+
 # Traits
 use App\Traits\FillingTraits;
 use App\Traits\KonfirmasiAntrianTraits;
@@ -868,6 +875,27 @@ class ApiSimapanController extends Controller{
 				} else {
 					throw new \Exception($postAntreanBpjs['metaData']->message, (int)$postAntreanBpjs['metaData']->code);
 				}
+
+				$antrian = Antrian::where('id', $postAntrian)->first();
+				$request->merge([
+					'payload_guzzle' => [
+						'body' => [
+							'antrian_id' => $antrian->id,
+							'pasien_baru' => $antrian->is_pasien_baru === 'Y' ? 1 : 0,
+							'kode_booking' => $antrian->kode_booking,
+							'task_id' => $antrian->is_pasien_baru === 'Y' ? 1 : 3,
+							'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+						],
+						'method' => 'POST',
+						'endpoint' => 'api/antrian/task-id/store',
+					],
+				]);
+
+				$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+				if(!in_array($sendRequest->code, [201, 409])){
+					return ['status'=> 'error', 'code'=>500 , 'message'=>'Task Id gagal disimpan, silahkan coba lagi'];
+				}
+
 				Log::info("POST BPJS SUCESS (SIMAPAN) : ", [
 					'data' => $generateReqAntreanBPJS,
 					'response' => $postAntreanBpjs
