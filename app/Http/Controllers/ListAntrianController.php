@@ -221,6 +221,37 @@ class ListAntrianController extends Controller{
 				DB::rollback();
 				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal update antrian','antrian'=>''];
 			}
+
+			# Store taskid to local DB srtart
+			$request->merge([
+				'payload_guzzle' => [
+					'body' => [
+						'antrian_id' => $cekAntri->id,
+						'pasien_baru' => $cekAntri->is_pasien_baru === 'Y' ? 1 : 0,
+						'kode_booking' => $cekAntri->kode_booking,
+						'task_id' => 2,
+						'tanggal_berobat' => date('d-m-Y', strtotime($cekAntri->tgl_periksa)),
+					],
+					'method' => 'POST',
+					'endpoint' => 'api/antrian/task-id/store',
+				],
+			]);
+
+			$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+			if(!in_array($sendRequest->code, [201, 409])){
+				Log::error(json_encode([
+					'file' => 'app/Http/Controllers/ListAntrianController.php',
+					'method' => 'saveList()',
+					'status' => 'catch_log_guzzle_in_controller',
+					'guzzle_result' => $sendRequest,
+					'data' => $request->all(),
+				], JSON_PRETTY_PRINT));
+
+				DB::rollback();
+				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Task Id gagal disimpan, silahkan coba lagi','antrian'=>''];
+			}
+			# Store taskid to local DB end
+
 			$custId = $Customer->cust_id;
 			if(!($PasienBaru = AntPasienBaru::where('cust_id',$custId)->first())){
 				$PasienBaru = new AntPasienBaru;
@@ -243,17 +274,11 @@ class ListAntrianController extends Controller{
 				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal simpan antrian pasien baru','antrian'=>''];
 			}
 
-			// $antrianTracer = $this->antrianTracer($id_antrian,'loket','poli',1,'input');
-			// 	return 'ok';
-			// if(!$antrianTracer){
-			// 	DB::rollback();
-			// 	return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Gagal simpan antrian tracer','antrian'=>''];
-			// }
-			$request->kodebooking = $cekAntri->kode_booking;
-			$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
-			$request->taskid = '2';
-			$bridgBpjs = new BridgBpjsController;
-			$updateWaktu = $bridgBpjs->updateWaktu($request);
+			// $request->kodebooking = $cekAntri->kode_booking;
+			// $request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
+			// $request->taskid = '2';
+			// $bridgBpjs = new BridgBpjsController;
+			// $updateWaktu = $bridgBpjs->updateWaktu($request);
 			$getAntrian = Antrian::where('id', $id_antrian)->first();
 			//insert antrian_id di table filling
 			$insertFilling = DB::connection('mysql')->table('filling')
@@ -431,14 +456,14 @@ class ListAntrianController extends Controller{
 					->update(['loket' => $user]);
 			}
 
-			$split = substr($antrian->no_antrian,0,1);
-			if($split=='B'){
-				$request->kodebooking = $antrian->kode_booking;
-				$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
-				$request->taskid = '2';
-				$bridgBpjs = new BridgBpjsController;
-				$updateWaktu = $bridgBpjs->updateWaktu($request);
-			}
+			// $split = substr($antrian->no_antrian,0,1);
+			// if($split=='B'){
+			// 	$request->kodebooking = $antrian->kode_booking;
+			// 	$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
+			// 	$request->taskid = '2';
+			// 	$bridgBpjs = new BridgBpjsController;
+			// 	$updateWaktu = $bridgBpjs->updateWaktu($request);
+			// }
 
 			$data = [
 				'type'=>'success',

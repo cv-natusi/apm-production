@@ -501,11 +501,11 @@ class AntrianController extends Controller{
 						->where('antrian_id',$panggilPasien->id)
 						->update(['loket' => $user == 9 ? 2 : 1]);
 				}
-				$request->kodebooking = $panggilPasien->kode_booking;
-				$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
-				$request->taskid = '2';
-				$bridgBpjs = new BridgBpjsController;
-				$updateWaktu = $bridgBpjs->updateWaktu($request);
+				// $request->kodebooking = $panggilPasien->kode_booking;
+				// $request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
+				// $request->taskid = '2';
+				// $bridgBpjs = new BridgBpjsController;
+				// $updateWaktu = $bridgBpjs->updateWaktu($request);
 				return ['status' => 'success','message' => 'Panggil antrian berhasil','data'=>$panggilPasien];
 			}else{
 				return ['status' => 'error','message' => 'Tidak ada antrian'];
@@ -580,11 +580,11 @@ class AntrianController extends Controller{
 					->where('antrian_id',$panggilGeriatri->id)
 					->update(['loket' => $user == "Loket 2" ? 2 : 1]);
 				// return response()->json($antrianTracer);
-				$request->kodebooking = $panggilGeriatri->kode_booking;
-				$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
-				$request->taskid = '2';
-				$bridgBpjs = new BridgBpjsController;
-				$updateWaktu = $bridgBpjs->updateWaktu($request);
+				// $request->kodebooking = $panggilGeriatri->kode_booking;
+				// $request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
+				// $request->taskid = '2';
+				// $bridgBpjs = new BridgBpjsController;
+				// $updateWaktu = $bridgBpjs->updateWaktu($request);
 				return ['status' => 'success','message' => 'Panggil antrian berhasil','data'=>$panggilGeriatri];
 			}else{
 				return ['status' => 'error','message' => 'Tidak ada antrian'];
@@ -941,11 +941,11 @@ class AntrianController extends Controller{
 			if($antrian){
 				// $split = substr($data->no_antrian,0,1);
 				// if($split=='B'){
-					$request->kodebooking = $kode;
-					$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
-					$request->taskid = '4';
-					$bridgBpjs = new BridgBpjsController;
-					$updateWaktu = $bridgBpjs->updateWaktu($request);
+					// $request->kodebooking = $kode;
+					// $request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
+					// $request->taskid = '4';
+					// $bridgBpjs = new BridgBpjsController;
+					// $updateWaktu = $bridgBpjs->updateWaktu($request);
 				// }
 				$res = ['status'=>'success','message'=>'Antrian berhasil diipanggil'];
 			}else{
@@ -1258,11 +1258,11 @@ class AntrianController extends Controller{
 		$antrian->status = 'antrifarmasi';
 		$antrian->save();
 		if($antrian){
-			$request->kodebooking = $antrian->kode_booking;
-			$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
-			$request->taskid = '5';
-			$bridgBpjs = new BridgBpjsController;
-			$updateWaktu = $bridgBpjs->updateWaktu($request);
+			// $request->kodebooking = $antrian->kode_booking;
+			// $request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
+			// $request->taskid = '5';
+			// $bridgBpjs = new BridgBpjsController;
+			// $updateWaktu = $bridgBpjs->updateWaktu($request);
 			$insertTracer = [
 				'antrian_id'    => $antrian->id,
 				'from'          => 'poli',
@@ -1285,11 +1285,11 @@ class AntrianController extends Controller{
 		$antrian->status = 'selesai';
 		$antrian->save();
 		if($antrian){
-			$request->kodebooking = $antrian->kode_booking;
-			$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
-			$request->taskid = '5';
-			$bridgBpjs = new BridgBpjsController;
-			$updateWaktu = $bridgBpjs->updateWaktu($request);
+			// $request->kodebooking = $antrian->kode_booking;
+			// $request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
+			// $request->taskid = '5';
+			// $bridgBpjs = new BridgBpjsController;
+			// $updateWaktu = $bridgBpjs->updateWaktu($request);
 			$tracer = DB::table('natusi_apm.antrian_tracer')
 				->where('antrian_id',$antrian->id)
 				->where('to','poli')

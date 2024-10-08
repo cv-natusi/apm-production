@@ -213,31 +213,6 @@ class ApiSiramaErmController extends Controller{
 			$antreanBpjs = new BridgBpjsController();
 			$generateReqUpdateWaktuBPJS = $this->generateReqUpdateWaktuBpjs($dataPasien,$taskId,$jenisResep);
 			$postUpdateWaktuBpjs =  $antreanBpjs->updateWaktu(new Request($generateReqUpdateWaktuBPJS));
-			// if ($kategori=='erm') {
-			// 	$generateReqUpdateWaktuBPJS = $this->generateReqUpdateWaktuBpjs($dataPasien,$taskId,$jenisResep);
-			// 	$postUpdateWaktuBpjs =  $antreanBpjs->updateWaktu(new Request($generateReqUpdateWaktuBPJS));
-			// } else {
-			// 	$taskId = '4';
-			// 	$generateReqUpdateWaktuBPJS = $this->generateReqUpdateWaktuBpjs($dataPasien,$taskId,$jenisResep);
-			// 	$postUpdateWaktuBpjs =  $antreanBpjs->updateWaktu(new Request($generateReqUpdateWaktuBPJS));
-			// 	if ($postUpdateWaktuBpjs['metaData']->code == 200 ){
-			// 		$taskId = '5';
-			// 		$generateReqUpdateWaktuBPJS2 = $this->generateReqUpdateWaktuBpjs($dataPasien,$taskId,$jenisResep);
-			// 		$postUpdateWaktuBpjs2 =  $antreanBpjs->updateWaktu(new Request($generateReqUpdateWaktuBPJS2));
-			// 		if ($postUpdateWaktuBpjs2['metaData']->code == 200 ){
-			// 			$taskId = '6';
-			// 			$generateReqUpdateWaktuBPJS3 = $this->generateReqUpdateWaktuBpjs($dataPasien,$taskId,$jenisResep);
-			// 			$postUpdateWaktuBpjs3 =  $antreanBpjs->updateWaktu(new Request($generateReqUpdateWaktuBPJS3));
-			// 			if ($postUpdateWaktuBpjs3['metaData']->code != 200 ){
-			// 				throw new \Exception($postUpdateWaktuBpjs['metaData']->message, (int)$postUpdateWaktuBpjs['metaData']->code);
-			// 				DB::rollback();
-			// 			}
-			// 		}else{
-			// 			throw new \Exception($postUpdateWaktuBpjs['metaData']->message, (int)$postUpdateWaktuBpjs['metaData']->code);
-			// 			DB::rollback();
-			// 		}
-			// 	}
-			// }
 			//validasi jika gagal update
 			if ($postUpdateWaktuBpjs['metaData']->code != 200 ){
 				DB::rollback();
