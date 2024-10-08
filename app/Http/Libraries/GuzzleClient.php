@@ -73,26 +73,6 @@ class GuzzleClient
 			$response = json_decode($sendRequest->getBody());
 			$code = $response->code;
 			return response()->json($response, $code);
-
-			// $checkString = self::checkStr($metadata->message);
-			// if($code === 1){
-			// 	// $code = $checkString ? 201 : 200;
-			// 	$code = $checkString ? $checkString : 200;
-			// } else if ($code === 0 || $code < 200) {
-			// 	// $code = $checkString ? 409 : 400;
-			// 	$code = $checkString ? $checkString : 400;
-			// }
-
-			// $payloadResponse = [
-			// 	'code' => $code,
-			// 	'message' => $response->message,
-			// ];
-
-			// if (isset($result->response)) {
-			// 	$payloadResponse['data'] = $result->response;
-			// }
-
-			return response()->json($payloadResponse, $code);
 		} catch(ClientException $e) { # 400-level errors
 			$response = $e->getResponse();
 			$code = $response->getStatusCode();

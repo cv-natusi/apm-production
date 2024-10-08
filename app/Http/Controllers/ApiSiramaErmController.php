@@ -15,6 +15,7 @@ use App\Http\Models\Rsu_Register;
 use App\Http\Models\Rsu_setupall;
 use App\Http\Models\AntrianFarmasi;
 use App\Http\Models\rsu_customer;
+use Illuminate\Support\Facades\Validator;
 
 class ApiSiramaErmController extends Controller{
 	use KonfirmasiAntrianTraits;
