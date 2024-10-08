@@ -418,6 +418,32 @@ class WablasController extends Controller{
 							$conDbrsud->beginTransaction();
 							$insertAntrian = $conMysql->table('antrian')->insertGetId($forAntrianTB);
 
+							# Store taskid to local DB srtart
+							if(!in_array($dataPas->kodePoli,['ANT','GIG','GIZ','MCU','PSY','VCT'])){
+								$antrian = Antrian::where('id', $insertAntrian)->first();
+								$request->merge([
+									'payload_guzzle' => [
+										'body' => [
+											'antrian_id' => $antrian->id,
+											'pasien_baru' => $antrian->is_pasien_baru === 'Y' ? 1 : 0,
+											'kode_booking' => $antrian->kode_booking,
+											'task_id' => $antrian->is_pasien_baru === 'Y' ? 1 : 3,
+											'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+										],
+										'method' => 'POST',
+										'endpoint' => 'api/antrian/task-id/store',
+									],
+								]);
+	
+								$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+								if(!in_array($sendRequest->code, [201, 409])){
+									$conMysql->rollback();
+									$conDbrsud->rollback();
+									return ['code' =>  404, 'status' => 'error', 'message' => 'Task Id gagal disimpan, silahkan coba lagi'];
+								}
+							}
+							# Store taskid to local DB end
+
 							if($cekPas==false){ # Pasien lama update filling(antrian_id) & update jam kedaatngan di tr_registrasi
 								$getRegis = Rsu_Register::where('No_RM',$dataPas->KodeCust)
 									->whereDate('Tgl_Register','=',$dataPas->tglBerobat)
@@ -512,28 +538,6 @@ class WablasController extends Controller{
 									}else{
 										return ['code'=> 404,'status'=>'error','message'=>'Gagal Konfirmasi','data'=>$respon];
 									}
-								}
-
-								$antrian = Antrian::where('id', $insertAntrian)->first();
-								$request->merge([
-									'payload_guzzle' => [
-										'body' => [
-											'antrian_id' => $antrian->id,
-											'pasien_baru' => $antrian->is_pasien_baru === 'Y' ? 1 : 0,
-											'kode_booking' => $antrian->kode_booking,
-											'task_id' => $antrian->is_pasien_baru === 'Y' ? 1 : 3,
-											'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
-										],
-										'method' => 'POST',
-										'endpoint' => 'api/antrian/task-id/store',
-									],
-								]);
-
-								$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
-								if(!in_array($sendRequest->code, [201, 409])){
-									$conMysql->rollback();
-									$conDbrsud->rollback();
-									return ['code' =>  404, 'status' => 'error', 'message' => 'Task Id gagal disimpan, silahkan coba lagi'];
 								}
 							}
 						}else{

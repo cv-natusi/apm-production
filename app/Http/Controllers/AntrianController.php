@@ -185,6 +185,30 @@ class AntrianController extends Controller{
 
 		//hit to table antrian dan antrian_tracer
 		$postAntrian =  DB::connection('mysql')->table('antrian')->insertGetId($generateReqAntreanLocal);
+
+		# Store taskid to local DB srtart
+		$antrian = Antrian::where('id', $postAntrian)->first();
+		$request->merge([
+			'payload_guzzle' => [
+				'body' => [
+					'antrian_id' => $antrian->id,
+					'pasien_baru' => $antrian->is_pasien_baru === 'Y' ? 1 : 0,
+					'kode_booking' => $antrian->kode_booking,
+					'task_id' => $antrian->is_pasien_baru === 'Y' ? 1 : 3,
+					'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+				],
+				'method' => 'POST',
+				'endpoint' => 'api/antrian/task-id/store',
+			],
+		]);
+
+		$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+		if(!in_array($sendRequest->code, [201, 409])){
+			DB::rollback();
+			return ['status'=> 'error', 'code'=>500 , 'message'=>'Task Id gagal disimpan, silahkan coba lagi'];
+		}
+		# Store taskid to local DB end
+
 		$generateReqAntreanTracer = $this->generateReqAntreanTracer($postAntrian, $cekKode);
 		// $postAntrianTracer =  DB::connection('mysql')->table('antrian_tracer')->insert($generateReqAntreanTracer);
 		$insertTracer = [
@@ -247,26 +271,26 @@ class AntrianController extends Controller{
 					}
 				}
 
-				$antrian = Antrian::where('id', $postAntrian)->first();
-				$request->merge([
-					'payload_guzzle' => [
-						'body' => [
-							'antrian_id' => $antrian->id,
-							'pasien_baru' => $antrian->is_pasien_baru === 'Y' ? 1 : 0,
-							'kode_booking' => $antrian->kode_booking,
-							'task_id' => $antrian->is_pasien_baru === 'Y' ? 1 : 3,
-							'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
-						],
-						'method' => 'POST',
-						'endpoint' => 'api/antrian/task-id/store',
-					],
-				]);
+				// $antrian = Antrian::where('id', $postAntrian)->first();
+				// $request->merge([
+				// 	'payload_guzzle' => [
+				// 		'body' => [
+				// 			'antrian_id' => $antrian->id,
+				// 			'pasien_baru' => $antrian->is_pasien_baru === 'Y' ? 1 : 0,
+				// 			'kode_booking' => $antrian->kode_booking,
+				// 			'task_id' => $antrian->is_pasien_baru === 'Y' ? 1 : 3,
+				// 			'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+				// 		],
+				// 		'method' => 'POST',
+				// 		'endpoint' => 'api/antrian/task-id/store',
+				// 	],
+				// ]);
 
-				$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
-				if(!in_array($sendRequest->code, [201, 409])){
-					DB::rollback();
-					return ['status'=> 'error', 'code'=>500 , 'message'=>'Task Id gagal disimpan, silahkan coba lagi'];
-				}
+				// $sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+				// if(!in_array($sendRequest->code, [201, 409])){
+				// 	DB::rollback();
+				// 	return ['status'=> 'error', 'code'=>500 , 'message'=>'Task Id gagal disimpan, silahkan coba lagi'];
+				// }
 			}
 
 			// Log::info("POST BPJS SUCESS : ", [
@@ -974,6 +998,7 @@ class AntrianController extends Controller{
 			// 	$updateWaktu = $bridgBpjs->updateWaktu($request);
 			// }
 
+			# Store taskid to local DB srtart
 			$request->merge([
 				'payload_guzzle' => [
 					'body' => [
@@ -993,6 +1018,7 @@ class AntrianController extends Controller{
 				DB::rollback();
 				return ['code'=>400, 'status'=>'error','message'=>'Task Id gagal disimpan, silahkan coba lagi'];
 			}
+			# Store taskid to local DB end
 
 			# UPDATE ANTRIAN TRACER
 			$id_antrian = $antrian->id;

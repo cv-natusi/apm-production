@@ -234,6 +234,34 @@ class LoketController extends Controller
 				], 500);
 			}
 
+			# Store taskid to local DB srtart
+			$request->merge([
+				'payload_guzzle' => [
+					'body' => [
+						'antrian_id' => $antrian->id,
+						'pasien_baru' => 1,
+						'kode_booking' => $antrian->kode_booking,
+						'task_id' => 2,
+						'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+					],
+					'method' => 'POST',
+					'endpoint' => 'api/antrian/task-id/store',
+				],
+			]);
+
+			$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+			if(!in_array($sendRequest->code, [201, 409])){
+				DB::rollback();
+				return response()->json([
+					'metadata' => [
+						'code' => 500,
+						'status' => 'error',
+						'message' => 'Task Id gagal disimpan, silahkan coba lagi',
+					],
+				], 500);
+			}
+			# Store taskid to local DB end
+
 			if($antrian->metode_ambil=='KIOSK'){
 				$antrianTracer = $this->antrianTracer($antrian->id,'kiosk','loket',2,'update');
 			}elseif($antrian->metode_ambil=='SIMAPAN'){
@@ -281,32 +309,6 @@ class LoketController extends Controller
 			// $bridgBpjs = new BridgBpjsController;
 			// $updateWaktu = $bridgBpjs->updateWaktu($request);
 			// \Log::info(json_encode($updateWaktu,JSON_PRETTY_PRINT));
-
-			$request->merge([
-				'payload_guzzle' => [
-					'body' => [
-						'antrian_id' => $antrian->id,
-						'pasien_baru' => 1,
-						'kode_booking' => $antrian->kode_booking,
-						'task_id' => 2,
-						'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
-					],
-					'method' => 'POST',
-					'endpoint' => 'api/antrian/task-id/store',
-				],
-			]);
-
-			$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
-			if(!in_array($sendRequest->code, [201, 409])){
-				DB::rollback();
-				return response()->json([
-					'metadata' => [
-						'code' => 500,
-						'status' => 'error',
-						'message' => 'Task Id gagal disimpan, silahkan coba lagi',
-					],
-				], 500);
-			}
 
 			//insert antrian_id di table filling
 			$insertFilling = DB::connection('mysql')->table('filling')
