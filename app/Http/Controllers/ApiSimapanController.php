@@ -893,13 +893,20 @@ class ApiSimapanController extends Controller{
 
 				$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
 				if(!in_array($sendRequest->code, [201, 409])){
+					Log::error(json_encode([
+						'file' => 'app/Http/Controllers/ApiSimapanController.php',
+						'status' => 'catch_log_guzzle_in_controller',
+						'guzzle_result' => $sendRequest,
+						'data' => $request->all(),
+					], JSON_PRETTY_PRINT));
+
 					return ['status'=> 'error', 'code'=>500 , 'message'=>'Task Id gagal disimpan, silahkan coba lagi'];
 				}
 
-				Log::info("POST BPJS SUCESS (SIMAPAN) : ", [
-					'data' => $generateReqAntreanBPJS,
-					'response' => $postAntreanBpjs
-				]);
+				// Log::info("POST BPJS SUCESS (SIMAPAN) : ", [
+				// 	'data' => $generateReqAntreanBPJS,
+				// 	'response' => $postAntreanBpjs
+				// ]);
 			}catch(\Exception $e){
 				Log::info("POST BPJS ERROR (SIMAPAN) : ", [
 					'data' => $generateReqAntreanBPJS,

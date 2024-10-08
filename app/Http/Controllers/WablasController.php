@@ -437,6 +437,13 @@ class WablasController extends Controller{
 	
 								$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
 								if(!in_array($sendRequest->code, [201, 409])){
+									Log::error(json_encode([
+										'file' => 'app/Http/Controllers/WablasController.php',
+										'status' => 'catch_log_guzzle_in_controller',
+										'guzzle_result' => $sendRequest,
+										'data' => $request->all(),
+									], JSON_PRETTY_PRINT));
+
 									$conMysql->rollback();
 									$conDbrsud->rollback();
 									return ['code' =>  404, 'status' => 'error', 'message' => 'Task Id gagal disimpan, silahkan coba lagi'];

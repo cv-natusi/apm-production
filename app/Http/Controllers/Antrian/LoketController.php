@@ -17,6 +17,7 @@ use TM;
 
 # Library / package
 use Datatables, DateTime, DB;
+use Illuminate\Support\Facades\Log;
 
 ### Models
 use App\Http\Models\Antrian;
@@ -251,6 +252,13 @@ class LoketController extends Controller
 
 			$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
 			if(!in_array($sendRequest->code, [201, 409])){
+				Log::error(json_encode([
+					'file' => 'app/Http/Controllers/Antrian/LoketController.php',
+					'status' => 'catch_log_guzzle_in_controller',
+					'guzzle_result' => $sendRequest,
+					'data' => $request->all(),
+				], JSON_PRETTY_PRINT));
+
 				DB::rollback();
 				return response()->json([
 					'metadata' => [
