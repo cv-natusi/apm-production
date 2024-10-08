@@ -95,7 +95,9 @@ class GuzzleClient
 
 			$logPayload['message'] = $e->getMessage();
 			$logPayload['status'] = 'error_client_exception';
-			Log::error(json_encode($logPayload, JSON_PRETTY_PRINT));
+			if ($code != 409) {
+				Log::error(json_encode($logPayload, JSON_PRETTY_PRINT));
+			}
 
 			return response()->json($payloadResponse, $code);
 		} catch(ServerException $e) { # 500-level errors
