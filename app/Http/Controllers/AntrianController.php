@@ -975,6 +975,7 @@ class AntrianController extends Controller{
 				'tgl_periksa',
 				'kode_dokter',
 				'pembayaran_pasien',
+				'is_pasien_baru',
 			)->where('id',$request->kode)
 			->first();
 
