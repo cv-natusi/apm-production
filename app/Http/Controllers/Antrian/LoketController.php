@@ -236,37 +236,42 @@ class LoketController extends Controller
 			}
 
 			# Store taskid to local DB srtart
-			$request->merge([
-				'payload_guzzle' => [
-					'body' => [
-						'antrian_id' => $antrian->id,
-						'pasien_baru' => 1,
-						'kode_booking' => $antrian->kode_booking,
-						'task_id' => 2,
-						'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+			if (
+				!in_array($antrian->kode_poli,['ANT','GIG','GIZ','MCU','PSY','VCT'])
+				&& $antrian->metode_ambil != 'JKN'
+			) {
+				$request->merge([
+					'payload_guzzle' => [
+						'body' => [
+							'antrian_id' => $antrian->id,
+							'pasien_baru' => 1,
+							'kode_booking' => $antrian->kode_booking,
+							'task_id' => 2,
+							'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+						],
+						'method' => 'POST',
+						'endpoint' => 'api/antrian/task-id/store',
 					],
-					'method' => 'POST',
-					'endpoint' => 'api/antrian/task-id/store',
-				],
-			]);
-
-			$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
-			if(!in_array($sendRequest->code, [201, 409])){
-				Log::error(json_encode([
-					'file' => 'app/Http/Controllers/Antrian/LoketController.php',
-					'status' => 'catch_log_guzzle_in_controller',
-					'guzzle_result' => $sendRequest,
-					'data' => $request->all(),
-				], JSON_PRETTY_PRINT));
-
-				DB::rollback();
-				return response()->json([
-					'metadata' => [
-						'code' => 500,
-						'status' => 'error',
-						'message' => 'Task Id gagal disimpan, silahkan coba lagi',
-					],
-				], 500);
+				]);
+	
+				$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+				if(!in_array($sendRequest->code, [201, 409])){
+					Log::error(json_encode([
+						'file' => 'app/Http/Controllers/Antrian/LoketController.php',
+						'status' => 'catch_log_guzzle_in_controller',
+						'guzzle_result' => $sendRequest,
+						'data' => $request->all(),
+					], JSON_PRETTY_PRINT));
+	
+					DB::rollback();
+					return response()->json([
+						'metadata' => [
+							'code' => 500,
+							'status' => 'error',
+							'message' => 'Task Id gagal disimpan, silahkan coba lagi',
+						],
+					], 500);
+				}
 			}
 			# Store taskid to local DB end
 

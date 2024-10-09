@@ -188,32 +188,37 @@ class AntrianController extends Controller{
 
 		# Store taskid to local DB srtart
 		$antrian = Antrian::where('id', $postAntrian)->first();
-		$request->merge([
-			'payload_guzzle' => [
-				'body' => [
-					'antrian_id' => $antrian->id,
-					'pasien_baru' => $antrian->is_pasien_baru === 'Y' ? 1 : 0,
-					'kode_booking' => $antrian->kode_booking,
-					'task_id' => $antrian->is_pasien_baru === 'Y' ? 1 : 3,
-					'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+		if (
+			!in_array($antrian->kode_poli,['ANT','GIG','GIZ','MCU','PSY','VCT'])
+			&& $antrian->metode_ambil != 'JKN'
+		) {
+			$request->merge([
+				'payload_guzzle' => [
+					'body' => [
+						'antrian_id' => $antrian->id,
+						'pasien_baru' => $antrian->is_pasien_baru === 'Y' ? 1 : 0,
+						'kode_booking' => $antrian->kode_booking,
+						'task_id' => $antrian->is_pasien_baru === 'Y' ? 1 : 3,
+						'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+					],
+					'method' => 'POST',
+					'endpoint' => 'api/antrian/task-id/store',
 				],
-				'method' => 'POST',
-				'endpoint' => 'api/antrian/task-id/store',
-			],
-		]);
-
-		$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
-		if(!in_array($sendRequest->code, [201, 409])){
-			Log::error(json_encode([
-				'file' => 'app/Http/Controllers/AntrianController.php',
-				'method' => 'konfirmasiManual()',
-				'status' => 'catch_log_guzzle_in_controller',
-				'guzzle_result' => $sendRequest,
-				'data' => $request->all(),
-			], JSON_PRETTY_PRINT));
-
-			DB::rollback();
-			return ['status'=> 'error', 'code'=>500 , 'message'=>'Task Id gagal disimpan, silahkan coba lagi'];
+			]);
+	
+			$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+			if(!in_array($sendRequest->code, [201, 409])){
+				Log::error(json_encode([
+					'file' => 'app/Http/Controllers/AntrianController.php',
+					'method' => 'konfirmasiManual()',
+					'status' => 'catch_log_guzzle_in_controller',
+					'guzzle_result' => $sendRequest,
+					'data' => $request->all(),
+				], JSON_PRETTY_PRINT));
+	
+				DB::rollback();
+				return ['status'=> 'error', 'code'=>500 , 'message'=>'Task Id gagal disimpan, silahkan coba lagi'];
+			}
 		}
 		# Store taskid to local DB end
 
@@ -980,32 +985,37 @@ class AntrianController extends Controller{
 			->first();
 
 			# Store taskid to local DB srtart
-			$request->merge([
-				'payload_guzzle' => [
-					'body' => [
-						'antrian_id' => $antrian->id,
-						'pasien_baru' => $antrian->is_pasien_baru == 'Y' ? 1 : 0,
-						'kode_booking' => $antrian->kode_booking,
-						'task_id' => 3,
-						'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+			if (
+				!in_array($antrian->kode_poli,['ANT','GIG','GIZ','MCU','PSY','VCT'])
+				&& $antrian->metode_ambil != 'JKN'
+			) {
+				$request->merge([
+					'payload_guzzle' => [
+						'body' => [
+							'antrian_id' => $antrian->id,
+							'pasien_baru' => $antrian->is_pasien_baru == 'Y' ? 1 : 0,
+							'kode_booking' => $antrian->kode_booking,
+							'task_id' => 3,
+							'tanggal_berobat' => date('d-m-Y', strtotime($antrian->tgl_periksa)),
+						],
+						'method' => 'POST',
+						'endpoint' => 'api/antrian/task-id/store',
 					],
-					'method' => 'POST',
-					'endpoint' => 'api/antrian/task-id/store',
-				],
-			]);
-
-			$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
-			if(!in_array($sendRequest->code, [201, 409])){
-				Log::error(json_encode([
-					'file' => 'app/Http/Controllers/AntrianController.php',
-					'method' => 'conterToPoli()',
-					'status' => 'catch_log_guzzle_in_controller',
-					'guzzle_result' => $sendRequest,
-					'data' => $request->all(),
-				], JSON_PRETTY_PRINT));
-
-				DB::rollback();
-				return ['code'=>400, 'status'=>'error','message'=>'Task Id gagal disimpan, silahkan coba lagi'];
+				]);
+	
+				$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+				if(!in_array($sendRequest->code, [201, 409])){
+					Log::error(json_encode([
+						'file' => 'app/Http/Controllers/AntrianController.php',
+						'method' => 'conterToPoli()',
+						'status' => 'catch_log_guzzle_in_controller',
+						'guzzle_result' => $sendRequest,
+						'data' => $request->all(),
+					], JSON_PRETTY_PRINT));
+	
+					DB::rollback();
+					return ['code'=>400, 'status'=>'error','message'=>'Task Id gagal disimpan, silahkan coba lagi'];
+				}
 			}
 			# Store taskid to local DB end
 

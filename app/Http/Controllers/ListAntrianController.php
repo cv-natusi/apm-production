@@ -223,32 +223,37 @@ class ListAntrianController extends Controller{
 			}
 
 			# Store taskid to local DB srtart
-			$request->merge([
-				'payload_guzzle' => [
-					'body' => [
-						'antrian_id' => $cekAntri->id,
-						'pasien_baru' => $cekAntri->is_pasien_baru === 'Y' ? 1 : 0,
-						'kode_booking' => $cekAntri->kode_booking,
-						'task_id' => 2,
-						'tanggal_berobat' => date('d-m-Y', strtotime($cekAntri->tgl_periksa)),
+			if (
+				!in_array($cekAntri->kode_poli,['ANT','GIG','GIZ','MCU','PSY','VCT'])
+				&& $cekAntri->metode_ambil != 'JKN'
+			) {
+				$request->merge([
+					'payload_guzzle' => [
+						'body' => [
+							'antrian_id' => $cekAntri->id,
+							'pasien_baru' => $cekAntri->is_pasien_baru === 'Y' ? 1 : 0,
+							'kode_booking' => $cekAntri->kode_booking,
+							'task_id' => 2,
+							'tanggal_berobat' => date('d-m-Y', strtotime($cekAntri->tgl_periksa)),
+						],
+						'method' => 'POST',
+						'endpoint' => 'api/antrian/task-id/store',
 					],
-					'method' => 'POST',
-					'endpoint' => 'api/antrian/task-id/store',
-				],
-			]);
-
-			$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
-			if(!in_array($sendRequest->code, [201, 409])){
-				Log::error(json_encode([
-					'file' => 'app/Http/Controllers/ListAntrianController.php',
-					'method' => 'saveList()',
-					'status' => 'catch_log_guzzle_in_controller',
-					'guzzle_result' => $sendRequest,
-					'data' => $request->all(),
-				], JSON_PRETTY_PRINT));
-
-				DB::rollback();
-				return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Task Id gagal disimpan, silahkan coba lagi','antrian'=>''];
+				]);
+	
+				$sendRequest = GuzzleClient::sendRequestTaskId($request)->getData();
+				if(!in_array($sendRequest->code, [201, 409])){
+					Log::error(json_encode([
+						'file' => 'app/Http/Controllers/ListAntrianController.php',
+						'method' => 'saveList()',
+						'status' => 'catch_log_guzzle_in_controller',
+						'guzzle_result' => $sendRequest,
+						'data' => $request->all(),
+					], JSON_PRETTY_PRINT));
+	
+					DB::rollback();
+					return ['type'=>'warning','status'=>'error','code'=>400,'head_message'=>'Whooops!','message'=>'Task Id gagal disimpan, silahkan coba lagi','antrian'=>''];
+				}
 			}
 			# Store taskid to local DB end
 
