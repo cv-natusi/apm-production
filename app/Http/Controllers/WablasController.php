@@ -420,13 +420,13 @@ class WablasController extends Controller{
 
 							# Store taskid to local DB srtart
 							if(!in_array($dataPas->kodePoli,['ANT','GIG','GIZ','MCU','PSY','VCT'])){
-								// $antrian = Antrian::where('id', $insertAntrian)->first();
+								$antrian = Antrian::select('kode_booking')->where('id', $insertAntrian)->first();
 								$request->merge([
 									'payload_guzzle' => [
 										'body' => [
 											'antrian_id' => $insertAntrian,
 											'pasien_baru' => $prefix === 'Y' ? 1 : 0,
-											'kode_booking' => $kodeBooking,
+											'kode_booking' => $antrian->kode_booking,
 											'task_id' => $prefix === 'Y' ? 1 : 3,
 											'tanggal_berobat' => date('d-m-Y', strtotime($dataPas->tglBerobat)),
 										],
