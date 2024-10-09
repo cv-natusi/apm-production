@@ -977,34 +977,6 @@ class AntrianController extends Controller{
 				'pembayaran_pasien',
 			)->where('id',$request->kode)
 			->first();
-			$antrian->status = 'antripoli';
-			if ($request->kode_poli) {
-				$antrian->kode_poli = $request->kode_poli;
-			}
-			$antrian->cekin = date('Y-m-d H:i:s');
-			$antrian->save();
-			if (!$antrian) {
-				DB::rollback();
-				return ['code'=>400, 'status'=>'error','message'=>'Gagal update antrian, Silahkan coba lagi.'];
-			}
-			# tr_registrasi 
-			$storeRegistrasi = $this->storeRsuRegister($antrian);
-			if(!$storeRegistrasi){
-				DB::rollback();
-				return ['code'=>400, 'status'=>'error','message'=>'Gagal simpan registrasi, Silahkan coba lagi.'];
-			}
-			$antrian->No_Register = $storeRegistrasi;
-			$antrian->save();
-			# Update taskid
-			// $split = substr($antrian->no_antrian,0,1);
-			// if($split=='B'){
-			// 	$request->kodebooking = $antrian->kode_booking;
-			// 	$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
-			// 	$request->taskid = '3';
-
-			// 	$bridgBpjs = new BridgBpjsController;
-			// 	$updateWaktu = $bridgBpjs->updateWaktu($request);
-			// }
 
 			# Store taskid to local DB srtart
 			$request->merge([
@@ -1035,6 +1007,36 @@ class AntrianController extends Controller{
 				return ['code'=>400, 'status'=>'error','message'=>'Task Id gagal disimpan, silahkan coba lagi'];
 			}
 			# Store taskid to local DB end
+
+			$antrian->status = 'antripoli';
+			if ($request->kode_poli) {
+				$antrian->kode_poli = $request->kode_poli;
+			}
+			$antrian->cekin = date('Y-m-d H:i:s');
+			$antrian->save();
+			if (!$antrian) {
+				DB::rollback();
+				return ['code'=>400, 'status'=>'error','message'=>'Gagal update antrian, Silahkan coba lagi.'];
+			}
+
+			# tr_registrasi 
+			$storeRegistrasi = $this->storeRsuRegister($antrian);
+			if(!$storeRegistrasi){
+				DB::rollback();
+				return ['code'=>400, 'status'=>'error','message'=>'Gagal simpan registrasi, Silahkan coba lagi.'];
+			}
+			$antrian->No_Register = $storeRegistrasi;
+			$antrian->save();
+			# Update taskid
+			// $split = substr($antrian->no_antrian,0,1);
+			// if($split=='B'){
+			// 	$request->kodebooking = $antrian->kode_booking;
+			// 	$request->waktu = strtotime(date('Y-m-d H:i:s'))*1000;
+			// 	$request->taskid = '3';
+
+			// 	$bridgBpjs = new BridgBpjsController;
+			// 	$updateWaktu = $bridgBpjs->updateWaktu($request);
+			// }
 
 			# UPDATE ANTRIAN TRACER
 			$id_antrian = $antrian->id;
